@@ -38,5 +38,14 @@ setup(
     include_package_data=True,
     author='Diego Fernandez',
     install_requires=install_requires,
+    extras_require={
+        'dev': [
+            'sphinx',
+            'sphinx_rtd_theme',
+            'nose',
+            'coverage',
+            'pypi-publisher'
+        ]
+    },
     dependency_links=dependency_links,
     author_email='aiguo.fernandez@gmail.com')
