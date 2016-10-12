@@ -1,7 +1,7 @@
 gspread-pandas
 ===============================
 
-version number: 0.1
+version number: 0.2
 author: Diego Fernandez
 
 Overview
