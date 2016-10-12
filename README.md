@@ -24,7 +24,7 @@ Or clone the repo:
     $ git clone https://github.com/aiguofer/gspread-pandas.git
     $ python setup.py install
 
-Get OAuth 2.0 client ID info from (Google)[https://console.developers.google.com/apis/credentials?project=api-project-920881618663] and download JSON as `~/.google/google_secret.json`
+Get OAuth 2.0 client ID info from [Google](https://console.developers.google.com/apis/credentials?project=api-project-920881618663) and download JSON as `~/.google/google_secret.json`
 
 Contributing
 ------------
