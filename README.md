@@ -41,6 +41,7 @@ from gspread_pandas.client import Spread
 file_name = "http://www.ats.ucla.edu/stat/data/binary.csv"
 df = pd.read_csv(file_name)
 
+# 'Example Spreadsheet' needs to already exist and your user must have access to it
 spread = Spread('example_user', 'Example Spreadsheet')
 # This will ask to authenticate if you haven't done so before for 'example_user'
 
