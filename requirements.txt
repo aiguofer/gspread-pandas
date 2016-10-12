@@ -1,3 +1,9 @@
+# Reqs
+oauth2client
+gspread
+numpy
+pandas
+
 # Dev/Deployment
 sphinx
 sphinx_rtd_theme
