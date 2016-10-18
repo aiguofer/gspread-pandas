@@ -247,16 +247,29 @@ class Spread():
             if sheet == worksheet.title:
                 return worksheet
 
-    def clear_sheet(self, sheet):
+    def clear_sheet(self, rows=1, cols=1, sheet=None):
         """
-        Remove a worksheet by title then re-create it
+        Reset sheet to a blank sheet with given dimensions.
         """
-        if self.delete_sheet(sheet):
-            self.create_sheet(sheet)
+        if sheet:
+            self.open_sheet(sheet)
+
+        if not self.sheet:
+            raise Exception("No open worksheet")
+
+        self.sheet.resize(1, 1)
+
+        self.update_cells(
+            start=(1, 1),
+            end=(1, 1),
+            vals=['']
+        )
+
+        self.sheet.resize(rows, cols)
 
     def delete_sheet(self, sheet):
         """
-        Delete a worksheet by title. Returns whether the sheet was deleted or not
+        Delete a worksheet by title. Returns whether the sheet was deleted or not.
         """
         s = self.find_sheet(sheet)
         if s:
