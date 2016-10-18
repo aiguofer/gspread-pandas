@@ -8,7 +8,7 @@ from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow, argparser
 
-from conf import get_config
+from gspread_pandas.conf import get_config
 
 _default_scope = [
     'https://docs.google.com/feeds', 'https://spreadsheets.google.com/feeds',
