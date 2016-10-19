@@ -1,4 +1,5 @@
 from os import path
+from functools import wraps
 
 import numpy as np
 import pandas as pd
@@ -42,6 +43,7 @@ class Spread():
         self.open(spread, sheet)
 
     def _ensure_auth(func):
+        @wraps(func)
         def wrapper(self, *args, **kwargs):
             self.client.login()
             return func(self, *args, **kwargs)
