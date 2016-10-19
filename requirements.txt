@@ -3,3 +3,4 @@ oauth2client
 gspread
 numpy
 pandas
+decorator

@@ -1,5 +1,4 @@
 from os import path
-from functools import wraps
 
 import numpy as np
 import pandas as pd
@@ -8,6 +7,8 @@ import gspread
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow, argparser
+
+from decorator import decorator
 
 from gspread_pandas.conf import get_config
 
@@ -42,12 +43,10 @@ class Spread():
         self.sheet = None
         self.open(spread, sheet)
 
-    def _ensure_auth(func):
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            self.client.login()
-            return func(self, *args, **kwargs)
-        return wrapper
+    @decorator
+    def _ensure_auth(func, self, *args, **kwargs):
+        self.client.login()
+        return func(self, *args, **kwargs)
 
     def _authorize(self):
         flow = OAuth2WebServerFlow(
@@ -76,7 +75,6 @@ class Spread():
         if self.spread:
             self.sheets = self.spread.worksheets()
 
-    @_ensure_auth
     def open(self, spread=None, sheet=None):
         """
         Open a spreadsheet and optionally a worksheet
