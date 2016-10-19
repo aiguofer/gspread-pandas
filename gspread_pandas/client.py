@@ -16,6 +16,8 @@ _default_scope = [
     'https://www.googleapis.com/auth/drive'
 ]
 
+ROW = 0
+COL = 1
 
 class Spread():
     """
@@ -25,6 +27,11 @@ class Spread():
     It each user will be associated with specific OAuth credentials. The user will
     need respective access to the Spreadsheet.
     """
+    # chunk range request: https://github.com/burnash/gspread/issues/375
+    max_range_chunk_size = 200000
+
+    # chunk update_cells: https://github.com/burnash/gspread/issues/384
+    max_update_chunk_size = 40000
 
     def __init__(self, user, spread, sheet=None, config=None):
         self._config = config or get_config()
@@ -215,7 +222,38 @@ class Spread():
 
     def _get_range(self, start, end):
         return "{0}:{1}".format(
-            self.sheet.get_addr_int(*start), self.sheet.get_addr_int(*end))
+            self.sheet.get_addr_int(*start),
+            self.sheet.get_addr_int(*end))
+
+    def _get_int_range(self, rng):
+        endpoints = rng.split(":")
+        return (self.sheet.get_int_addr(endpoints[0]),
+                self.sheet.get_int_addr(endpoints[1]))
+
+    def _get_update_chunks(self, start, end, vals):
+        if type(start) == tuple and type(end) == tuple:
+            pass
+        elif isinstance(start, basestring) and isinstance(end, basestring):
+            start, end = self._get_int_range(start + ":" + end)
+        else:
+            raise TypeError("Start and end need to be tuple or string")
+
+        num_cols = end[COL] - start[COL] + 1
+        num_rows = end[ROW] - start[ROW] + 1
+        num_cells = num_cols * num_rows
+
+        if num_cells != len(vals):
+            raise Exception("Number of values needs to match number of cells")
+
+        chunk_rows = self.max_range_chunk_size / num_cols
+        chunk_size = chunk_rows * num_cols
+
+        end_cell = (start[ROW] - 1, 0)
+
+        for val_chunks in _chunks(vals, chunk_size):
+            start_cell = (end_cell[ROW] + 1, start[COL])
+            end_cell = (min(start_cell[ROW] + chunk_rows - 1, num_rows), end[COL])
+            yield start_cell, end_cell, val_chunks
 
     @_ensure_auth
     def update_cells(self, start, end, vals, sheet=None):
@@ -235,22 +273,23 @@ class Spread():
         if not self.sheet:
             raise Exception("No open worksheet")
 
-        if type(start) == tuple and type(end) == tuple:
-            rng = self._get_range(start, end)
-        elif isinstance(start, basestring) and isinstance(end, basestring):
-            rng = start + ":" + end
-        else:
-            raise TypeError("Start and end need to be tuple or string")
+        for start_cell, end_cell, val_chunks in self._get_update_chunks(start,
+                                                                        end,
+                                                                        vals):
+            self.client.login()  # ensure that token is still active
+            rng = self._get_range(start_cell, end_cell)
 
-        cells = self.sheet.range(rng)
+            cells = self.sheet.range(rng)
 
-        for val, cell in zip(vals, cells):
-            cell.value = val
+            if len(val_chunks) != len(cells):
+                raise Exception("Number of chunked values doesn't match number of cells")
 
-        # https://github.com/burnash/gspread/issues/384
-        # and https://github.com/burnash/gspread/issues/375
-        for cells_chunk in _chunks(cells, 40000):
-            self.sheet.update_cells(cells_chunk)
+            for val, cell in zip(val_chunks, cells):
+                cell.value = val
+
+            for cells_chunk in _chunks(cells, self.max_update_chunk_size):
+                self.client.login()  # ensure that token is still active
+                self.sheet.update_cells(cells_chunk)
 
     def find_sheet(self, sheet):
         """
