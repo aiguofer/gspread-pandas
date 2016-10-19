@@ -34,6 +34,12 @@ class Spread():
         self.sheet = None
         self.open(spread, sheet)
 
+    def _ensure_auth(func):
+        def wrapper(self, *args, **kwargs):
+            self.client.login()
+            return func(self, *args, **kwargs)
+        return wrapper
+
     def _authorize(self):
         flow = OAuth2WebServerFlow(
             client_id=self._config['client_id'],
@@ -61,6 +67,7 @@ class Spread():
         if self.spread:
             self.sheets = self.spread.worksheets()
 
+    @_ensure_auth
     def open(self, spread=None, sheet=None):
         """
         Open a spreadsheet and optionally a worksheet
@@ -70,6 +77,7 @@ class Spread():
         if sheet:
             self.open_sheet(sheet)
 
+    @_ensure_auth
     def open_spread(self, spread):
         """
         Open a spreadsheet. It can take in a name, url, or id
@@ -88,6 +96,7 @@ class Spread():
                     raise Exception("Spreadsheet not found")
         self._refresh_sheets()
 
+    @_ensure_auth
     def open_sheet(self, sheet):
         """
         Open a worksheet. It can take in a name or integer index (0 indexed)
@@ -105,6 +114,7 @@ class Spread():
         if not self.sheet:
             raise Exception("Worksheet not found")
 
+    @_ensure_auth
     def create_sheet(self, name, rows=1, cols=1):
         """
         Create a new worksheet with the given number of rows and cols.
@@ -145,6 +155,7 @@ class Spread():
             df.index.name = df.index.name or None
         return df
 
+    @_ensure_auth
     def sheet_to_df(self, index=None, headers=None, start_row=1, sheet=None):
         """
         Convert a worksheet into a DataFrame
@@ -191,6 +202,7 @@ class Spread():
 
         return headers
 
+    @_ensure_auth
     def get_sheet_dims(self, sheet=None):
         """
         Get the dimensions of a worksheet
@@ -205,6 +217,7 @@ class Spread():
         return "{0}:{1}".format(
             self.sheet.get_addr_int(*start), self.sheet.get_addr_int(*end))
 
+    @_ensure_auth
     def update_cells(self, start, end, vals, sheet=None):
         """
         Update the values in a given range. The values should be listed in order
@@ -247,6 +260,7 @@ class Spread():
             if sheet == worksheet.title:
                 return worksheet
 
+    @_ensure_auth
     def clear_sheet(self, rows=1, cols=1, sheet=None):
         """
         Reset sheet to a blank sheet with given dimensions.
@@ -267,6 +281,7 @@ class Spread():
 
         self.sheet.resize(rows, cols)
 
+    @_ensure_auth
     def delete_sheet(self, sheet):
         """
         Delete a worksheet by title. Returns whether the sheet was deleted or not.
@@ -280,6 +295,7 @@ class Spread():
                 pass
         return False
 
+    @_ensure_auth
     def df_to_sheet(self, df, index=True, headers=True, start_row=1,
                     start_col=1, replace=False, sheet=None):
         """
