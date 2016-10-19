@@ -16,25 +16,33 @@ Installation / Usage
 
 To install use pip:
 
-    $ pip install gspread-pandas
-
+```
+$ pip install gspread-pandas
+```
 
 Or clone the repo:
 
-    $ git clone https://github.com/aiguofer/gspread-pandas.git
-    $ python setup.py install
+```
+$ git clone https://github.com/aiguofer/gspread-pandas.git
+$ python setup.py install
+```
 
 Get OAuth 2.0 client ID info from [Google](https://console.developers.google.com/apis/credentials) and download JSON as `~/.google/google_secret.json`
 
 Contributing
 ------------
 
+```
+$ git clone https://github.com/aiguofer/gspread-pandas.git && cd gspread-pandas
+$ pip install -e ".[dev]"
+```
+
 TBD
 
 Example
 -------
 
-```
+```python
 import pandas as pd
 from gspread_pandas.client import Spread
 
