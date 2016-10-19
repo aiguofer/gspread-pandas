@@ -107,7 +107,7 @@ class Spread():
             try:
                 self.sheet = self.sheets[sheet]
             except:
-                pass
+                raise Exception("Invalid sheet index {0}".format(sheet))
         else:
             self.sheet = self.find_sheet(sheet)
 
@@ -311,12 +311,13 @@ class Spread():
         sheet -- in case you want to open a different sheet first (default None)
         """
         if sheet:
-            if replace:
-                self.clear_sheet(sheet)
             self.open_or_create_sheet(sheet)
 
         if not self.sheet:
             raise Exception("No open worksheet")
+
+        if replace:
+            self.clear_sheet()
 
         if index:
             df = df.reset_index()
@@ -334,13 +335,11 @@ class Spread():
         # make sure sheet is large enough
         self.sheet.resize(max(sheet_rows, req_rows), max(sheet_cols, req_cols))
 
-        args = {
-            'start': (start_row, start_col),
-            'end': (req_rows, req_cols),
-            'vals': [val for row in df_list for val in row]
-        }
-
-        self.update_cells(**args)
+        self.update_cells(
+            start=(start_row, start_col),
+            end=(req_rows, req_cols),
+            vals=[val for row in df_list for val in row]
+        )
 
 
 def _chunks(lst, chunk_size):
