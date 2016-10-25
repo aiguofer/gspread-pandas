@@ -163,13 +163,13 @@ class Spread():
         return df
 
     @_ensure_auth
-    def sheet_to_df(self, index=None, headers=None, start_row=1, sheet=None):
+    def sheet_to_df(self, index=1, headers=1, start_row=1, sheet=None):
         """
         Convert a worksheet into a DataFrame
 
         Args:
-        index -- col number of index (default None)
-        headers -- number of rows that represent headers (default None)
+        index -- col number of index (default 1)
+        headers -- number of rows that represent headers (default 1)
         start_row -- row number for first row of headers or data (default 1)
         sheet -- in case you want to open a different sheet first (default None)
         """
