@@ -1,13 +1,13 @@
 gspread-pandas
 ===============================
 
-version number: 0.5
+version number: 0.6
 author: Diego Fernandez
 
 Overview
 --------
 
-A package to easily open an instance of a Google spreadsheet and interact with worksheets through Pandas DataFrames. 
+A package to easily open an instance of a Google spreadsheet and interact with worksheets through Pandas DataFrames.
 
 Some key goals/features:
 
