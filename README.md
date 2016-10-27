@@ -7,9 +7,14 @@ author: Diego Fernandez
 Overview
 --------
 
-A package to easily open an instance of a Google spreadsheet and interact with worksheets through Pandas DataFrames.
+A package to easily open an instance of a Google spreadsheet and interact with worksheets through Pandas DataFrames. 
 
-When going to and from DataFrames, it can nicely handle headers and indexes.
+Some key goals/features:
+
+* Nicely handle headers and indexes.
+* Run on Jupyter, headless server, and/or scripts
+* Allow storing different user credentials
+* Automatically handle token refreshes
 
 Installation / Usage
 --------------------
@@ -27,7 +32,32 @@ $ git clone https://github.com/aiguofer/gspread-pandas.git
 $ python setup.py install
 ```
 
-Get OAuth 2.0 client ID info from [Google](https://console.developers.google.com/apis/credentials) and download JSON as `~/.google/google_secret.json`
+Before using, you will need to download Google client credentials for your app.
+
+Client Credentials
+----------------
+
+To allow a script to use Google Drive API we need to authenticate our self towards Google. To do so, we need to create a project, describing the tool and generate credentials. Please use your web browser and go to [Google console](https://console.developers.google.com/) and :
+
+* Choose “Create Project” in popup menu on the top.
+* A dialog box appears, so give your project a name and click on “Create” button.
+* On the left-side menu click on “API Manager”.
+* A table of available APIs is shown. Switch “Drive API” and click on “Enable API” button. Other APIs might be switched off, for our purpose.
+* On the left-side menu click on “Credentials”.
+* In section “OAuth consent screen” select your email address and give your product a name. Then click on “Save” button.
+* In section “Credentials” click on “Add credentials” and switch “OAuth 2.0 client ID”.
+* A dialog box “Create Cliend ID” appears. Select “Application type” item as “Other”.
+* Click on “Create” button.
+* Click on “Download JSON” icon on the right side of created “OAuth 2.0 client IDs” and store the downloaded file on your file system. Please be aware, the file contains your private credentials, so take care of the file in the same way you care of your private SSH key; i.e. move downloaded JSON to `~/.google/google_secret.json` (or you can configure the directory and file name by directly calling `gspread_pandas.conf.get_config`
+
+Thanks to similar project [df2gspread](https://github.com/maybelinot/df2gspread) for this great description of how to get the client credentials.
+
+User Credentials
+----------------
+
+Once you have your client credentials, you can have multiple user credentials stored in the same machine. This can be useful when you have a shared server (for example with a Jupyter notebook server) with multiple people that may want to use the library. The first parameter to `Spread` must be the key identifying a user's credentials. The first time this is called for a specific key, you will have to authenticate through a text based OAuth; this makes it possible to run on a headless server through ssh or through a Jupyter notebook. After this, the credentials for that user will be stored and the tokens will be refreshed automatically any time the tool is used.
+
+Users will only be able to interact with Spreadsheets that they have access to.
 
 Contributing
 ------------
