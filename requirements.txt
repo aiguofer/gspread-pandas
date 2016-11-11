@@ -4,3 +4,4 @@ gspread
 numpy
 pandas
 decorator
+future

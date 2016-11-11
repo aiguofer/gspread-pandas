@@ -32,6 +32,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3'
     ],
     keywords='gspread pandas google spreadsheets',
     packages=find_packages(exclude=['docs', 'tests*']),

@@ -1,5 +1,7 @@
 from os import path
 
+from builtins import str, range
+
 import numpy as np
 import pandas as pd
 import gspread
@@ -233,7 +235,7 @@ class Spread():
     def _get_update_chunks(self, start, end, vals):
         if type(start) == tuple and type(end) == tuple:
             pass
-        elif isinstance(start, basestring) and isinstance(end, basestring):
+        elif isinstance(start, str) and isinstance(end, str):
             start, end = self._get_int_range(start + ":" + end)
         else:
             raise TypeError("Start and end need to be tuple or string")
@@ -382,5 +384,5 @@ class Spread():
 
 
 def _chunks(lst, chunk_size):
-    for i in xrange(0, len(lst), chunk_size):
+    for i in range(0, len(lst), chunk_size):
         yield lst[i:i + chunk_size]
