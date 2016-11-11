@@ -15,7 +15,8 @@ from decorator import decorator
 from gspread_pandas.conf import get_config
 
 _default_scope = [
-    'https://docs.google.com/feeds', 'https://spreadsheets.google.com/feeds',
+    'https://docs.google.com/feeds',
+    'https://spreadsheets.google.com/feeds',
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
 ]
@@ -53,7 +54,7 @@ class Spread():
     def _authorize(self):
         flow = OAuth2WebServerFlow(
             client_id=self._config['client_id'],
-            client_config=self._config['client_config'],
+            client_secret=self._config['client_secret'],
             redirect_uri=self._config['redirect_uris'][0],
             scope=_default_scope)
 
