@@ -15,10 +15,7 @@ from decorator import decorator
 from gspread_pandas.conf import get_config
 
 _default_scope = [
-    'https://docs.google.com/feeds',
     'https://spreadsheets.google.com/feeds',
-    'https://www.googleapis.com/auth/spreadsheets',
-    'https://www.googleapis.com/auth/drive'
 ]
 
 ROW = 0
