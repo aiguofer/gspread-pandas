@@ -16,7 +16,9 @@ from decorator import decorator
 
 from gspread_pandas.conf import get_config
 
-_default_scope = [
+__all__ = ['Spread']
+
+default_scope = [
     'https://spreadsheets.google.com/feeds',
     'https://www.googleapis.com/auth/userinfo.email'
 ]
@@ -81,7 +83,7 @@ class Spread():
             client_id=self._config['client_id'],
             client_secret=self._config['client_secret'],
             redirect_uri=self._config['redirect_uris'][0],
-            scope=_default_scope)
+            scope=default_scope)
 
         storage = Storage(self._creds_file)
 
