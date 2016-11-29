@@ -47,6 +47,20 @@ class Spread():
         self.email = self._get_email()
         self.open(spread, sheet)
 
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        base = "<gspread_pandas.client.Spread - {0}>"
+        meta = []
+        if self.email:
+            meta.append("User: {0}".format(self.email))
+        if self.spread:
+            meta.append("Spread: {0}".format(self.spread.title))
+        if self.sheet:
+            meta.append("Sheet: {0}".format(self.spread.sheet))
+        return base.format(", ".join(meta))
+
     @decorator
     def _ensure_auth(func, self, *args, **kwargs):
         self.client.login()
