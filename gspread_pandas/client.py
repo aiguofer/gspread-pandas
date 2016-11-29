@@ -318,8 +318,17 @@ class Spread():
                 cell.value = val
 
             for cells_chunk in _chunks(cells, self.max_update_chunk_size):
-                self.client.login()  # ensure that token is still active
-                self.sheet.update_cells(cells_chunk)
+                self._retry_update(cells_chunk)
+
+    def _retry_update(self, cells, n=3):
+        try:
+            self.client.login()  # ensure that token is still active
+            self.sheet.update_cells(cells)
+        except Exception as e:
+            if n > 0:
+                self._retry_update(cells, n-1)
+            else:
+                raise(e)
 
     def find_sheet(self, sheet):
         """
