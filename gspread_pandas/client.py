@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from os import path
 
 from builtins import str, range
@@ -16,6 +18,7 @@ from gspread_pandas.conf import get_config
 
 _default_scope = [
     'https://spreadsheets.google.com/feeds',
+    'https://www.googleapis.com/auth/userinfo.email'
 ]
 
 ROW = 0
@@ -41,12 +44,23 @@ class Spread():
         self._login()
         self.spread = None
         self.sheet = None
+        self.email = self._get_email()
         self.open(spread, sheet)
 
     @decorator
     def _ensure_auth(func, self, *args, **kwargs):
         self.client.login()
         return func(self, *args, **kwargs)
+
+    def _get_email(self):
+        try:
+            return self\
+                .client\
+                .session\
+                .get('https://www.googleapis.com/userinfo/v2/me')\
+                .json()['email']
+        except:
+            print("Couldn't retrieve email. Delete ~/.google/creds and authenticate again")
 
     def _authorize(self):
         flow = OAuth2WebServerFlow(
