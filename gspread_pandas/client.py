@@ -282,7 +282,7 @@ class Spread():
 
         for val_chunks in _chunks(vals, chunk_size):
             start_cell = (end_cell[ROW] + 1, start[COL])
-            end_cell = (min(start_cell[ROW] + chunk_rows - 1, num_rows), end[COL])
+            end_cell = (min(start_cell[ROW] + chunk_rows - 1, start[ROW] + num_rows - 1), end[COL])
             yield start_cell, end_cell, val_chunks
 
     @_ensure_auth
