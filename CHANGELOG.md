@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
+
+## [0.9] - 2016-12-07
 ### Added
 - Add `__repr__` and `__str__` to show the active
 - Add user's email as a property to Spread. I recommend deleting existing Oauth credentials and re-creating them with new permissions.
