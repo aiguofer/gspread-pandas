@@ -60,7 +60,7 @@ class Spread():
         if self.spread:
             meta.append("Spread: {0}".format(self.spread.title))
         if self.sheet:
-            meta.append("Sheet: {0}".format(self.spread.sheet))
+            meta.append("Sheet: {0}".format(self.sheet.title))
         return base.format(", ".join(meta))
 
     @decorator
