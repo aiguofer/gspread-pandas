@@ -1,11 +1,9 @@
-Welcome to gspread-pandas's documentation!
-=========================================
-
-Contents:
-
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 5
 
+   getting_started
+   modules
+   changelog
 
 
 Indices and tables
@@ -14,4 +12,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

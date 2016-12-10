@@ -32,9 +32,24 @@ class Spread():
     Simple wrapper for gspread to interact with Pandas. It holds an instance of
     an 'open' spreadsheet, an 'open' worksheet, and a list of available worksheets.
 
-    It each user will be associated with specific OAuth credentials. The user will
-    need respective access to the Spreadsheet.
+    Each user will be associated with specific OAuth credentials. The authenticated user will
+    need the appropriate permissions to the Spreadsheet in order to interact with it.
     """
+    #: `(gspread.models.Spreadsheet)` - Currently open Spreadsheet
+    spread = None
+
+    #: `(gspread.models.Worksheet)` - Currently open Worksheet
+    sheet = None
+
+    #: `(list)` - List of available Worksheets
+    sheets = []
+
+    #: `(str)` - E-mail for the currently authenticated user
+    email = ''
+
+    #: `(gspread.client.Client)` - Current gspread Client
+    client = None
+
     # chunk range request: https://github.com/burnash/gspread/issues/375
     _max_range_chunk_size = 200000
 
@@ -42,12 +57,23 @@ class Spread():
     _max_update_chunk_size = 40000
 
     def __init__(self, user, spread, sheet=None, config=None):
+        """
+        :param str user: string indicating the key to a users credentials, which will
+            be stored in a file (by default they will be stored in ``~/.google/creds/<user>``
+            but can be modified with ``creds_dir`` property in config)
+        :param str spread: name, url, or id of the spreadsheet; must have read access by
+            the authenticated user,
+            see :meth:`open_spread <gspread_pandas.client.Spread.open_spread>`
+        :param str,int sheet: optional, name or index of Worksheet,
+            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
+        :param dict config: optional, if you want to provide an alternate configuration,
+            see :meth:`get_config <gspread_pandas.conf.get_config>`
+        """
         self._config = config or get_config()
         self._creds_file = path.join(self._config['creds_dir'], user)
         self._login()
-        self.spread = None
-        self.sheet = None
         self.email = self._get_email()
+
         self.open(spread, sheet)
 
     def __str__(self):
@@ -108,7 +134,12 @@ class Spread():
 
     def open(self, spread, sheet=None):
         """
-        Open a spreadsheet and optionally a worksheet
+        Open a spreadsheet, and optionally a worksheet. See
+        :meth:`open_spread <gspread_pandas.Spread.open_spread>` and
+        :meth:`open_sheet <gspread_pandas.Spread.open_sheet>`.
+
+        :param str spread: name, url, or id of Spreadsheet
+        :param str,int sheet: name or index of Worksheet
         """
         self.open_spread(spread)
 
@@ -118,7 +149,9 @@ class Spread():
     @_ensure_auth
     def open_spread(self, spread):
         """
-        Open a spreadsheet. It can take in a name, url, or id
+        Open a spreadsheet. Authorized user must already have read access.
+
+        :param str spread: name, url, or id of Spreadsheet
         """
         self.spread = None
 
@@ -137,7 +170,12 @@ class Spread():
     @_ensure_auth
     def open_sheet(self, sheet, create=False):
         """
-        Open a worksheet. It can take in a name or integer index (0 indexed)
+        Open a worksheet. Optionally, if the sheet doesn't exist then create it first
+        (only when ``sheet`` is a str).
+
+        :param str,int sheet: name or index of Worksheet
+        :param bool create: whether to create the sheet if it doesn't exist,
+            see :meth:`create_sheet <gspread_pandas.Spread.create_sheet>` (default False)
         """
         self.sheet = None
 
@@ -161,6 +199,10 @@ class Spread():
         Create a new worksheet with the given number of rows and cols.
 
         Automatically opens that sheet after it's created.
+
+        :param str name: name of new Worksheet
+        :param int rows: number of rows (default 1)
+        :param int cols: number of columns (default 1)
         """
         self.spread.add_worksheet(name, rows, cols)
         self._refresh_sheets()
@@ -190,13 +232,15 @@ class Spread():
     @_ensure_auth
     def sheet_to_df(self, index=1, headers=1, start_row=1, sheet=None):
         """
-        Convert a worksheet into a DataFrame
+        Pull a worksheet into a DataFrame.
 
-        Args:
-        index -- col number of index (default 1)
-        headers -- number of rows that represent headers (default 1)
-        start_row -- row number for first row of headers or data (default 1)
-        sheet -- in case you want to open a different sheet first (default None)
+        :param int index: col number of index column, 0 or None for no index (default 1)
+        :param int headers: number of rows that represent headers (default 1)
+        :param int start_row: row number for first row of headers or data (default 1)
+        :param str,int sheet: optional, if you want to open a different sheet first,
+            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
+
+        :returns: a DataFrame with the data from the Worksheet
         """
         if sheet:
             self.open_sheet(sheet)
@@ -208,8 +252,11 @@ class Spread():
 
         col_names = self._parse_sheet_headers(vals, headers)
 
-        df = pd.DataFrame(vals[headers or 0:]).replace('', np.nan).dropna(
-            how='all').fillna('')
+        # remove rows where everything is null, then replace nulls with ''
+        df = pd.DataFrame(vals[headers or 0:])\
+               .replace('', np.nan)\
+               .dropna(how='all')\
+               .fillna('')
 
         if col_names is not None:
             df.columns = col_names
@@ -237,7 +284,12 @@ class Spread():
     @_ensure_auth
     def get_sheet_dims(self, sheet=None):
         """
-        Get the dimensions of a worksheet
+        Get the dimensions of the currently open Worksheet.
+
+        :param str,int sheet: optional, if you want to open a different sheet first,
+            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
+
+        :returns: a tuple containing (num_rows,num_cols)
         """
         if sheet:
             self.open_sheet(sheet)
@@ -286,11 +338,11 @@ class Spread():
         Update the values in a given range. The values should be listed in order
         from left to right across rows.
 
-        Args:
-        start -- tuple indicating (row, col) or string like 'A1'
-        end -- tuple indicating (row, col) or string like 'Z20'
-        vals -- array of values to populate
-        sheet -- in case you want to open a different sheet first (default None)
+        :param tuple,str start: tuple indicating (row, col) or string like 'A1'
+        :param tuple,str end: tuple indicating (row, col) or string like 'Z20'
+        :param list vals: array of values to populate
+        :param str,int sheet: optional, if you want to open a different sheet first,
+            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
         """
         if sheet:
             self.open_sheet(sheet)
@@ -323,11 +375,15 @@ class Spread():
             if n > 0:
                 self._retry_update(cells, n-1)
             else:
-                raise(e)
+                raise e
 
     def find_sheet(self, sheet):
         """
-        Find a given worksheet by title, return None if not found.
+        Find a given worksheet by title.
+
+        :param str sheet: name of Worksheet
+
+        :returns: a Worksheet by the given name or None if not found
         """
         for worksheet in self.sheets:
             if sheet == worksheet.title:
@@ -336,7 +392,12 @@ class Spread():
     @_ensure_auth
     def clear_sheet(self, rows=1, cols=1, sheet=None):
         """
-        Reset sheet to a blank sheet with given dimensions.
+        Reset open worksheet to a blank sheet with given dimensions.
+
+        :param int rows: number of rows (default 1)
+        :param int cols: number of columns (default 1)
+        :param str,int sheet: optional, name or index of Worksheet,
+            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
         """
         if sheet:
             self.open_sheet(sheet)
@@ -357,7 +418,12 @@ class Spread():
     @_ensure_auth
     def delete_sheet(self, sheet):
         """
-        Delete a worksheet by title. Returns whether the sheet was deleted or not.
+        Delete a worksheet by title. Returns whether the sheet was deleted or not. If
+        current sheet is deleted, the ``sheet`` property will be set to None.
+
+        :param str sheet: name of Worksheet
+
+        :returns: True if deleted successfully, else False
         """
         is_current = False
 
@@ -380,16 +446,17 @@ class Spread():
     def df_to_sheet(self, df, index=True, headers=True, start_row=1,
                     start_col=1, replace=False, sheet=None):
         """
-        Convert a DataFrame into a worksheet
+        Save a DataFrame into a worksheet.
 
-        Args:
-        df - a DataFrame
-        index -- whether to include the index in worksheet (default True)
-        headers -- whether to include the headers in the worksheet (default True)
-        start_row -- row number for first row of headers or data (default 1)
-        start_col -- column number for first column of headers or data (default 1)
-        replace -- whether to remove everything in the sheet first (default False)
-        sheet -- in case you want to open a different sheet first (default None)
+        :param DataFrame df: the DataFrame to save
+        :param bool index: whether to include the index in worksheet (default True)
+        :param bool headers: whether to include the headers in the worksheet (default True)
+        :param int start_row: row number for first row of headers or data (default 1)
+        :param int start_col: column number for first column of headers or data (default 1)
+        :param bool replace: whether to remove everything in the sheet first (default False)
+        :param str,int sheet: optional, if you want to open or create a different sheet
+            before saving,
+            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
         """
         if sheet:
             self.open_sheet(sheet, create=True)
