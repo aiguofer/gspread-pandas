@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import gspread
 
+from gspread.exceptions import SpreadsheetNotFound, WorksheetNotFound
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow, argparser
@@ -130,7 +131,7 @@ class Spread():
                 try:
                     self.spread = self.client.open_by_key(spread)
                 except:
-                    raise Exception("Spreadsheet not found")
+                    raise SpreadsheetNotFound("Spreadsheet not found")
         self._refresh_sheets()
 
     @_ensure_auth
@@ -144,12 +145,12 @@ class Spread():
             try:
                 self.sheet = self.sheets[sheet]
             except:
-                raise Exception("Invalid sheet index {0}".format(sheet))
+                raise WorksheetNotFound("Invalid sheet index {0}".format(sheet))
         else:
             self.sheet = self.find_sheet(sheet)
 
         if not self.sheet:
-            raise Exception("Worksheet not found")
+            raise WorksheetNotFound("Worksheet not found")
 
     @_ensure_auth
     def create_sheet(self, name, rows=1, cols=1):
