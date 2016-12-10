@@ -359,10 +359,18 @@ class Spread():
         """
         Delete a worksheet by title. Returns whether the sheet was deleted or not.
         """
+        is_current = False
+
         s = self.find_sheet(sheet)
+
+        if s == self.sheet:
+            is_current = True
+
         if s:
             try:
                 self.spread.del_worksheet(s)
+                if is_current:
+                    self.sheet = None
                 return True
             except:
                 pass
