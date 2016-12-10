@@ -101,9 +101,9 @@ class Spread():
 
         self.client = gspread.authorize(creds)
 
+    @_ensure_auth
     def _refresh_sheets(self):
-        if self.spread:
-            self.sheets = self.spread.worksheets()
+        self.sheets = self.spread.worksheets()
 
     def open(self, spread=None, sheet=None):
         """
