@@ -275,12 +275,12 @@ class Spread():
         if num_cells != len(vals):
             raise Exception("Number of values needs to match number of cells")
 
-        chunk_rows = self._max_range_chunk_size / num_cols
+        chunk_rows = self._max_range_chunk_size // num_cols
         chunk_size = chunk_rows * num_cols
 
         end_cell = (start[ROW] - 1, 0)
 
-        for val_chunks in _chunks(vals, chunk_size):
+        for val_chunks in _chunks(vals, int(chunk_size)):
             start_cell = (end_cell[ROW] + 1, start[COL])
             end_cell = (min(start_cell[ROW] + chunk_rows - 1, start[ROW] + num_rows - 1), end[COL])
             yield start_cell, end_cell, val_chunks
