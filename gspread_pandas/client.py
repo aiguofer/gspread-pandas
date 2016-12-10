@@ -135,7 +135,7 @@ class Spread():
         self._refresh_sheets()
 
     @_ensure_auth
-    def open_sheet(self, sheet):
+    def open_sheet(self, sheet, create=False):
         """
         Open a worksheet. It can take in a name or integer index (0 indexed)
         """
@@ -150,7 +150,10 @@ class Spread():
             self.sheet = self.find_sheet(sheet)
 
         if not self.sheet:
-            raise WorksheetNotFound("Worksheet not found")
+            if create:
+                create_sheet(sheet)
+            else:
+                raise WorksheetNotFound("Worksheet not found")
 
     @_ensure_auth
     def create_sheet(self, name, rows=1, cols=1):
@@ -162,15 +165,6 @@ class Spread():
         self.spread.add_worksheet(name, rows, cols)
         self._refresh_sheets()
         self.open_sheet(name)
-
-    def open_or_create_sheet(self, sheet):
-        """
-        Open a worksheet. If it doesn't exist, create it first.
-        """
-        try:
-            self.open_sheet(sheet)
-        except:
-            self.create_sheet(sheet)
 
     def _parse_sheet_headers(self, vals, headers):
         col_names = None
@@ -390,7 +384,7 @@ class Spread():
         sheet -- in case you want to open a different sheet first (default None)
         """
         if sheet:
-            self.open_or_create_sheet(sheet)
+            self.open_sheet(sheet, create=True)
 
         if not self.sheet:
             raise Exception("No open worksheet")
