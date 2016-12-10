@@ -44,3 +44,6 @@ output/
 *~
 \#*
 *#
+
+# Pyenv
+.python-version
