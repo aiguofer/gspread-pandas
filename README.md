@@ -1,7 +1,8 @@
 gspread-pandas
 ===============================
 
-version number: 0.9
+[![PyPI version](https://badge.fury.io/py/gspread-pandas.svg)](https://badge.fury.io/py/gspread-pandas)
+
 author: Diego Fernandez
 
 Overview
