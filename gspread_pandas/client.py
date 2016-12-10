@@ -53,14 +53,14 @@ class Spread():
         return self.__repr__()
 
     def __repr__(self):
-        base = "<gspread_pandas.client.Spread - {0}>"
+        base = "<gspread_pandas.client.Spread - '{0}'>"
         meta = []
         if self.email:
-            meta.append("User: {0}".format(self.email))
+            meta.append("User: '{0}'".format(self.email))
         if self.spread:
-            meta.append("Spread: {0}".format(self.spread.title))
+            meta.append("Spread: '{0}'".format(self.spread.title))
         if self.sheet:
-            meta.append("Sheet: {0}".format(self.sheet.title))
+            meta.append("Sheet: '{0}'".format(self.sheet.title))
         return base.format(", ".join(meta))
 
     @decorator
