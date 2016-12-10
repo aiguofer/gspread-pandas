@@ -105,7 +105,7 @@ class Spread():
     def _refresh_sheets(self):
         self.sheets = self.spread.worksheets()
 
-    def open(self, spread=None, sheet=None):
+    def open(self, spread, sheet=None):
         """
         Open a spreadsheet and optionally a worksheet
         """
