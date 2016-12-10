@@ -35,10 +35,10 @@ class Spread():
     need respective access to the Spreadsheet.
     """
     # chunk range request: https://github.com/burnash/gspread/issues/375
-    max_range_chunk_size = 200000
+    _max_range_chunk_size = 200000
 
     # chunk update_cells: https://github.com/burnash/gspread/issues/384
-    max_update_chunk_size = 40000
+    _max_update_chunk_size = 40000
 
     def __init__(self, user, spread, sheet=None, config=None):
         self._config = config or get_config()
@@ -275,7 +275,7 @@ class Spread():
         if num_cells != len(vals):
             raise Exception("Number of values needs to match number of cells")
 
-        chunk_rows = self.max_range_chunk_size / num_cols
+        chunk_rows = self._max_range_chunk_size / num_cols
         chunk_size = chunk_rows * num_cols
 
         end_cell = (start[ROW] - 1, 0)
@@ -317,7 +317,7 @@ class Spread():
             for val, cell in zip(val_chunks, cells):
                 cell.value = val
 
-            for cells_chunk in _chunks(cells, self.max_update_chunk_size):
+            for cells_chunk in _chunks(cells, self._max_update_chunk_size):
                 self._retry_update(cells_chunk)
 
     def _retry_update(self, cells, n=3):
