@@ -3,10 +3,44 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
-The format is based on `Keep a Changelog <http://keepachangelog.com/>`__
+The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
+and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+[0.10.0] - 2017-01-18
+---------------------
+
+Added
+~~~~~
+-  Added optional ``create`` param to ``open_sheet`` to create it if it doesn't exist
+-  Added optional ``start`` param to ``df_to_sheet``, will take tuple or address as str
+
+Changed
+~~~~~~~
+
+-  Improved docs, changed to ``rst``
+-  Made some variables private
+-  Improved ``__str__`` output
+-  Switch to using exceptions from ``gspread``
+-  ``spread`` param is now required for ``open``
+-  When current sheet is deleted, ``self.sheet`` is set to ``None``
+-  Improved versioning, switched to `Semantic Versioning <http://semver.org/>`_
+
+Fixed
+~~~~~
+
+-  Fixed chunk calculation in Python 3
+-  Sheet names are case insensitive, fixed ``find_sheet``
+
+Deprecated
+~~~~~~~~~~
+
+-  Deprecate ``open_or_create_sheet`` function in favor of ``create=True`` param
+   for ``open_sheet``
+-  Deprecate ``start_row`` and ``start_col`` in ``df_to_sheet`` in favor of ``start``
+   param
 
 [0.9] - 2016-12-07
 ------------------
@@ -16,7 +50,7 @@ Added
 
 -  Add ``__repr__`` and ``__str__`` to show the active
 -  Add user's email as a property to Spread. I recommend deleting
-   existing Oauth credentials and re-creating them with new permissions.
+   existing Oauth credentials and re-creating them with new permissions
 -  Allow importing with: ``from gspread_pandas import Spread``
 -  Added ``CHANGELOG.md``
 
