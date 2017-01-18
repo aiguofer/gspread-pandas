@@ -169,6 +169,15 @@ class Spread():
                     raise SpreadsheetNotFound("Spreadsheet not found")
         self._refresh_sheets()
 
+    def open_or_create_sheet(self, sheet):
+        """
+        DEPRECATED, use the `create` param for `open_sheet` instead
+
+        Open a worksheet. If it doesn't exist, create it first.
+        """
+        _deprecate("open_or_create_sheet is deprecated, pass create=True to open_sheet")
+        self.open_sheet(sheet, True)
+
     @_ensure_auth
     def open_sheet(self, sheet, create=False):
         """
@@ -454,7 +463,7 @@ class Spread():
         return False
 
     @_ensure_auth
-    def df_to_sheet(self, df, index=True, headers=True, start=(1,1), replace=False, sheet=None):
+    def df_to_sheet(self, df, index=True, headers=True, start=(1,1), replace=False, sheet=None, start_row=1, start_col=1):
         """
         Save a DataFrame into a worksheet.
 
@@ -467,6 +476,8 @@ class Spread():
         :param str,int sheet: optional, if you want to open or create a different sheet
             before saving,
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
+        :param int start_row: (DEPRECATED - use `start`) row number for first row of headers or data (default 1)
+        :param int start_col: (DEPRECATED - use `start`) column number for first column of headers or data (default 1)
         """
         if sheet:
             self.open_sheet(sheet, create=True)
@@ -487,6 +498,12 @@ class Spread():
             df_list = headers + df_list
 
         start = self._get_cell_as_tuple(start)
+
+        # Check deprecated params.. will be removed in 1.0
+        if start == (1, 1) and (start_row > 1 or start_col > 1):
+            _deprecate("start_col and start_row params are deprecated, use start instead")
+            start = (start_row, start_col)
+
         sheet_rows, sheet_cols = self.get_sheet_dims()
         req_rows = len(df_list) + (start[ROW] - 1)
         req_cols = len(df_list[0]) + (start[COL] - 1)
@@ -504,3 +521,7 @@ class Spread():
 def _chunks(lst, chunk_size):
     for i in range(0, len(lst), chunk_size):
         yield lst[i:i + chunk_size]
+
+def _deprecate(message):
+    import warnings
+    warnings.warn(message, DeprecationWarning, stacklevel=2)
