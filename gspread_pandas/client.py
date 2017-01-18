@@ -1,8 +1,10 @@
 from __future__ import print_function
 
+from re import match
 from os import path
 
 from builtins import str, range
+from past.builtins import basestring
 
 import numpy as np
 import pandas as pd
@@ -189,7 +191,7 @@ class Spread():
 
         if not self.sheet:
             if create:
-                create_sheet(sheet)
+                self.create_sheet(sheet)
             else:
                 raise WorksheetNotFound("Worksheet not found")
 
@@ -298,22 +300,31 @@ class Spread():
                 self.sheet.col_count) if self.sheet else None
 
     def _get_range(self, start, end):
-        return "{0}:{1}".format(
-            self.sheet.get_addr_int(*start),
-            self.sheet.get_addr_int(*end))
+        """Transform start and end to cell range like A1:B5"""
+        start_int = self._get_cell_as_tuple(start)
+        end_int = self._get_cell_as_tuple(end)
 
-    def _get_int_range(self, rng):
-        endpoints = rng.split(":")
-        return (self.sheet.get_int_addr(endpoints[0]),
-                self.sheet.get_int_addr(endpoints[1]))
+        return "{0}:{1}".format(
+            self.sheet.get_addr_int(*start_int),
+            self.sheet.get_addr_int(*end_int)
+        )
+
+    def _get_cell_as_tuple(self, cell):
+        """Take cell in either format, validate, and return as tuple"""
+        if type(cell) == tuple:
+            if len(cell) != 2 or type(cell[0]) != int or type(cell[1]) != int:
+                raise TypeError("{0} is not a valid cell tuple".format(cell))
+            return cell
+        elif isinstance(cell, basestring):
+            if not match('[a-zA-Z]+[0-9]+', cell):
+                raise TypeError("{0} is not a valid address".format(cell))
+            return self.sheet.get_int_addr(cell)
+        else:
+            raise TypeError("{0} is not a valid format".format(cell))
 
     def _get_update_chunks(self, start, end, vals):
-        if type(start) == tuple and type(end) == tuple:
-            pass
-        elif isinstance(start, str) and isinstance(end, str):
-            start, end = self._get_int_range(start + ":" + end)
-        else:
-            raise TypeError("Start and end need to be tuple or string")
+        start = self._get_cell_as_tuple(start)
+        end = self._get_cell_as_tuple(end)
 
         num_cols = end[COL] - start[COL] + 1
         num_rows = end[ROW] - start[ROW] + 1
@@ -443,16 +454,15 @@ class Spread():
         return False
 
     @_ensure_auth
-    def df_to_sheet(self, df, index=True, headers=True, start_row=1,
-                    start_col=1, replace=False, sheet=None):
+    def df_to_sheet(self, df, index=True, headers=True, start=(1,1), replace=False, sheet=None):
         """
         Save a DataFrame into a worksheet.
 
         :param DataFrame df: the DataFrame to save
         :param bool index: whether to include the index in worksheet (default True)
         :param bool headers: whether to include the headers in the worksheet (default True)
-        :param int start_row: row number for first row of headers or data (default 1)
-        :param int start_col: column number for first column of headers or data (default 1)
+        :param tuple,str start: tuple indicating (row, col) or string like 'A1' for top left
+            cell
         :param bool replace: whether to remove everything in the sheet first (default False)
         :param str,int sheet: optional, if you want to open or create a different sheet
             before saving,
@@ -476,15 +486,16 @@ class Spread():
             headers = self._parse_df_headers(df, index)
             df_list = headers + df_list
 
+        start = self._get_cell_as_tuple(start)
         sheet_rows, sheet_cols = self.get_sheet_dims()
-        req_rows = len(df_list) + (start_row - 1)
-        req_cols = len(df_list[0]) + (start_col - 1)
+        req_rows = len(df_list) + (start[ROW] - 1)
+        req_cols = len(df_list[0]) + (start[COL] - 1)
 
         # make sure sheet is large enough
         self.sheet.resize(max(sheet_rows, req_rows), max(sheet_cols, req_cols))
 
         self.update_cells(
-            start=(start_row, start_col),
+            start=start,
             end=(req_rows, req_cols),
             vals=[val for row in df_list for val in row]
         )
