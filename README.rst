@@ -6,6 +6,10 @@ Getting Started
 
 author: Diego Fernandez
 
+Links:
+-  `Documentation <https://aiguofer.github.io/gspread-pandas/>`_
+-  `Source code <https://aiguofer.github.io/gspread-pandas/>`_
+
 Overview
 ========
 
