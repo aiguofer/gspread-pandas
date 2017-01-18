@@ -397,7 +397,7 @@ class Spread():
         :returns: a Worksheet by the given name or None if not found
         """
         for worksheet in self.sheets:
-            if sheet == worksheet.title:
+            if sheet.lower() == worksheet.title.lower():
                 return worksheet
 
     @_ensure_auth
