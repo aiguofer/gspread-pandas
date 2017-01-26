@@ -9,11 +9,22 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Added
+~~~~~
+
+-  Added troubleshooting for ``certifi`` issue in ``README``
+
+Changed
+~~~~~~~
+
+-  Only catch ``SpreadsheetNotFound`` exceptions when opening a spreadsheet
+
 [0.10.0] - 2017-01-18
 ---------------------
 
 Added
 ~~~~~
+
 -  Added optional ``create`` param to ``open_sheet`` to create it if it doesn't exist
 -  Added optional ``start`` param to ``df_to_sheet``, will take tuple or address as str
 
