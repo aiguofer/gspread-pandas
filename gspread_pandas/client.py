@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import gspread
 
-from gspread.exceptions import SpreadsheetNotFound, WorksheetNotFound
+from gspread.exceptions import SpreadsheetNotFound, WorksheetNotFound, NoValidUrlKeyFound
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow, argparser
@@ -159,13 +159,13 @@ class Spread():
 
         try:
             self.spread = self.client.open(spread)
-        except:
+        except SpreadsheetNotFound:
             try:
                 self.spread = self.client.open_by_url(spread)
-            except:
+            except (SpreadsheetNotFound, NoValidUrlKeyFound):
                 try:
                     self.spread = self.client.open_by_key(spread)
-                except:
+                except SpreadsheetNotFound:
                     raise SpreadsheetNotFound("Spreadsheet not found")
         self._refresh_sheets()
 
