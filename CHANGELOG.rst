@@ -19,6 +19,11 @@ Changed
 
 -  Only catch ``SpreadsheetNotFound`` exceptions when opening a spreadsheet
 
+Fixed
+~~~~~
+
+-  Allow passing index ``0`` to ``open``
+
 [0.10.0] - 2017-01-18
 ---------------------
 

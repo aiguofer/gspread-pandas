@@ -145,7 +145,7 @@ class Spread():
         """
         self.open_spread(spread)
 
-        if sheet:
+        if sheet is not None:
             self.open_sheet(sheet)
 
     @_ensure_auth
