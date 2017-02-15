@@ -9,6 +9,24 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+[0.11.0] - 2017-02-14
+---------------------
+
+Changed
+~~~~~~~
+
+-  Only clear up to first row in ``clear_sheet`` so that data filters will persist
+-  Moved default config from ``~/.google/`` to ``~/.config/gspread_pandas``
+
+Fixed
+~~~~~
+
+-  Allow passing index ``0`` to ``open``
+-  Fixed changelog
+
+[0.10.1] - 2017-01-26
+---------------------
+
 Added
 ~~~~~
 
@@ -18,13 +36,7 @@ Changed
 ~~~~~~~
 
 -  Only catch ``SpreadsheetNotFound`` exceptions when opening a spreadsheet
--  Only clear up to first row in ``clear_sheet`` so that data filters will persist
--  Moved default config from ``~/.google/`` to ``~/.config/gspread_pandas``
 
-Fixed
-~~~~~
-
--  Allow passing index ``0`` to ``open``
 
 [0.10.0] - 2017-01-18
 ---------------------
