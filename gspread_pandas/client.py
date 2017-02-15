@@ -61,8 +61,9 @@ class Spread():
     def __init__(self, user, spread, sheet=None, config=None):
         """
         :param str user: string indicating the key to a users credentials, which will
-            be stored in a file (by default they will be stored in ``~/.google/creds/<user>``
-            but can be modified with ``creds_dir`` property in config)
+            be stored in a file (by default they will be stored in
+            ``~/.config/gspread_pandas/creds/<user>`` but can be modified with ``creds_dir``
+            property in config)
         :param str spread: name, url, or id of the spreadsheet; must have read access by
             the authenticated user,
             see :meth:`open_spread <gspread_pandas.client.Spread.open_spread>`
@@ -105,7 +106,9 @@ class Spread():
                 .get('https://www.googleapis.com/userinfo/v2/me')\
                 .json()['email']
         except:
-            print("Couldn't retrieve email. Delete ~/.google/creds and authenticate again")
+            print("""
+            Couldn't retrieve email. Delete ~/.config/gspread_pandas/creds and authenticate again
+            """)
 
     def _authorize(self):
         flow = OAuth2WebServerFlow(

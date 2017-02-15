@@ -19,6 +19,7 @@ Changed
 
 -  Only catch ``SpreadsheetNotFound`` exceptions when opening a spreadsheet
 -  Only clear up to first row in ``clear_sheet`` so that data filters will persist
+-  Moved default config from ``~/.google/`` to ``~/.config/gspread_pandas``
 
 Fixed
 ~~~~~

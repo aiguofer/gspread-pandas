@@ -70,8 +70,8 @@ the tool and generate credentials. Please use your web browser and go to
    2.0 client IDs** and store the downloaded file on your file system.
    Please be aware, the file contains your private credentials, so take
    care of the file in the same way you care of your private SSH key;
-   i.e. move downloaded JSON to ``~/.google/google_secret.json`` (or you
-   can configure the directory and file name by directly calling
+   i.e. move downloaded JSON to ``~/.config/gspread_pandas/google_secret.json``
+   (or you can configure the directory and file name by directly calling
    ``gspread_pandas.conf.get_config``
 
 Thanks to similar project
@@ -89,8 +89,9 @@ multiple people that may want to use the library. The first parameter to
 time this is called for a specific key, you will have to authenticate
 through a text based OAuth prompt; this makes it possible to run on a headless
 server through ssh or through a Jupyter notebook. After this, the
-credentials for that user will be stored (by default in ``~/.google/creds``)and the tokens will be
-refreshed automatically any time the tool is used.
+credentials for that user will be stored (by default in
+``~/.config/gspread_pandas/creds``) and the tokens will berefreshed
+automatically any time the tool is used.
 
 Users will only be able to interact with Spreadsheets that they have
 access to.
