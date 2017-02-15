@@ -18,6 +18,7 @@ Changed
 ~~~~~~~
 
 -  Only catch ``SpreadsheetNotFound`` exceptions when opening a spreadsheet
+-  Only clear up to first row in ``clear_sheet`` so that data filters will persist
 
 Fixed
 ~~~~~

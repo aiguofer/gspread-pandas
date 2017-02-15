@@ -425,11 +425,11 @@ class Spread():
         if not self.sheet:
             raise Exception("No open worksheet")
 
-        self.sheet.resize(1, 1)
+        self.sheet.resize(1, cols)
 
         self.update_cells(
             start=(1, 1),
-            end=(1, 1),
+            end=(1, cols),
             vals=['']
         )
 
