@@ -9,6 +9,11 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Added
+~~~~~
+
+-  Added note about ``EOFError`` when verifying Oauth in ``Rodeo``
+
 [0.11.0] - 2017-02-14
 ---------------------
 

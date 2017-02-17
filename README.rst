@@ -134,7 +134,16 @@ Example
 Troubleshooting
 ===============
 
-If you're getting an SSL related error or can't seem to be able to open existing spreadsheets that you have access to, you might be running into an issue caused by ``certifi``. This has mainly been experienced on RHEL and CentOS running Python 2.7. You can read more about it `here <https://github.com/burnash/gspread/issues/223>`_ and `here <https://github.com/burnash/gspread/issues/354>`_ but, in short, the solution is to either install a specific version of ``certifi`` that works for you, or remove it altogether.
+SSL Error
+---------
+
+If you're getting an SSL related error or can't seem to be able to open existing
+spreadsheets that you have access to, you might be running into an issue caused by
+``certifi``. This has mainly been experienced on RHEL and CentOS running Python 2.7.
+You can read more about it `here <https://github.com/burnash/gspread/issues/223>`_
+and `here <https://github.com/burnash/gspread/issues/354>`_ but, in short, the
+solution is to either install a specific version of ``certifi`` that works for you,
+or remove it altogether.
 
 .. code:: bash
 
@@ -149,3 +158,17 @@ or
 
 .. |PyPI version| image:: https://badge.fury.io/py/gspread-pandas.svg
    :target: https://badge.fury.io/py/gspread-pandas
+
+EOFError in Rodeo
+-----------------
+
+If you're trying to use ``gspread_pandas`` from within
+`Rodeo <https://www.yhat.com/products/rodeo>`_ you might get an
+``EOFError: EOF when reading a line`` error when trying to pass in the verification
+code. The workaround for this is to first verify your account in a regular shell.
+Since you're just doing this to get your Oauth token, the spreadsheet doesn't need
+to be valid. Just run this in shell:
+
+.. code:: python
+
+   python -c "from gspread_pandas import Spread; Spread('<user_key>','')"
