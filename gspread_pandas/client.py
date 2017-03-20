@@ -376,10 +376,9 @@ class Spread():
         for start_cell, end_cell, val_chunks in self._get_update_chunks(start,
                                                                         end,
                                                                         vals):
-            self.client.login()  # ensure that token is still active
             rng = self._get_range(start_cell, end_cell)
 
-            cells = self.sheet.range(rng)
+            cells = self._retry_range(rng)
 
             if len(val_chunks) != len(cells):
                 raise Exception("Number of chunked values doesn't match number of cells")
@@ -391,6 +390,7 @@ class Spread():
                 self._retry_update(cells_chunk)
 
     def _retry_update(self, cells, n=3):
+        """Call self.sheet.update_cells with retry"""
         try:
             self.client.login()  # ensure that token is still active
             self.sheet.update_cells(cells)
@@ -399,6 +399,18 @@ class Spread():
                 self._retry_update(cells, n-1)
             else:
                 raise e
+
+    def _retry_range(self, rng, n=3):
+        """Call self.sheet.range with retry"""
+        try:
+            self.client.login()  # ensure that token is still active
+            return self.sheet.range(rng)
+        except Exception as e:
+            if n > 0:
+                self._retry_range(rng, n-1)
+            else:
+                raise e
+
 
     def find_sheet(self, sheet):
         """

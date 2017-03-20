@@ -14,6 +14,11 @@ Added
 
 -  Added note about ``EOFError`` when verifying Oauth in ``Rodeo``
 
+Changed
+~~~~~~~
+
+-  Add retry method for ``sheet.range`` to work around 'Connection Broken' error
+
 [0.11.0] - 2017-02-14
 ---------------------
 
