@@ -172,3 +172,5 @@ to be valid. Just run this in shell:
 .. code:: python
 
    python -c "from gspread_pandas import Spread; Spread('<user_key>','')"
+
+Then follow the instructions to create and store the OAuth creds.
