@@ -411,7 +411,6 @@ class Spread():
             else:
                 raise e
 
-
     def find_sheet(self, sheet):
         """
         Find a given worksheet by title.
@@ -445,7 +444,7 @@ class Spread():
         self.update_cells(
             start=(1, 1),
             end=(1, cols),
-            vals=['']
+            vals=['' for i in range(0, cols)]
         )
 
         self.sheet.resize(rows, cols)
@@ -500,9 +499,6 @@ class Spread():
         if not self.sheet:
             raise Exception("No open worksheet")
 
-        if replace:
-            self.clear_sheet()
-
         if index:
             df = df.reset_index()
 
@@ -522,6 +518,9 @@ class Spread():
         sheet_rows, sheet_cols = self.get_sheet_dims()
         req_rows = len(df_list) + (start[ROW] - 1)
         req_cols = len(df_list[0]) + (start[COL] - 1)
+
+        if replace:
+            self.clear_sheet(1, req_cols)
 
         # make sure sheet is large enough
         self.sheet.resize(max(sheet_rows, req_rows), max(sheet_cols, req_cols))

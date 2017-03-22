@@ -19,6 +19,11 @@ Changed
 
 -  Add retry method for ``sheet.range`` to work around 'Connection Broken' error
 
+Fixed
+~~~~~
+
+-  Fixed clearing only rows with ``clear_sheet``
+
 [0.11.0] - 2017-02-14
 ---------------------
 
