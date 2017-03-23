@@ -140,24 +140,20 @@ SSL Error
 If you're getting an SSL related error or can't seem to be able to open existing
 spreadsheets that you have access to, you might be running into an issue caused by
 ``certifi``. This has mainly been experienced on RHEL and CentOS running Python 2.7.
-You can read more about it `here <https://github.com/burnash/gspread/issues/223>`_
-and `here <https://github.com/burnash/gspread/issues/354>`_ but, in short, the
+You can read more about it in `issue 223 <https://github.com/burnash/gspread/issues/223>`_
+and `issue 354 <https://github.com/burnash/gspread/issues/354>`_ but, in short, the
 solution is to either install a specific version of ``certifi`` that works for you,
 or remove it altogether.
 
-.. code:: bash
+::
 
    pip install certifi==2015.4.28
 
 or
 
-.. code:: bash
+::
 
    pip uninstall certifi
-
-
-.. |PyPI version| image:: https://badge.fury.io/py/gspread-pandas.svg
-   :target: https://badge.fury.io/py/gspread-pandas
 
 EOFError in Rodeo
 -----------------
@@ -174,3 +170,7 @@ to be valid. Just run this in shell:
    python -c "from gspread_pandas import Spread; Spread('<user_key>','')"
 
 Then follow the instructions to create and store the OAuth creds.
+
+
+.. |PyPI version| image:: https://badge.fury.io/py/gspread-pandas.svg
+   :target: https://badge.fury.io/py/gspread-pandas
