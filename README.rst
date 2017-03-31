@@ -56,8 +56,8 @@ the tool and generate credentials. Please use your web browser and go to
    **Create** button.
 -  On the left-side menu click on **API Manager**.
 -  A table of available APIs is shown. Switch **Drive API** and click on
-   **Enable API** button. Other APIs might be switched off, for our
-   purpose.
+   **Enable API** button. Do the same for **Sheets API**. Other APIs might
+   be switched off, for our purpose.
 -  On the left-side menu click on **Credentials**.
 -  In section **OAuth consent screen** select your email address and
    give your product a name. Then click on **Save** button.

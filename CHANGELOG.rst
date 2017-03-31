@@ -9,6 +9,17 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Added
+~~~~~
+
+-  Add Sheets API v4 client to ``self.clientv4``
+
+Fixed
+~~~~~
+
+-  Merged cells now all get the right value in ``sheet_to_df``
+-  You can now pass ``replace=True`` when a sheet has frozen rows/cols
+
 [0.11.2] - 2017-03-22
 ---------------------
 
