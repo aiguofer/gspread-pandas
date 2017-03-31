@@ -274,7 +274,8 @@ class Spread():
         if not self.sheet:
             raise Exception("No open worksheet")
 
-        vals = self.sheet.get_all_values()[start_row - 1:]
+        vals = self.sheet.get_all_values()
+        vals = self._fix_merge_values(vals)[start_row - 1:]
 
         col_names = self._parse_sheet_headers(vals, headers)
 
@@ -546,6 +547,18 @@ class Spread():
             end=(req_rows, req_cols),
             vals=[val for row in df_list for val in row]
         )
+
+    def _fix_merge_values(self, vals):
+        """Assign the top-left value to all cells in a merged range"""
+        for merge in self._sheet_metadata.get('merges', []):
+            start_row, end_row = merge['startRowIndex'], merge['endRowIndex']
+            start_col, end_col = merge['startColumnIndex'], merge['endColumnIndex']
+
+            orig_val = vals[start_row][start_col]
+            for row in vals[start_row:end_row]:
+                row[start_col:end_col] = [orig_val for i in range(start_col, end_col)]
+
+        return vals
 
 
 def _chunks(lst, chunk_size):
