@@ -14,6 +14,7 @@ from gspread.exceptions import SpreadsheetNotFound, WorksheetNotFound, NoValidUr
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow, argparser
+from googleapiclient import discovery
 
 from decorator import decorator
 
@@ -51,6 +52,9 @@ class Spread():
 
     #: `(gspread.client.Client)` - Current gspread Client
     client = None
+
+    #: `(googleapiclient.discovery.Resource)` - Current sheet through v4 Sheets API
+    clientv4 = None
 
     # chunk range request: https://github.com/burnash/gspread/issues/375
     _max_range_chunk_size = 200000
@@ -132,10 +136,14 @@ class Spread():
             creds = self._authorize()
 
         self.client = gspread.authorize(creds)
+        self.clientv4 = discovery.build('sheets', 'v4', credentials=creds)\
+                                 .spreadsheets()
 
     @_ensure_auth
     def _refresh_sheets(self):
         self.sheets = self.spread.worksheets()
+        self._spread_metadata = self.clientv4.get(spreadsheetId=self.spread.id)\
+                                             .execute()
 
     def open(self, spread, sheet=None):
         """
@@ -170,6 +178,7 @@ class Spread():
                     self.spread = self.client.open_by_key(spread)
                 except SpreadsheetNotFound:
                     raise SpreadsheetNotFound("Spreadsheet not found")
+
         self._refresh_sheets()
 
     def open_or_create_sheet(self, sheet):
@@ -192,14 +201,17 @@ class Spread():
             see :meth:`create_sheet <gspread_pandas.Spread.create_sheet>` (default False)
         """
         self.sheet = None
-
+        ix = None
         if isinstance(sheet, int):
             try:
                 self.sheet = self.sheets[sheet]
+                ix = sheet
             except:
                 raise WorksheetNotFound("Invalid sheet index {0}".format(sheet))
         else:
-            self.sheet = self.find_sheet(sheet)
+            ix, self.sheet = self._find_sheet(sheet)
+
+        self._sheet_metadata = self._spread_metadata['sheets'][ix]
 
         if not self.sheet:
             if create:
@@ -411,6 +423,12 @@ class Spread():
             else:
                 raise e
 
+    def _find_sheet(self, sheet):
+        """Find a worksheet and return with index"""
+        for ix, worksheet in enumerate(self.sheets):
+            if sheet.lower() == worksheet.title.lower():
+                return ix, worksheet
+
     def find_sheet(self, sheet):
         """
         Find a given worksheet by title.
@@ -419,9 +437,7 @@ class Spread():
 
         :returns: a Worksheet by the given name or None if not found
         """
-        for worksheet in self.sheets:
-            if sheet.lower() == worksheet.title.lower():
-                return worksheet
+        return self._find_sheet(sheet)[1]
 
     @_ensure_auth
     def clear_sheet(self, rows=1, cols=1, sheet=None):
