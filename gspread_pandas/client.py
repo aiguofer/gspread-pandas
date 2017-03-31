@@ -456,15 +456,24 @@ class Spread():
         if not self.sheet:
             raise Exception("No open worksheet")
 
-        self.sheet.resize(1, cols)
+        frozen_rows = self._sheet_metadata['properties']['gridProperties']\
+                          .get('frozenRowCount', 0)
+
+        frozen_cols = self._sheet_metadata['properties']['gridProperties']\
+                          .get('frozenColCount', 0)
+
+        clear_rows = frozen_rows + 1
+        clear_cols = max(frozen_cols, cols)
+
+        self.sheet.resize(clear_rows, clear_cols)
 
         self.update_cells(
             start=(1, 1),
-            end=(1, cols),
-            vals=['' for i in range(0, cols)]
+            end=(clear_rows, clear_cols),
+            vals=['' for i in range(0, clear_rows * clear_cols)]
         )
 
-        self.sheet.resize(rows, cols)
+        self.sheet.resize(max(clear_rows, rows), clear_cols)
 
     @_ensure_auth
     def delete_sheet(self, sheet):
