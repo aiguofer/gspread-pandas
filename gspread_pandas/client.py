@@ -214,13 +214,13 @@ class Spread():
         else:
             ix, self.sheet = self._find_sheet(sheet)
 
-        self._sheet_metadata = self._spread_metadata['sheets'][ix]
-
         if not self.sheet:
             if create:
                 self.create_sheet(sheet)
             else:
                 raise WorksheetNotFound("Worksheet not found")
+        else:
+            self._sheet_metadata = self._spread_metadata['sheets'][ix]
 
     @_ensure_auth
     def create_sheet(self, name, rows=1, cols=1):
@@ -393,6 +393,7 @@ class Spread():
         for ix, worksheet in enumerate(self.sheets):
             if sheet.lower() == worksheet.title.lower():
                 return ix, worksheet
+        return None, None
 
     def find_sheet(self, sheet):
         """
