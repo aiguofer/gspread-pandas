@@ -238,12 +238,14 @@ class Spread():
         self.open_sheet(name)
 
     @_ensure_auth
-    def sheet_to_df(self, index=1, headers=1, start_row=1, sheet=None):
+    def sheet_to_df(self, index=1, headers=1, header_rows=1, start_row=1, sheet=None):
         """
         Pull a worksheet into a DataFrame.
 
         :param int index: col number of index column, 0 or None for no index (default 1)
-        :param int headers: number of rows that represent headers (default 1)
+        :param int headers: (DEPRECATED - use `header_rows`) number of rows that represent
+            headers (default 1)
+        :param int header_rows: number of rows that represent headers (default 1)
         :param int start_row: row number for first row of headers or data (default 1)
         :param str,int sheet: optional, if you want to open a different sheet first,
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
@@ -256,13 +258,17 @@ class Spread():
         if not self.sheet:
             raise Exception("No open worksheet")
 
+        if headers != 1:
+            _deprecate("headers has been deprecated, use header_rows instead")
+            header_rows = headers
+
         vals = self.sheet.get_all_values()
         vals = self._fix_merge_values(vals)[start_row - 1:]
 
-        col_names = _parse_sheet_headers(vals, headers)
+        col_names = _parse_sheet_headers(vals, header_rows)
 
         # remove rows where everything is null, then replace nulls with ''
-        df = pd.DataFrame(vals[headers or 0:])\
+        df = pd.DataFrame(vals[header_rows or 0:])\
                .replace('', np.nan)\
                .dropna(how='all')\
                .fillna('')
