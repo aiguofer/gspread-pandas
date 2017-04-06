@@ -19,7 +19,7 @@ from googleapiclient import discovery
 from decorator import decorator
 
 from gspread_pandas.conf import get_config
-from gspread_pandas.util import (_deprecate, _chunks, _parse_df_headers,
+from gspread_pandas.util import (_deprecate, _chunks, _parse_df_col_names,
                                  _parse_sheet_index, _parse_sheet_headers)
 
 
@@ -496,7 +496,7 @@ class Spread():
         df_list = df.fillna('').values.tolist()
 
         if headers:
-            headers = _parse_df_headers(df, index)
+            headers = _parse_df_col_names(df, index)
             df_list = headers + df_list
 
         start = self._get_cell_as_tuple(start)

@@ -12,7 +12,7 @@ def _parse_sheet_index(df, index):
         df.index.name = df.index.name or None
     return df
 
-def _parse_df_headers(df, include_index):
+def _parse_df_col_names(df, include_index):
     """Parse column names from a df into sheet headers"""
     headers = df.columns.tolist()
 
@@ -37,11 +37,39 @@ def _parse_sheet_headers(vals, header_rows):
     if header_rows:
         headers = vals[:header_rows]
         if header_rows > 1:
+            _fix_sheet_header_level(headers)
             col_names = pd.MultiIndex.from_arrays(headers)
         elif header_rows == 1:
             col_names = headers
 
     return col_names
+
+def _fix_sheet_header_level(header_names):
+    for col_ix in range(len(header_names[0])):
+        _shift_header_up(header_names, col_ix)
+
+    return header_names
+
+def _shift_header_up(header_names, col_index, row_index=0,
+                     shift_val=0, found_first=False):
+    """Recursively shift headers up so that top level is not empty"""
+    rows = len(header_names)
+    if row_index < rows:
+        current_value = header_names[row_index][col_index]
+
+        if current_value == '' and not found_first:
+            shift_val += 1
+        else:
+            found_first = True
+
+        shift_val = _shift_header_up(header_names, col_index, row_index + 1,
+                                     shift_val, found_first)
+        if shift_val <= row_index:
+            header_names[row_index - shift_val][col_index] = current_value
+
+        if row_index + shift_val >= rows:
+            header_names[row_index][col_index] = ''
+    return shift_val
 
 def _chunks(lst, chunk_size):
     """Chunk a list into specified chunk sizes"""
