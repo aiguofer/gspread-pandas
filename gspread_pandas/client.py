@@ -19,6 +19,9 @@ from googleapiclient import discovery
 from decorator import decorator
 
 from gspread_pandas.conf import get_config
+from gspread_pandas.util import (_deprecate, _chunks, _parse_df_headers,
+                                 _parse_sheet_index, _parse_sheet_headers)
+
 
 __all__ = ['Spread']
 
@@ -234,27 +237,6 @@ class Spread():
         self._refresh_sheets()
         self.open_sheet(name)
 
-    def _parse_sheet_headers(self, vals, headers):
-        col_names = None
-        if headers:
-            if headers > 1:
-                col_names = pd.MultiIndex.from_arrays(vals[:headers])
-            elif headers == 1:
-                col_names = vals[0]
-            vals = vals[headers:]
-        return col_names
-
-    def _parse_sheet_index(self, df, index):
-        if index:
-            df = df.set_index(df.columns[index - 1])
-            # if it was multi-index, the name is tuple;
-            # choose last value in tuple since that is more common
-            if type(df.index.name) == tuple:
-                df.index.name = df.index.name[-1]
-            # get rid of falsey index names
-            df.index.name = df.index.name or None
-        return df
-
     @_ensure_auth
     def sheet_to_df(self, index=1, headers=1, start_row=1, sheet=None):
         """
@@ -277,7 +259,7 @@ class Spread():
         vals = self.sheet.get_all_values()
         vals = self._fix_merge_values(vals)[start_row - 1:]
 
-        col_names = self._parse_sheet_headers(vals, headers)
+        col_names = _parse_sheet_headers(vals, headers)
 
         # remove rows where everything is null, then replace nulls with ''
         df = pd.DataFrame(vals[headers or 0:])\
@@ -288,25 +270,7 @@ class Spread():
         if col_names is not None:
             df.columns = col_names
 
-        return self._parse_sheet_index(df, index)
-
-    def _parse_df_headers(self, df, include_index):
-        headers = df.columns.tolist()
-
-        # handle multi-index headers
-        if type(headers[0]) == tuple:
-            headers = [list(row) for row in zip(*headers)]
-
-            # Pandas sets index name as top level col name with reset_index
-            # Switch to low level since that is more natural
-            if include_index:
-                headers[-1][0] = headers[0][0]
-                headers[0][0] = ''
-        # handle regular columns
-        else:
-            headers = [headers]
-
-        return headers
+        return _parse_sheet_index(df, index)
 
     @_ensure_auth
     def get_sheet_dims(self, sheet=None):
@@ -531,7 +495,7 @@ class Spread():
         df_list = df.fillna('').values.tolist()
 
         if headers:
-            headers = self._parse_df_headers(df, index)
+            headers = _parse_df_headers(df, index)
             df_list = headers + df_list
 
         start = self._get_cell_as_tuple(start)
@@ -568,12 +532,3 @@ class Spread():
                 row[start_col:end_col] = [orig_val for i in range(start_col, end_col)]
 
         return vals
-
-
-def _chunks(lst, chunk_size):
-    for i in range(0, len(lst), chunk_size):
-        yield lst[i:i + chunk_size]
-
-def _deprecate(message):
-    import warnings
-    warnings.warn(message, DeprecationWarning, stacklevel=2)
