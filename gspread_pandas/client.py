@@ -469,6 +469,7 @@ class Spread():
         if s:
             try:
                 self.spread.del_worksheet(s)
+                self._refresh_sheets()
                 if is_current:
                     self.sheet = None
                 return True
