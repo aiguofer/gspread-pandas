@@ -9,6 +9,24 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+[0.12.1] - 2017-04-25
+---------------------
+
+Changed
+~~~~~~~
+
+-  If using multi-level headings, heading will be shifted up so the top level
+   is not a blank strin
+-  Some functions that don't depend on ``self`` were moved into ``util.py``
+-  The ``headers`` param in ``sheet_to_df`` was deprecated in favor of ``header_rows``
+
+Fixed
+~~~~~
+
+-  I introduced some small bugs with the v4 api changes when a sheet is not found,
+   they now work as expected even when a new sheet is created
+-  The list of sheets is now refreshed when one is deleted
+
 [0.12.0] - 2017-03-31
 ---------------------
 
