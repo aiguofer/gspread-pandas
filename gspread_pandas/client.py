@@ -216,11 +216,14 @@ class Spread():
 
         if not self.sheet:
             if create:
+                # Assuming the new sheet will always be the last in the list
                 self.create_sheet(sheet)
+                ix = len(self.sheets) - 1
             else:
                 raise WorksheetNotFound("Worksheet not found")
-        else:
-            self._sheet_metadata = self._spread_metadata['sheets'][ix]
+
+        # Should only get here either after a sheet has been found or created
+        self._sheet_metadata = self._spread_metadata['sheets'][ix]
 
     @_ensure_auth
     def create_sheet(self, name, rows=1, cols=1):
