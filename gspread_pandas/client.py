@@ -27,6 +27,7 @@ __all__ = ['Spread']
 
 default_scope = [
     'https://spreadsheets.google.com/feeds',
+    'https://www.googleapis.com/auth/drive',
     'https://www.googleapis.com/auth/userinfo.email'
 ]
 
