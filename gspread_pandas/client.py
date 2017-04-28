@@ -10,7 +10,8 @@ import numpy as np
 import pandas as pd
 import gspread
 
-from gspread.exceptions import SpreadsheetNotFound, WorksheetNotFound, NoValidUrlKeyFound
+from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
+                                NoValidUrlKeyFound, RequestError)
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow, argparser
@@ -66,7 +67,8 @@ class Spread():
     # chunk update_cells: https://github.com/burnash/gspread/issues/384
     _max_update_chunk_size = 40000
 
-    def __init__(self, user, spread, sheet=None, config=None):
+    def __init__(self, user, spread, sheet=None, config=None,
+                 create_spread=False, create_sheet=False):
         """
         :param str user: string indicating the key to a users credentials, which will
             be stored in a file (by default they will be stored in
@@ -79,13 +81,17 @@ class Spread():
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
         :param dict config: optional, if you want to provide an alternate configuration,
             see :meth:`get_config <gspread_pandas.conf.get_config>`
+        :param bool create_sheet: whether to create the spreadsheet if it doesn't exist,
+            it wil use the ``spread`` value as the sheet title
+        :param bool create_spread: whether to create the sheet if it doesn't exist,
+            it wil use the ``spread`` value as the sheet title
         """
         self._config = config or get_config()
         self._creds_file = path.join(self._config['creds_dir'], user)
         self._login()
         self.email = self._get_email()
 
-        self.open(spread, sheet)
+        self.open(spread, sheet, create_sheet, create_spread)
 
     def __repr__(self):
         base = "<gspread_pandas.client.Spread - '{0}'>"
@@ -112,8 +118,8 @@ class Spread():
                 .json()['email']
         except:
             print("""
-            Couldn't retrieve email. Delete ~/.config/gspread_pandas/creds and authenticate again
-            """)
+            Couldn't retrieve email. Delete {0} and authenticate again
+            """.format(self._creds_file))
 
     def _authorize(self):
         flow = OAuth2WebServerFlow(
@@ -146,7 +152,7 @@ class Spread():
         self._spread_metadata = self.clientv4.get(spreadsheetId=self.spread.id)\
                                              .execute()
 
-    def open(self, spread, sheet=None):
+    def open(self, spread, sheet=None, create_sheet=False, create_spread=False):
         """
         Open a spreadsheet, and optionally a worksheet. See
         :meth:`open_spread <gspread_pandas.Spread.open_spread>` and
@@ -154,18 +160,24 @@ class Spread():
 
         :param str spread: name, url, or id of Spreadsheet
         :param str,int sheet: name or index of Worksheet
+        :param bool create_sheet: whether to create the spreadsheet if it doesn't exist,
+            it wil use the ``spread`` value as the sheet title
+        :param bool create_spread: whether to create the sheet if it doesn't exist,
+            it wil use the ``spread`` value as the sheet title
         """
-        self.open_spread(spread)
+        self.open_spread(spread, create_spread)
 
         if sheet is not None:
-            self.open_sheet(sheet)
+            self.open_sheet(sheet, create_sheet)
 
     @_ensure_auth
-    def open_spread(self, spread):
+    def open_spread(self, spread, create=False):
         """
         Open a spreadsheet. Authorized user must already have read access.
 
         :param str spread: name, url, or id of Spreadsheet
+        :param bool create: whether to create the spreadsheet if it doesn't exist,
+            it wil use the ``spread`` value as the sheet title
         """
         self.spread = None
 
@@ -178,7 +190,23 @@ class Spread():
                 try:
                     self.spread = self.client.open_by_key(spread)
                 except SpreadsheetNotFound:
-                    raise SpreadsheetNotFound("Spreadsheet not found")
+                    if create:
+                        try:
+                            self.spread = self.client.create(spread)
+                        except RequestError as e:
+                            err = str(e)
+                            msg = "Couldn't create spreadsheet.\n"
+                            if 'accessNotConfigured' in err:
+                                msg += "Drive API has not been enabled. Enable it at " +\
+                                "https://console.developers.google.com/apis/api/drive/overview"
+                            elif 'insufficientPermissions' in err:
+                                msg += "Delete {0} and authenticate again"\
+                                       .format(self._creds_file)
+                            else:
+                                msg += err
+                            raise Exception(msg)
+                    else:
+                        raise SpreadsheetNotFound("Spreadsheet not found")
 
         self._refresh_sheets()
 

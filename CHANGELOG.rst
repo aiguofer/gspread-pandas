@@ -9,6 +9,13 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Added
+~~~~~
+
+-  Added ``create_spread`` and ``create_sheet`` params for ``Spread`` class. This enables
+   creating a spreadsheet or a worksheet during opening. This will require re-authenticating
+   in order to use it
+
 [0.12.1] - 2017-04-25
 ---------------------
 
