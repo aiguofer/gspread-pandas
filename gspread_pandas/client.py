@@ -10,15 +10,15 @@ import numpy as np
 import pandas as pd
 import gspread
 
-from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
-                                NoValidUrlKeyFound, RequestError)
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow, argparser
 from googleapiclient import discovery
 
 from decorator import decorator
-
+from gspread.utils import rowcol_to_a1, a1_to_rowcol
+from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
+                                NoValidUrlKeyFound, RequestError)
 from gspread_pandas.conf import get_config
 from gspread_pandas.util import (_deprecate, _chunks, _parse_df_col_names,
                                  _parse_sheet_index, _parse_sheet_headers)
@@ -329,8 +329,8 @@ class Spread():
         end_int = self._get_cell_as_tuple(end)
 
         return "{0}:{1}".format(
-            self.sheet.get_addr_int(*start_int),
-            self.sheet.get_addr_int(*end_int)
+            rowcol_to_a1(*start_int),
+            rowcol_to_a1(*end_int)
         )
 
     def _get_cell_as_tuple(self, cell):
@@ -342,7 +342,7 @@ class Spread():
         elif isinstance(cell, basestring):
             if not match('[a-zA-Z]+[0-9]+', cell):
                 raise TypeError("{0} is not a valid address".format(cell))
-            return self.sheet.get_int_addr(cell)
+            return a1_to_rowcol(cell)
         else:
             raise TypeError("{0} is not a valid format".format(cell))
 
