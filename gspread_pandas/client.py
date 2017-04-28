@@ -87,9 +87,6 @@ class Spread():
 
         self.open(spread, sheet)
 
-    def __str__(self):
-        return self.__repr__()
-
     def __repr__(self):
         base = "<gspread_pandas.client.Spread - '{0}'>"
         meta = []
