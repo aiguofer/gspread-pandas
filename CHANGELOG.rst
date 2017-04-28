@@ -9,6 +9,9 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+[0.13.0] - 2017-04-28
+---------------------
+
 Added
 ~~~~~
 
@@ -23,7 +26,7 @@ Changed
 ~~~~~~~
 
 -  If using multi-level headings, heading will be shifted up so the top level
-   is not a blank strin
+   is not a blank string
 -  Some functions that don't depend on ``self`` were moved into ``util.py``
 -  The ``headers`` param in ``sheet_to_df`` was deprecated in favor of ``header_rows``
 
