@@ -40,8 +40,8 @@ class Spread():
     Simple wrapper for gspread to interact with Pandas. It holds an instance of
     an 'open' spreadsheet, an 'open' worksheet, and a list of available worksheets.
 
-    Each user will be associated with specific OAuth credentials. The authenticated user will
-    need the appropriate permissions to the Spreadsheet in order to interact with it.
+    Each user will be associated with specific OAuth credentials. The authenticated user
+    will need the appropriate permissions to the Spreadsheet in order to interact with it.
     """
     #: `(gspread.models.Spreadsheet)` - Currently open Spreadsheet
     spread = None
@@ -547,10 +547,11 @@ class Spread():
         req_cols = len(df_list[0]) + (start[COL] - 1)
 
         if replace:
-            self.clear_sheet(1, req_cols)
-
-        # make sure sheet is large enough
-        self.sheet.resize(max(sheet_rows, req_rows), max(sheet_cols, req_cols))
+            # this takes care of resizing
+            self.clear_sheet(req_rows, req_cols)
+        else:
+            # make sure sheet is large enough
+            self.sheet.resize(max(sheet_rows, req_rows), max(sheet_cols, req_cols))
 
         self.update_cells(
             start=start,
