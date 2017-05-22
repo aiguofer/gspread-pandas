@@ -9,6 +9,17 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Changed
+~~~~~~~
+
+-  Don't re-size again when using ``replace=True``
+-  Switch away from deprecated ``gspread`` functions
+
+Fixed
+~~~~~
+
+-  Prevent error when index > number of columns in ``sheet_to_df``
+
 [0.13.0] - 2017-04-28
 ---------------------
 
