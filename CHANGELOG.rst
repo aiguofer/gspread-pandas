@@ -14,6 +14,7 @@ Changed
 
 -  Don't re-size again when using ``replace=True``
 -  Switch away from deprecated ``gspread`` functions
+-  Make functions in ``util`` non-private
 
 Fixed
 ~~~~~

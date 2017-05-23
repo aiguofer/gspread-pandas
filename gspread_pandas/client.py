@@ -20,8 +20,8 @@ from gspread.utils import rowcol_to_a1, a1_to_rowcol
 from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
                                 NoValidUrlKeyFound, RequestError)
 from gspread_pandas.conf import get_config
-from gspread_pandas.util import (_deprecate, _chunks, _parse_df_col_names,
-                                 _parse_sheet_index, _parse_sheet_headers)
+from gspread_pandas.util import (deprecate, chunks, parse_df_col_names,
+                                 parse_sheet_index, parse_sheet_headers)
 
 
 __all__ = ['Spread']
@@ -216,7 +216,7 @@ class Spread():
 
         Open a worksheet. If it doesn't exist, create it first.
         """
-        _deprecate("open_or_create_sheet is deprecated, pass create=True to open_sheet")
+        deprecate("open_or_create_sheet is deprecated, pass create=True to open_sheet")
         self.open_sheet(sheet, True)
 
     @_ensure_auth
@@ -288,13 +288,13 @@ class Spread():
             raise Exception("No open worksheet")
 
         if headers != 1:
-            _deprecate("headers has been deprecated, use header_rows instead")
+            deprecate("headers has been deprecated, use header_rows instead")
             header_rows = headers
 
         vals = self.sheet.get_all_values()
         vals = self._fix_merge_values(vals)[start_row - 1:]
 
-        col_names = _parse_sheet_headers(vals, header_rows)
+        col_names = parse_sheet_headers(vals, header_rows)
 
         # remove rows where everything is null, then replace nulls with ''
         df = pd.DataFrame(vals[header_rows or 0:])\
@@ -305,7 +305,7 @@ class Spread():
         if col_names is not None:
             df.columns = col_names
 
-        return _parse_sheet_index(df, index)
+        return parse_sheet_index(df, index)
 
     @_ensure_auth
     def get_sheet_dims(self, sheet=None):
@@ -362,7 +362,7 @@ class Spread():
 
         end_cell = (start[ROW] - 1, 0)
 
-        for val_chunks in _chunks(vals, int(chunk_size)):
+        for val_chunks in chunks(vals, int(chunk_size)):
             start_cell = (end_cell[ROW] + 1, start[COL])
             end_cell = (min(start_cell[ROW] + chunk_rows - 1, start[ROW] + num_rows - 1), end[COL])
             yield start_cell, end_cell, val_chunks
@@ -398,7 +398,7 @@ class Spread():
             for val, cell in zip(val_chunks, cells):
                 cell.value = val
 
-            for cells_chunk in _chunks(cells, self._max_update_chunk_size):
+            for cells_chunk in chunks(cells, self._max_update_chunk_size):
                 self._retry_update(cells_chunk)
 
     def _retry_update(self, cells, n=3):
@@ -532,14 +532,14 @@ class Spread():
         df_list = df.fillna('').values.tolist()
 
         if headers:
-            headers = _parse_df_col_names(df, index)
+            headers = parse_df_col_names(df, index)
             df_list = headers + df_list
 
         start = self._get_cell_as_tuple(start)
 
         # Check deprecated params.. will be removed in 1.0
         if start == (1, 1) and (start_row > 1 or start_col > 1):
-            _deprecate("start_col and start_row params are deprecated, use start instead")
+            deprecate("start_col and start_row params are deprecated, use start instead")
             start = (start_row, start_col)
 
         sheet_rows, sheet_cols = self.get_sheet_dims()

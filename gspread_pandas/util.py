@@ -1,6 +1,6 @@
 import pandas as pd
 
-def _parse_sheet_index(df, index):
+def parse_sheet_index(df, index):
     """Parse sheet index into df index"""
     if index and len(df.columns) > index:
         df = df.set_index(df.columns[index - 1])
@@ -12,7 +12,7 @@ def _parse_sheet_index(df, index):
         df.index.name = df.index.name or None
     return df
 
-def _parse_df_col_names(df, include_index):
+def parse_df_col_names(df, include_index):
     """Parse column names from a df into sheet headers"""
     headers = df.columns.tolist()
 
@@ -31,7 +31,7 @@ def _parse_df_col_names(df, include_index):
 
     return headers
 
-def _parse_sheet_headers(vals, header_rows):
+def parse_sheet_headers(vals, header_rows):
     """Parse headers from a sheet into df columns"""
     col_names = None
     if header_rows:
@@ -71,12 +71,12 @@ def _shift_header_up(header_names, col_index, row_index=0,
             header_names[row_index][col_index] = ''
     return shift_val
 
-def _chunks(lst, chunk_size):
+def chunks(lst, chunk_size):
     """Chunk a list into specified chunk sizes"""
     for i in range(0, len(lst), chunk_size):
         yield lst[i:i + chunk_size]
 
-def _deprecate(message):
+def deprecate(message):
     """Display message about deprecation"""
     import warnings
     warnings.warn(message, DeprecationWarning, stacklevel=2)
