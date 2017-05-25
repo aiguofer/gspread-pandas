@@ -508,7 +508,9 @@ class Spread():
         return False
 
     @_ensure_auth
-    def df_to_sheet(self, df, index=True, headers=True, start=(1,1), replace=False, sheet=None, start_row=1, start_col=1):
+    def df_to_sheet(self, df, index=True, headers=True, start=(1,1), replace=False,
+                    sheet=None, freeze_index=False, freeze_headers=False,
+                    start_row=1, start_col=1):
         """
         Save a DataFrame into a worksheet.
 
@@ -521,6 +523,8 @@ class Spread():
         :param str,int sheet: optional, if you want to open or create a different sheet
             before saving,
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
+        :param bool freeze_index: whether to freeze the index columns (default False)
+        :param bool freeze_headers: whether to freeze the header rows (default False)
         :param int start_row: (DEPRECATED - use `start`) row number for first row of headers or data (default 1)
         :param int start_col: (DEPRECATED - use `start`) column number for first column of headers or data (default 1)
         """
@@ -530,14 +534,17 @@ class Spread():
         if not self.sheet:
             raise Exception("No open worksheet")
 
+        index_size = df.index.nlevels
+        header_size = df.columns.nlevels
+
         if index:
             df = df.reset_index()
 
         df_list = df.fillna('').values.tolist()
 
         if headers:
-            headers = parse_df_col_names(df, index)
-            df_list = headers + df_list
+            header_rows = parse_df_col_names(df, index)
+            df_list = header_rows + df_list
 
         start = self._get_cell_as_tuple(start)
 
@@ -562,6 +569,9 @@ class Spread():
             end=(req_rows, req_cols),
             vals=[val for row in df_list for val in row]
         )
+
+        self.freeze(None if not freeze_headers else header_size,
+                    None if not freeze_index else index_size)
 
     def _fix_merge_values(self, vals):
         """Assign the top-left value to all cells in a merged range"""
