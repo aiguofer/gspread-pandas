@@ -80,3 +80,28 @@ def deprecate(message):
     """Display message about deprecation"""
     import warnings
     warnings.warn(message, DeprecationWarning, stacklevel=2)
+
+def create_frozen_request(sheet_id, rows=None, cols=None):
+    """
+    Create v4 API request to freeze rows and/or columns for a
+    given worksheet.
+    """
+    grid_properties = {}
+
+    if rows >= 0:
+        grid_properties['frozen_row_count'] = rows
+
+    if cols >= 0:
+        grid_properties['frozen_column_count'] = cols
+
+    changed_props = grid_properties.keys()
+
+    return {
+        'update_sheet_properties': {
+            'properties': {
+                'sheet_id': sheet_id,
+                'grid_properties': grid_properties
+            },
+            'fields': 'grid_properties({0})'.format(', '.join(changed_props))
+        }
+    }

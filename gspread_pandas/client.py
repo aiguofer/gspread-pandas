@@ -21,7 +21,8 @@ from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
                                 NoValidUrlKeyFound, RequestError)
 from gspread_pandas.conf import get_config
 from gspread_pandas.util import (deprecate, chunks, parse_df_col_names,
-                                 parse_sheet_index, parse_sheet_headers)
+                                 parse_sheet_index, parse_sheet_headers,
+                                 create_frozen_request)
 
 
 __all__ = ['Spread']
@@ -570,3 +571,32 @@ class Spread():
                 row[start_col:end_col] = [orig_val for i in range(start_col, end_col)]
 
         return vals
+
+    @_ensure_auth
+    def freeze(self, rows=None, cols=None, sheet=None):
+        """
+        Freeze rows and/or columns for the open worksheet.
+
+        :param int rows: the DataFrame to save
+        :param int cols: whether to include the index in worksheet (default True)
+        :param str,int sheet: optional, if you want to open or create a different sheet
+            before freezing,
+            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
+        """
+        if sheet:
+            self.open_sheet(sheet, create=True)
+
+        if not self.sheet:
+            raise Exception("No open worksheet")
+
+        if rows is None and cols is None:
+            return
+
+        sheet_id = self._sheet_metadata['properties']['sheetId']
+
+        req = {
+            'requests': [create_frozen_request(sheet_id, rows, cols)]
+        }
+
+        self.clientv4.batchUpdate(spreadsheetId=self.spread.id, body=req)\
+                     .execute()
