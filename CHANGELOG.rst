@@ -9,6 +9,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Added
+~~~~~
+
+-  Added function to freeze rows/columns to ``Spread``
+-  Added ``freeze_index`` and ``freeze_headers`` flags to ``df_to_sheet``
+
 Changed
 ~~~~~~~
 

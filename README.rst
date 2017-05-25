@@ -23,6 +23,8 @@ Some key goals/features:
 -  Run on Jupyter, headless server, and/or scripts
 -  Allow storing different user credentials
 -  Automatically handle token refreshes
+-  Enable handling of frozen rows and columns
+-  Enable handling of merged cells
 
 Installation / Usage
 ====================
