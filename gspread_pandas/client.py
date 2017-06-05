@@ -243,9 +243,8 @@ class Spread():
 
         if not self.sheet:
             if create:
-                # Assuming the new sheet will always be the last in the list
                 self.create_sheet(sheet)
-                ix = len(self.sheets) - 1
+                ix = self._find_sheet(sheet)[0]
             else:
                 raise WorksheetNotFound("Worksheet not found")
 
