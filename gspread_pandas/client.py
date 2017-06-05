@@ -110,6 +110,12 @@ class Spread():
         self.client.login()
         return func(self, *args, **kwargs)
 
+    @decorator
+    def _ensure_refresh(func, self, *args, **kwargs):
+        ret = func(self, *args, **kwargs)
+        self._refresh_sheets()
+        return ret
+
     def _get_email(self):
         try:
             return self\
@@ -152,6 +158,9 @@ class Spread():
         self.sheets = self.spread.worksheets()
         self._spread_metadata = self.clientv4.get(spreadsheetId=self.spread.id)\
                                              .execute()
+        if self.sheet:
+            ix = self._find_sheet(self.sheet.title)[0]
+            self._sheet_metadata = self._spread_metadata['sheets'][ix]
 
     def open(self, spread, sheet=None, create_sheet=False, create_spread=False):
         """
@@ -172,6 +181,7 @@ class Spread():
             self.open_sheet(sheet, create_sheet)
 
     @_ensure_auth
+    @_ensure_refresh
     def open_spread(self, spread, create=False):
         """
         Open a spreadsheet. Authorized user must already have read access.
@@ -208,8 +218,6 @@ class Spread():
                             raise Exception(msg)
                     else:
                         raise SpreadsheetNotFound("Spreadsheet not found")
-
-        self._refresh_sheets()
 
     def open_or_create_sheet(self, sheet):
         """
@@ -455,6 +463,7 @@ class Spread():
         return self._find_sheet(sheet)[1]
 
     @_ensure_auth
+    @_ensure_refresh
     def clear_sheet(self, rows=1, cols=1, sheet=None):
         """
         Reset open worksheet to a blank sheet with given dimensions.
@@ -490,6 +499,7 @@ class Spread():
         self.sheet.resize(max(clear_rows, rows), clear_cols)
 
     @_ensure_auth
+    @_ensure_refresh
     def delete_sheet(self, sheet):
         """
         Delete a worksheet by title. Returns whether the sheet was deleted or not. If
@@ -509,7 +519,6 @@ class Spread():
         if s:
             try:
                 self.spread.del_worksheet(s)
-                self._refresh_sheets()
                 if is_current:
                     self.sheet = None
                 return True
@@ -596,6 +605,7 @@ class Spread():
         return vals
 
     @_ensure_auth
+    @_ensure_refresh
     def freeze(self, rows=None, cols=None, sheet=None):
         """
         Freeze rows and/or columns for the open worksheet.
