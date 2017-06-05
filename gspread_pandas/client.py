@@ -292,7 +292,7 @@ class Spread():
             deprecate("headers has been deprecated, use header_rows instead")
             header_rows = headers
 
-        vals = self.sheet.get_all_values()
+        vals = self._retry_get_all_values()
         vals = self._fix_merge_values(vals)[start_row - 1:]
 
         col_names = parse_sheet_headers(vals, header_rows)
@@ -404,6 +404,17 @@ class Spread():
 
             for cells_chunk in chunks(cells, self._max_update_chunk_size):
                 self._retry_update(cells_chunk)
+
+    def _retry_get_all_values(self, n=3):
+        """Call self.sheet.update_cells with retry"""
+        try:
+            self.client.login()  # ensure that token is still active
+            return self.sheet.get_all_values()
+        except Exception as e:
+            if n > 0:
+                self._retry_update(n-1)
+            else:
+                raise e
 
     def _retry_update(self, cells, n=3):
         """Call self.sheet.update_cells with retry"""
