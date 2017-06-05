@@ -9,6 +9,17 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+[0.14.1] - 2017-06-05
+---------------------
+
+Changed
+-------
+
+-  Ensure sheet matadata is refreshed after sheet changing activitiesthrough use of a
+   decorator
+-  Retry when calling ``get_all_values``
+-  More robust way to get index when a new sheet is created
+
 [0.14.0] - 2017-05-25
 ---------------------
 
