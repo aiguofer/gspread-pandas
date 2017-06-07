@@ -105,6 +105,11 @@ class Spread():
             meta.append("Sheet: '{0}'".format(self.sheet.title))
         return base.format(", ".join(meta))
 
+    @property
+    def url(self):
+        """`(str)` - Url for this spreadsheet"""
+        return 'https://docs.google.com/spreadsheets/d/{0}'.format(self.spread.id)
+
     @decorator
     def _ensure_auth(func, self, *args, **kwargs):
         self.client.login()

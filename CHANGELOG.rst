@@ -9,6 +9,11 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Added
+~~~~~
+
+-  Added ``url`` property for easy linking
+
 [0.14.1] - 2017-06-05
 ---------------------
 
