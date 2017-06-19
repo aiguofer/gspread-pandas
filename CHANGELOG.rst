@@ -9,10 +9,18 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+[0.14.2] - 2017-06-18
+---------------------
+
 Added
 ~~~~~
 
 -  Added ``url`` property for easy linking
+
+Fixed
+~~~~~
+
+-  Fixed retry for _retry_get_all_values
 
 [0.14.1] - 2017-06-05
 ---------------------
