@@ -424,7 +424,7 @@ class Spread():
             return self.sheet.get_all_values()
         except Exception as e:
             if n > 0:
-                self._retry_update(n-1)
+                self._retry_get_all_values(n-1)
             else:
                 raise e
 
