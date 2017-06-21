@@ -10,6 +10,7 @@ Links:
 
 -  `Documentation <https://aiguofer.github.io/gspread-pandas/>`_
 -  `Source code <https://github.com/aiguofer/gspread-pandas>`_
+-  `Short video tutorial <https://youtu.be/2yIcNYzfzPw>`_
 
 Overview
 ========
