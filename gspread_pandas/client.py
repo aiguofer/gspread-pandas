@@ -160,6 +160,8 @@ class Spread():
 
     @_ensure_auth
     def _refresh_sheets(self):
+        # force sheets refresh in case sheets were manually changed
+        self.spread._fetch_sheets()
         self.sheets = self.spread.worksheets()
         self._spread_metadata = self.clientv4.get(spreadsheetId=self.spread.id)\
                                              .execute()

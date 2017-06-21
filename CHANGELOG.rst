@@ -9,6 +9,11 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Changed
+~~~~~~~
+
+-  Force gspread sheets refresh when refreshing sheets
+
 [0.14.2] - 2017-06-18
 ---------------------
 
