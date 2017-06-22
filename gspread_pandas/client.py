@@ -16,6 +16,7 @@ from oauth2client.tools import run_flow, argparser
 from googleapiclient import discovery
 
 from decorator import decorator
+from gspread.models import Worksheet
 from gspread.utils import rowcol_to_a1, a1_to_rowcol
 from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
                                 NoValidUrlKeyFound, RequestError)
@@ -241,7 +242,7 @@ class Spread():
         Open a worksheet. Optionally, if the sheet doesn't exist then create it first
         (only when ``sheet`` is a str).
 
-        :param str,int sheet: name or index of Worksheet
+        :param str,int,Worksheet sheet: name, index, or Worksheet object
         :param bool create: whether to create the sheet if it doesn't exist,
             see :meth:`create_sheet <gspread_pandas.Spread.create_sheet>` (default False)
         """
@@ -327,7 +328,7 @@ class Spread():
         """
         Get the dimensions of the currently open Worksheet.
 
-        :param str,int sheet: optional, if you want to open a different sheet first,
+        :param str,int,Worksheet sheet: optional, if you want to open a different sheet first,
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
 
         :returns: a tuple containing (num_rows,num_cols)
@@ -394,7 +395,7 @@ class Spread():
         :param tuple,str start: tuple indicating (row, col) or string like 'A1'
         :param tuple,str end: tuple indicating (row, col) or string like 'Z20'
         :param list vals: array of values to populate
-        :param str,int sheet: optional, if you want to open a different sheet first,
+        :param str,int,Worksheet sheet: optional, if you want to open a different sheet first,
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
         """
         if sheet:
@@ -455,13 +456,15 @@ class Spread():
     def _find_sheet(self, sheet):
         """Find a worksheet and return with index"""
         for ix, worksheet in enumerate(self.sheets):
-            if sheet.lower() == worksheet.title.lower():
+            if isinstance(sheet, basestring) and sheet.lower() == worksheet.title.lower():
+                return ix, worksheet
+            if isinstance(sheet, Worksheet) and sheet == worksheet:
                 return ix, worksheet
         return None, None
 
     def find_sheet(self, sheet):
         """
-        Find a given worksheet by title.
+        Find a given worksheet by title
 
         :param str sheet: name of Worksheet
 
@@ -477,7 +480,7 @@ class Spread():
 
         :param int rows: number of rows (default 1)
         :param int cols: number of columns (default 1)
-        :param str,int sheet: optional, name or index of Worksheet,
+        :param str,int,Worksheet sheet: optional; name, index, or Worksheet,
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
         """
         if sheet:
@@ -512,7 +515,7 @@ class Spread():
         Delete a worksheet by title. Returns whether the sheet was deleted or not. If
         current sheet is deleted, the ``sheet`` property will be set to None.
 
-        :param str sheet: name of Worksheet
+        :param str,Worksheet sheet: name or Worksheet
 
         :returns: True if deleted successfully, else False
         """
@@ -546,7 +549,7 @@ class Spread():
         :param tuple,str start: tuple indicating (row, col) or string like 'A1' for top left
             cell
         :param bool replace: whether to remove everything in the sheet first (default False)
-        :param str,int sheet: optional, if you want to open or create a different sheet
+        :param str,int,Worksheet sheet: optional, if you want to open or create a different sheet
             before saving,
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
         :param bool freeze_index: whether to freeze the index columns (default False)
@@ -619,7 +622,7 @@ class Spread():
 
         :param int rows: the DataFrame to save
         :param int cols: whether to include the index in worksheet (default True)
-        :param str,int sheet: optional, if you want to open or create a different sheet
+        :param str,int,Worksheet sheet: optional, if you want to open or create a different sheet
             before freezing,
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
         """

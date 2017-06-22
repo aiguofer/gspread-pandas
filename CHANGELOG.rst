@@ -13,6 +13,7 @@ Changed
 ~~~~~~~
 
 -  Force gspread sheets refresh when refreshing sheets
+-  Worksheet object can now be passed it to most functions with ``sheet`` param
 
 [0.14.2] - 2017-06-18
 ---------------------
