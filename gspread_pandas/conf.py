@@ -26,7 +26,11 @@ def get_config(conf_dir=_default_dir, file_name=_default_file):
         raise IOError('No Google client config found.\nPlease download json from https://console.developers.google.com/apis/credentials and save as ~/.config/gspread_pandas/google_secret.json')
 
     with open(cfg_file) as f:
-        cfg = json.load(f)['installed']
+        cfg = json.load(f)
+        # Different type of App Creds have a different key
+        # and Service Accounts aren't nested
+        if len(cfg.keys()) == 1:
+            cfg = cfg[cfg.keys()[0]]
 
     cfg['creds_dir'] = creds_dir
     return cfg
