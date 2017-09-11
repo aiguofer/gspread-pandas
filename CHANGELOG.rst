@@ -9,6 +9,21 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+[0.15.0] - 2017-09-11
+---------------------
+
+Changed
+~~~~~~~
+
+-  Added ``fill_value`` option to df_to_sheet
+
+Fixed
+~~~~~
+
+-  Different application type credentials can be used now
+-  Some safeguards to prevent certain exceptions
+-  df_to_sheet won't fail when categorical columns have nulls
+
 [0.14.3] - 2017-06-22
 ---------------------
 
