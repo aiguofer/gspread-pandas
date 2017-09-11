@@ -308,6 +308,8 @@ class Spread():
             header_rows = headers
 
         vals = self._retry_get_all_values()
+        print(len(vals))
+        print(start_row)
         vals = self._fix_merge_values(vals)[start_row - 1:]
 
         col_names = parse_sheet_headers(vals, header_rows)
@@ -648,3 +650,44 @@ class Spread():
 
         self.clientv4.batchUpdate(spreadsheetId=self.spread.id, body=req)\
                      .execute()
+
+# drive_service = discovery.build('drive', 'v3', credentials=s.client.auth).files()
+
+def find_all_sheets(folder_name):
+    results = {}
+    for res in find_folders(folder_name):
+        results.update(res)
+    return results
+
+def find_sheets(folder_id):
+    page_token = None
+    while True:
+        response = drive_service.list(q="mimeType='application/vnd.google-apps.spreadsheet' and '{0}' in parents".format(folder_id),
+                                      spaces='drive',
+                                      fields='nextPageToken, files(id, name)',
+                                      pageToken=page_token).execute()
+        for sheet in response.get('files', []):
+            # Process change
+            yield Spread('difernan', sheet.get('id'))
+            page_token = response.get('nextPageToken')
+
+        if page_token is None:
+            break
+
+
+def find_folders(folder_name):
+    page_token = None
+    while True:
+        response = drive_service.list(q="mimeType='application/vnd.google-apps.folder' and name contains '{0}'".format(folder_name),
+                                      spaces='drive',
+                                      fields='nextPageToken, files(id, name)',
+                                      pageToken=page_token).execute()
+
+        for folder in response.get('files', []):
+            f = {}
+            f[folder.get('name')] = [sheet for sheet in find_sheets(folder.get('id'))]
+            yield f
+            page_token = response.get('nextPageToken', None)
+
+        if page_token is None:
+            break
