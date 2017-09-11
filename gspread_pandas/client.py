@@ -23,7 +23,7 @@ from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
 from gspread_pandas.conf import get_config
 from gspread_pandas.util import (deprecate, chunks, parse_df_col_names,
                                  parse_sheet_index, parse_sheet_headers,
-                                 create_frozen_request)
+                                 create_frozen_request, fillna)
 
 
 __all__ = ['Spread']
@@ -538,7 +538,7 @@ class Spread():
 
     @_ensure_auth
     def df_to_sheet(self, df, index=True, headers=True, start=(1,1), replace=False,
-                    sheet=None, freeze_index=False, freeze_headers=False,
+                    sheet=None, freeze_index=False, freeze_headers=False, fill_value='',
                     start_row=1, start_col=1):
         """
         Save a DataFrame into a worksheet.
@@ -554,6 +554,7 @@ class Spread():
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
         :param bool freeze_index: whether to freeze the index columns (default False)
         :param bool freeze_headers: whether to freeze the header rows (default False)
+        :param str fill_value: value to fill nulls with (default '')
         :param int start_row: (DEPRECATED - use `start`) row number for first row of headers or data (default 1)
         :param int start_col: (DEPRECATED - use `start`) column number for first column of headers or data (default 1)
         """
@@ -569,7 +570,8 @@ class Spread():
         if index:
             df = df.reset_index()
 
-        df_list = df.fillna('').values.tolist()
+        df = fillna(df, fill_value)
+        df_list = df.values.tolist()
 
         if headers:
             header_rows = parse_df_col_names(df, index)

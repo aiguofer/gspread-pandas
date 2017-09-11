@@ -105,3 +105,12 @@ def create_frozen_request(sheet_id, rows=None, cols=None):
             'fields': 'grid_properties({0})'.format(', '.join(changed_props))
         }
     }
+
+
+def fillna(df, fill_value=''):
+    """
+    Replace null values with `fill_value`. Also replaces in categorical columns.
+    """
+    for col in df.dtypes[df.dtypes == 'category'].index:
+        df[col].cat.add_categories([fill_value])
+    return df.fillna(fill_value)
