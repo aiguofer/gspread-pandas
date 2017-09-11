@@ -404,6 +404,9 @@ class Spread():
         if not self.sheet:
             raise Exception("No open worksheet")
 
+        if start == end:
+            return
+
         for start_cell, end_cell, val_chunks in self._get_update_chunks(start,
                                                                         end,
                                                                         vals):
@@ -586,7 +589,7 @@ class Spread():
 
         sheet_rows, sheet_cols = self.get_sheet_dims()
         req_rows = len(df_list) + (start[ROW] - 1)
-        req_cols = len(df_list[0]) + (start[COL] - 1)
+        req_cols = len(df_list[0]) + (start[COL] - 1) or 1
 
         if replace:
             # this takes care of resizing

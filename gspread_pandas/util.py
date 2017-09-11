@@ -17,7 +17,7 @@ def parse_df_col_names(df, include_index):
     headers = df.columns.tolist()
 
     # handle multi-index headers
-    if type(headers[0]) == tuple:
+    if len(headers) > 0 and type(headers[0]) == tuple:
         headers = [list(row) for row in zip(*headers)]
 
         # Pandas sets index name as top level col name with reset_index
