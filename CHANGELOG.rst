@@ -9,6 +9,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Fixed
+~~~~~
+
+-  When there are merged cells outside the data range, an exception is no longer
+   thrown.
+
 [0.15.0] - 2017-09-11
 ---------------------
 

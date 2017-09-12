@@ -613,9 +613,12 @@ class Spread():
             start_row, end_row = merge['startRowIndex'], merge['endRowIndex']
             start_col, end_col = merge['startColumnIndex'], merge['endColumnIndex']
 
-            orig_val = vals[start_row][start_col]
-            for row in vals[start_row:end_row]:
-                row[start_col:end_col] = [orig_val for i in range(start_col, end_col)]
+            # ignore merge cells outside the data range
+            if start_row < len(vals) and start_col < len(vals[0]):
+                orig_val = vals[start_row][start_col]
+                for row in vals[start_row:end_row]:
+                    row[start_col:end_col] = [orig_val for i in
+                                              range(start_col, end_col)]
 
         return vals
 
