@@ -30,7 +30,7 @@ def get_config(conf_dir=_default_dir, file_name=_default_file):
         # Different type of App Creds have a different key
         # and Service Accounts aren't nested
         if len(cfg.keys()) == 1:
-            cfg = cfg[cfg.keys()[0]]
+            cfg = cfg[list(cfg.keys())[0]]
 
     cfg['creds_dir'] = creds_dir
     return cfg
