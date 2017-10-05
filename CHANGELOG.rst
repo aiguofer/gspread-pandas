@@ -9,11 +9,15 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+[0.15.1] - 2017-10-05
+---------------------
+
 Fixed
 ~~~~~
 
 -  When there are merged cells outside the data range, an exception is no longer
    thrown.
+-  Cast keys() to a list to fix Python 3 compat
 
 [0.15.0] - 2017-09-11
 ---------------------
