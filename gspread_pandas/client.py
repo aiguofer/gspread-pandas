@@ -319,7 +319,13 @@ class Spread():
                .fillna('')
 
         if col_names is not None:
-            df.columns = col_names
+            if len(df.columns) == len(col_names):
+                df.columns = col_names
+            elif len(df) == 0:
+                # if we have headers but no data, set column headers on empty DF
+                df = df.reindex(columns=col_names)
+            else:
+                raise Exception("Column headers don't match number of data columns")
 
         return parse_sheet_index(df, index)
 

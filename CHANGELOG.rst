@@ -9,6 +9,11 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Fixed
+~~~~~
+
+-  Fix sheet_to_df when headers are present with no data
+
 [0.15.1] - 2017-10-05
 ---------------------
 
