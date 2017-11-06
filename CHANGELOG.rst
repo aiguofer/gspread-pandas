@@ -14,6 +14,11 @@ Fixed
 
 -  Fix sheet_to_df when headers are present with no data
 
+Changed
+~~~~~~~
+
+-  Minimum Pandas version .20 now required
+
 [0.15.1] - 2017-10-05
 ---------------------
 
