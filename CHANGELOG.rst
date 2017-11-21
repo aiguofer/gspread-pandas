@@ -9,6 +9,14 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+[0.15.3] - 2017-11-21
+---------------------
+
+Changed
+~~~~~~~
+
+-  Always return an Index object from parse_sheet_headers
+
 [0.15.2] - 2017-11-18
 ---------------------
 
