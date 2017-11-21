@@ -40,7 +40,7 @@ def parse_sheet_headers(vals, header_rows):
             _fix_sheet_header_level(headers)
             col_names = pd.MultiIndex.from_arrays(headers)
         elif header_rows == 1:
-            col_names = headers[0]
+            col_names = pd.Index(headers[0])
 
     return col_names
 
