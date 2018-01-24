@@ -118,7 +118,7 @@ Example
     import pandas as pd
     from gspread_pandas import Spread
 
-    file_name = "http://www.ats.ucla.edu/stat/data/binary.csv"
+    file_name = "http://stats.idre.ucla.edu/stat/data/binary.csv"
     df = pd.read_csv(file_name)
 
     # 'Example Spreadsheet' needs to already exist and your user must have access to it
