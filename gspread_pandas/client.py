@@ -12,6 +12,7 @@ import gspread
 
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
+from oauth2client.service_account import ServiceAccountCredentials
 from oauth2client.tools import run_flow, argparser
 from googleapiclient import discovery
 
@@ -135,17 +136,22 @@ class Spread():
             """.format(self._creds_file))
 
     def _authorize(self):
-        flow = OAuth2WebServerFlow(
-            client_id=self._config['client_id'],
-            client_secret=self._config['client_secret'],
-            redirect_uri=self._config['redirect_uris'][0],
-            scope=default_scope)
+        if all (key in self._config for key in ('client_id', 'client_secret', 'redirect_uris')):
+            flow = OAuth2WebServerFlow(
+                client_id=self._config['client_id'],
+                client_secret=self._config['client_secret'],
+                redirect_uri=self._config['redirect_uris'][0],
+                scope=default_scope)
 
-        storage = Storage(self._creds_file)
+            storage = Storage(self._creds_file)
+            args = argparser.parse_args(args=['--noauth_local_webserver'])
 
-        args = argparser.parse_args(args=['--noauth_local_webserver'])
+            return run_flow(flow, storage, args)
 
-        return run_flow(flow, storage, args)
+        if 'private_key_id' in self._config:
+            return ServiceAccountCredentials.from_json_keyfile_dict(self._config, default_scope)
+
+        raise Exception("Unknown config file format")
 
     def _login(self):
         creds = None
