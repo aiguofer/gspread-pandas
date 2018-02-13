@@ -9,6 +9,20 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+[0.15.4] - 2017-02-13
+---------------------
+
+Fixed
+~~~~~
+
+-  README example now points to the correct URL (thanks @lionel)
+-  Calling parse_sheet_headers on an empty sheet doesn't break anymore (thanks @taewookim)
+
+Added
+~~~~~
+
+-  You can now use service account credentials in the config (thanks @marcojetson)
+
 [0.15.3] - 2017-11-21
 ---------------------
 
