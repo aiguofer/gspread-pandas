@@ -9,6 +9,11 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+[0.15.6] - 2018-03-12
+---------------------
+
+-  Remove code accidentally pushed by build
+
 [0.15.5] - 2018-03-12
 ---------------------
 

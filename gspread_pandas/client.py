@@ -205,7 +205,7 @@ class Spread():
             it wil use the ``spread`` value as the sheet title
         """
         self.spread = None
-        import pdb; pdb.set_trace()
+
         try:
             self.spread = self.client.open(spread)
         except SpreadsheetNotFound:
@@ -663,7 +663,3 @@ class Spread():
 
         self.clientv4.batchUpdate(spreadsheetId=self.spread.id, body=req)\
                      .execute()
-
-for fn in f:
-    if 'Test' in fn['name']:
-        print(fn)
