@@ -9,7 +9,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
-[0.15.4] - 2017-02-13
+Fixed
+~~~~~
+
+-  Added dependency version limit for gspread; will remove in next version
+
+[0.15.4] - 2018-02-13
 ---------------------
 
 Fixed
