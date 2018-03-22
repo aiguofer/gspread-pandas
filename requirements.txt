@@ -1,7 +1,7 @@
 # Reqs
-oauth2client
-gspread>=0.5.0,<2.0.0
+oauth2client==4.1.2
+gspread==2.0.0
 pandas>=0.20.0
-decorator
-future
-google-api-python-client
+decorator==4.2.1
+future==0.16.0
+google-api-python-client==1.6.5
