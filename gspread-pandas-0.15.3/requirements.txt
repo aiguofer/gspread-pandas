@@ -2,6 +2,6 @@
 oauth2client==4.1.2
 gspread>=0.5.0
 pandas>=0.20.0
-decorator
+decorator==4.2.1
 future
 google-api-python-client
