@@ -4,4 +4,4 @@ gspread>=0.5.0
 pandas>=0.20.0
 decorator==4.2.1
 future==0.16.0
-google-api-python-client
+google-api-python-client==1.6.5
