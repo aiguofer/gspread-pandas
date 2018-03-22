@@ -1,5 +1,5 @@
 # Reqs
-oauth2client
+oauth2client==4.1.2
 gspread>=0.5.0
 pandas>=0.20.0
 decorator
