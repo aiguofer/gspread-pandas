@@ -143,7 +143,9 @@ class Spread():
             """.format(self._creds_file))
 
     def _authorize(self):
-        if all(key in self._config for key in ('client_id', 'client_secret', 'redirect_uris')):
+        if all(key in self._config for key in ('client_id',
+                                               'client_secret',
+                                               'redirect_uris')):
             flow = OAuth2WebServerFlow(
                 client_id=self._config['client_id'],
                 client_secret=self._config['client_secret'],
@@ -156,7 +158,8 @@ class Spread():
             return run_flow(flow, storage, args)
 
         if 'private_key_id' in self._config:
-            return ServiceAccountCredentials.from_json_keyfile_dict(self._config, default_scope)
+            return ServiceAccountCredentials.from_json_keyfile_dict(self._config,
+                                                                    default_scope)
 
         raise Exception("Unknown config file format")
 
