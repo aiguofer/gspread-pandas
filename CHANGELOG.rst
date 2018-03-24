@@ -9,8 +9,31 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Added
+~~~~~
+
+-  Test on multiple versions using tox
+-  Enable travis-ci
+
+Fixed
+~~~~~
+
+-  Remove dir accidentally pushed by build
+
+Changed
+~~~~~~~
+
+-  Moved dev requirements into requirements_dev.txt
+-  Now using bumpversion for version management
+-  Minor updates to README
+-  Documentation now at Read The Docs
+-  Minor code changes to please flake8
+
 [0.15.6] - 2018-03-12
 ---------------------
+
+Fixed
+~~~~~
 
 -  Remove code accidentally pushed by build
 
