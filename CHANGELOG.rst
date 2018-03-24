@@ -9,6 +9,14 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+[0.16.1] - 2018-03-24
+---------------------
+
+Fixed
+~~~~~
+
+-  Set up correct credentials for travis pypi push
+
 [0.16.0] - 2018-03-24
 ---------------------
 
