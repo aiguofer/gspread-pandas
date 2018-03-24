@@ -14,7 +14,6 @@ from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 from oauth2client.service_account import ServiceAccountCredentials
 from oauth2client.tools import run_flow, argparser
-from googleapiclient import discovery
 
 from decorator import decorator
 from gspread.models import Worksheet
@@ -60,9 +59,6 @@ class Spread():
 
     #: `(gspread.client.Client)` - Current gspread Client
     client = None
-
-    #: `(googleapiclient.discovery.Resource)` - Current sheet through v4 Sheets API
-    clientv4 = None
 
     # chunk range request: https://github.com/burnash/gspread/issues/375
     _max_range_chunk_size = 200000
@@ -112,16 +108,27 @@ class Spread():
         """`(str)` - Url for this spreadsheet"""
         return 'https://docs.google.com/spreadsheets/d/{0}'.format(self.spread.id)
 
+    @property
+    def sheets(self):
+        """Return available worksheets"""
+        return self.spread.worksheets()
+
+    @property
+    def _spread_metadata(self):
+        """Return spreadsheet metadata"""
+        return self.spread.fetch_sheet_metadata()
+
+    @property
+    def _sheet_metadata(self):
+        """Return currently open worksheet metadata"""
+        if self.sheet:
+            ix = self._find_sheet(self.sheet.title)[0]
+            return self._spread_metadata['sheets'][ix]
+
     @decorator
     def _ensure_auth(func, self, *args, **kwargs):
         self.client.login()
         return func(self, *args, **kwargs)
-
-    @decorator
-    def _ensure_refresh(func, self, *args, **kwargs):
-        ret = func(self, *args, **kwargs)
-        self._refresh_sheets()
-        return ret
 
     def _get_email(self):
         try:
@@ -162,19 +169,6 @@ class Spread():
             creds = self._authorize()
 
         self.client = gspread.authorize(creds)
-        self.clientv4 = discovery.build('sheets', 'v4', credentials=creds)\
-                                 .spreadsheets()
-
-    @_ensure_auth
-    def _refresh_sheets(self):
-        # force sheets refresh in case sheets were manually changed
-        self.spread._fetch_sheets()
-        self.sheets = self.spread.worksheets()
-        self._spread_metadata = self.clientv4.get(spreadsheetId=self.spread.id)\
-                                             .execute()
-        if self.sheet:
-            ix = self._find_sheet(self.sheet.title)[0]
-            self._sheet_metadata = self._spread_metadata['sheets'][ix]
 
     def open(self, spread, sheet=None, create_sheet=False, create_spread=False):
         """
@@ -195,7 +189,6 @@ class Spread():
             self.open_sheet(sheet, create_sheet)
 
     @_ensure_auth
-    @_ensure_refresh
     def open_spread(self, spread, create=False):
         """
         Open a spreadsheet. Authorized user must already have read access.
@@ -285,7 +278,6 @@ class Spread():
         :param int cols: number of columns (default 1)
         """
         self.spread.add_worksheet(name, rows, cols)
-        self._refresh_sheets()
         self.open_sheet(name)
 
     @_ensure_auth
@@ -488,7 +480,6 @@ class Spread():
         return self._find_sheet(sheet)[1]
 
     @_ensure_auth
-    @_ensure_refresh
     def clear_sheet(self, rows=1, cols=1, sheet=None):
         """
         Reset open worksheet to a blank sheet with given dimensions.
@@ -524,7 +515,6 @@ class Spread():
         self.sheet.resize(max(clear_rows, rows), clear_cols)
 
     @_ensure_auth
-    @_ensure_refresh
     def delete_sheet(self, sheet):
         """
         Delete a worksheet by title. Returns whether the sheet was deleted or not. If
@@ -635,7 +625,6 @@ class Spread():
         return vals
 
     @_ensure_auth
-    @_ensure_refresh
     def freeze(self, rows=None, cols=None, sheet=None):
         """
         Freeze rows and/or columns for the open worksheet.
@@ -655,11 +644,8 @@ class Spread():
         if rows is None and cols is None:
             return
 
-        sheet_id = self._sheet_metadata['properties']['sheetId']
-
         req = {
-            'requests': [create_frozen_request(sheet_id, rows, cols)]
+            'requests': [create_frozen_request(self.sheet.id, rows, cols)]
         }
 
-        self.clientv4.batchUpdate(spreadsheetId=self.spread.id, body=req)\
-                     .execute()
+        self.client.bath_update(req)
