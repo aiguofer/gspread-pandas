@@ -5,3 +5,4 @@ nose
 coverage
 pypi-publisher
 bumpversion
+tox

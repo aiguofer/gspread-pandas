@@ -1,0 +1,17 @@
+language: python
+python:
+- 3.6
+- 3.5
+- 3.4
+- 2.7
+install: pip install -U tox-travis
+script: tox
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  user: aiguofer
+  password:
+    secure: X8Rpj/pY/jKG86FF9eq2GRGcqOpgIIRiqyAOACVRSZ9KaU51WcyIUmaqaGAl5sle5xQOxmKopZxpkd12YTttenl39BAby23q3VcdSd+ko2zaMnPrW93g3zkP3UnhoBWX/qsPryD03c9OZOjyEgibB87NwkeNthH4qxH2mw2lQiX4+3CgcRrugbHLzgp9bpJL6c3jMm+sD+RrcJtA3V2N4N7Q6g7U+cDdiWxJ5JJin6S4n5tanrA0bP5cy0E7KD4IhkHTuGESilCIYUbLpi9CJad7ZG0EbctN7/757QSlvuvkYDiZJjrDdgiXQTFnCnrxtdDFIZ+H6Bv4s+8ogji3zGUnBTVJa+aZlKqLAWQU2DLqNohRqQnb4u17teNb4sUgdlXQq5CO7lGFYhx5EpqltaWBqsOSWsHJ0oLPIr2t4uvGuQuP5heYgjzmM2o+BQ4EWWFWAtZilBHhmoITrQLTCoLHr4KlfAwzZPvYRvBxeDO2haIBWtd8w7bYo41ZHqiFXXOp2aRlOvvwSg7s5HrXFJSQuFbbLRbiB1JDzxDCUv4EXkxZKpV7TV/Gb30dYWsu20cPlFQQ8Y+YZuIP1pRGXMnPniZbI/d4U6DUrt/oX3kSISQGBtpK5VEk0FwUHYM6m6KXD73MMolcWwU6RGFzP3KGsrMEHz07Wt3r4UqT7l0=
+  on:
+    tags: true
+    repo: aiguofer/gspread-pandas
