@@ -20,6 +20,7 @@ from gspread.models import Worksheet
 from gspread.utils import rowcol_to_a1, a1_to_rowcol
 from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
                                 NoValidUrlKeyFound, RequestError)
+from gspread.v4.exceptions import APIError
 from gspread_pandas.conf import get_config
 from gspread_pandas.util import (deprecate, chunks, parse_df_col_names,
                                  parse_sheet_index, parse_sheet_headers,
@@ -207,10 +208,12 @@ class Spread():
         except SpreadsheetNotFound:
             try:
                 self.spread = self.client.open_by_url(spread)
-            except (SpreadsheetNotFound, NoValidUrlKeyFound):
+                self.spread.fetch_sheet_metadata()
+            except (SpreadsheetNotFound, NoValidUrlKeyFound, APIError):
                 try:
                     self.spread = self.client.open_by_key(spread)
-                except SpreadsheetNotFound:
+                    self.spread.fetch_sheet_metadata()
+                except (SpreadsheetNotFound, APIError):
                     if create:
                         try:
                             self.spread = self.client.create(spread)
