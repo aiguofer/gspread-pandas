@@ -9,6 +9,15 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Changed
+~~~~~~~
+
+-  Now supports gspread 2.0 which uses Spreadsheets V4 API, this provides much better performance and reliability. Some APIs might have changed.
+-  No longer need to chunk update requests, and range requests can use larger chunks
+-  Some code improvements enabled by gspread 2.0
+-  Removed deprecated params and functions
+-  Added monkeypatches and hacky workarounds for gspread 2.0 issues. Once they get fixed upstream I need to remove these.
+
 [0.16.1] - 2018-03-24
 ---------------------
 
