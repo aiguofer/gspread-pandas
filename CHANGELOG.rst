@@ -7,7 +7,9 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
-------------
+------------\n
+[0.16.4] - 2018-03-24
+-----------------------------
 [0.16.3] - 2018-03-24
 -----------------------------
 [0.16.2] - 2018-03-24
