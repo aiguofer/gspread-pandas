@@ -1,7 +1,0 @@
-# Reqs
-oauth2client
-gspread>=0.5.0
-pandas>=0.20.0
-decorator
-future
-google-api-python-client
