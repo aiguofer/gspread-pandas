@@ -23,7 +23,7 @@ from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
                                 NoValidUrlKeyFound, RequestError)
 from gspread.v4.exceptions import APIError
 from gspread_pandas.conf import get_config
-from gspread_pandas.util import (deprecate, chunks, parse_df_col_names,
+from gspread_pandas.util import (chunks, parse_df_col_names,
                                  parse_sheet_index, parse_sheet_headers,
                                  create_frozen_request, fillna)
 
@@ -58,7 +58,9 @@ def list_spreadsheet_files_patched(self):
 
     return files
 
+
 gspread.v4.client.Client.list_spreadsheet_files = list_spreadsheet_files_patched
+
 
 class Spread():
     """
@@ -248,15 +250,6 @@ class Spread():
                     else:
                         raise SpreadsheetNotFound("Spreadsheet not found")
 
-    def open_or_create_sheet(self, sheet):
-        """
-        DEPRECATED, use the `create` param for `open_sheet` instead
-
-        Open a worksheet. If it doesn't exist, create it first.
-        """
-        deprecate("open_or_create_sheet is deprecated, pass create=True to open_sheet")
-        self.open_sheet(sheet, True)
-
     @_ensure_auth
     def open_sheet(self, sheet, create=False):
         """
@@ -282,7 +275,6 @@ class Spread():
             else:
                 raise WorksheetNotFound("Worksheet not found")
 
-
     @_ensure_auth
     def create_sheet(self, name, rows=1, cols=1):
         """
@@ -298,13 +290,11 @@ class Spread():
         self.open_sheet(name)
 
     @_ensure_auth
-    def sheet_to_df(self, index=1, headers=1, header_rows=1, start_row=1, sheet=None):
+    def sheet_to_df(self, index=1, header_rows=1, start_row=1, sheet=None):
         """
         Pull a worksheet into a DataFrame.
 
         :param int index: col number of index column, 0 or None for no index (default 1)
-        :param int headers: (DEPRECATED - use `header_rows`) number of rows that represent
-            headers (default 1)
         :param int header_rows: number of rows that represent headers (default 1)
         :param int start_row: row number for first row of headers or data (default 1)
         :param str,int sheet: optional, if you want to open a different sheet first,
@@ -317,10 +307,6 @@ class Spread():
 
         if not self.sheet:
             raise Exception("No open worksheet")
-
-        if headers != 1:
-            deprecate("headers has been deprecated, use header_rows instead")
-            header_rows = headers
 
         vals = self._retry_get_all_values()
         vals = self._fix_merge_values(vals)[start_row - 1:]
@@ -559,8 +545,7 @@ class Spread():
 
     @_ensure_auth
     def df_to_sheet(self, df, index=True, headers=True, start=(1,1), replace=False,
-                    sheet=None, freeze_index=False, freeze_headers=False, fill_value='',
-                    start_row=1, start_col=1):
+                    sheet=None, freeze_index=False, freeze_headers=False, fill_value=''):
         """
         Save a DataFrame into a worksheet.
 
@@ -576,8 +561,6 @@ class Spread():
         :param bool freeze_index: whether to freeze the index columns (default False)
         :param bool freeze_headers: whether to freeze the header rows (default False)
         :param str fill_value: value to fill nulls with (default '')
-        :param int start_row: (DEPRECATED - use `start`) row number for first row of headers or data (default 1)
-        :param int start_col: (DEPRECATED - use `start`) column number for first column of headers or data (default 1)
         """
         if sheet:
             self.open_sheet(sheet, create=True)
@@ -599,11 +582,6 @@ class Spread():
             df_list = header_rows + df_list
 
         start = self._get_cell_as_tuple(start)
-
-        # Check deprecated params.. will be removed in 1.0
-        if start == (1, 1) and (start_row > 1 or start_col > 1):
-            deprecate("start_col and start_row params are deprecated, use start instead")
-            start = (start_row, start_col)
 
         sheet_rows, sheet_cols = self.get_sheet_dims()
         req_rows = len(df_list) + (start[ROW] - 1)
@@ -660,8 +638,6 @@ class Spread():
         if rows is None and cols is None:
             return
 
-        req = {
+        self.client.bath_update({
             'requests': [create_frozen_request(self.sheet.id, rows, cols)]
-        }
-
-        self.client.bath_update(req)
+        })
