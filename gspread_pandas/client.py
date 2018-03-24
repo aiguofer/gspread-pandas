@@ -252,25 +252,25 @@ class Spread():
             see :meth:`create_sheet <gspread_pandas.Spread.create_sheet>` (default False)
         """
         self.sheet = None
-        ix = None
         if isinstance(sheet, int):
             try:
                 self.sheet = self.sheets[sheet]
+<<<<<<< HEAD
                 ix = sheet
             except Exception:
+=======
+            except:
+>>>>>>> No longer need to load sheet metadata in open_sheet
                 raise WorksheetNotFound("Invalid sheet index {0}".format(sheet))
         else:
-            ix, self.sheet = self._find_sheet(sheet)
+            self.sheet = self.find_sheet(sheet)
 
         if not self.sheet:
             if create:
                 self.create_sheet(sheet)
-                ix = self._find_sheet(sheet)[0]
             else:
                 raise WorksheetNotFound("Worksheet not found")
 
-        # Should only get here either after a sheet has been found or created
-        self._sheet_metadata = self._spread_metadata['sheets'][ix]
 
     @_ensure_auth
     def create_sheet(self, name, rows=1, cols=1):
