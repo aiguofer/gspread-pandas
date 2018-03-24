@@ -52,9 +52,6 @@ class Spread():
     #: `(gspread.models.Worksheet)` - Currently open Worksheet
     sheet = None
 
-    #: `(list)` - List of available Worksheets
-    sheets = []
-
     #: `(str)` - E-mail for the currently authenticated user
     email = ''
 
@@ -108,17 +105,17 @@ class Spread():
 
     @property
     def sheets(self):
-        """Return available worksheets"""
+        """`(list)` - List of available Worksheets"""
         return self.spread.worksheets()
 
     @property
     def _spread_metadata(self):
-        """Return spreadsheet metadata"""
+        """`(dict)` - Spreadsheet metadata"""
         return self.spread.fetch_sheet_metadata()
 
     @property
     def _sheet_metadata(self):
-        """Return currently open worksheet metadata"""
+        """`(dict)` - Metadata for currently open worksheet"""
         if self.sheet:
             ix = self._find_sheet(self.sheet.title)[0]
             return self._spread_metadata['sheets'][ix]
