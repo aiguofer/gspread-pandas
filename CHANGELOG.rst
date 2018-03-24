@@ -28,6 +28,7 @@ Changed
 -  Minor updates to README
 -  Documentation now at Read The Docs
 -  Minor code changes to please flake8
+-  Deleted update_pypi.sh as releases are now handled by travis
 
 [0.15.6] - 2018-03-12
 ---------------------
