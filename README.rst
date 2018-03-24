@@ -8,7 +8,7 @@ author: Diego Fernandez
 
 Links:
 
--  `Documentation <https://aiguofer.github.io/gspread-pandas/>`_
+-  `Documentation <http://gspread-pandas.readthedocs.io/>`_
 -  `Source code <https://github.com/aiguofer/gspread-pandas>`_
 -  `Short video tutorial <https://youtu.be/2yIcNYzfzPw>`_
 
