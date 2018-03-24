@@ -18,6 +18,10 @@ install_requires = [x.strip() for x in all_reqs if 'git+' not in x]
 dependency_links = [x.strip().replace('git+', '') for x in all_reqs
                     if x.startswith('git+')]
 
+# get the dependencies and installs
+with open(os.path.join(here, 'requirements_dev.txt'), encoding='utf-8') as f:
+    dev_requires = f.read().split('\n')
+
 setup(
     name='gspread-pandas',
     version=__version__,
@@ -40,13 +44,7 @@ setup(
     author='Diego Fernandez',
     install_requires=install_requires,
     extras_require={
-        'dev': [
-            'sphinx',
-            'sphinx_rtd_theme',
-            'nose',
-            'coverage',
-            'pypi-publisher'
-        ]
+        'dev': dev_requires
     },
     dependency_links=dependency_links,
     author_email='aiguo.fernandez@gmail.com')
