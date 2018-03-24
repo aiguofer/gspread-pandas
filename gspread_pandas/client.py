@@ -427,10 +427,10 @@ class Spread():
             for cells_chunk in chunks(cells, self._max_update_chunk_size):
                 self._retry_update(cells_chunk)
 
+    @_ensure_auth
     def _retry_get_all_values(self, n=3):
         """Call self.sheet.update_cells with retry"""
         try:
-            self.client.login()  # ensure that token is still active
             return self.sheet.get_all_values()
         except Exception as e:
             if n > 0:
@@ -438,10 +438,10 @@ class Spread():
             else:
                 raise e
 
+    @_ensure_auth
     def _retry_update(self, cells, n=3):
         """Call self.sheet.update_cells with retry"""
         try:
-            self.client.login()  # ensure that token is still active
             self.sheet.update_cells(cells)
         except Exception as e:
             if n > 0:
@@ -449,10 +449,10 @@ class Spread():
             else:
                 raise e
 
+    @_ensure_auth
     def _retry_range(self, rng, n=3):
         """Call self.sheet.range with retry"""
         try:
-            self.client.login()  # ensure that token is still active
             return self.sheet.range(rng)
         except Exception as e:
             if n > 0:
