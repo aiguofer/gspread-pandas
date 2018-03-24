@@ -16,6 +16,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from oauth2client.tools import run_flow, argparser
 
 from decorator import decorator
+import gspread
 from gspread.models import Worksheet
 from gspread.utils import rowcol_to_a1, a1_to_rowcol
 from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
@@ -37,6 +38,27 @@ default_scope = [
 
 ROW = 0
 COL = 1
+
+def list_spreadsheet_files_patched(self):
+    files = []
+    page_token = ''
+    url = "https://www.googleapis.com/drive/v3/files"
+    params = {
+        'q': "mimeType='application/vnd.google-apps.spreadsheet'",
+        "pageSize": 1000
+    }
+
+    while page_token is not None:
+        if page_token:
+            params['pageToken'] = page_token
+
+        res = self.request('get', url, params=params).json()
+        files.extend(res['files'])
+        page_token = res.get('nextPageToken', None)
+
+    return files
+
+gspread.v4.client.Client.list_spreadsheet_files = list_spreadsheet_files_patched
 
 class Spread():
     """
