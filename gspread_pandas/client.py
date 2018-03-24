@@ -130,13 +130,13 @@ class Spread():
                 .session\
                 .get('https://www.googleapis.com/userinfo/v2/me')\
                 .json()['email']
-        except:
+        except Exception:
             print("""
             Couldn't retrieve email. Delete {0} and authenticate again
             """.format(self._creds_file))
 
     def _authorize(self):
-        if all (key in self._config for key in ('client_id', 'client_secret', 'redirect_uris')):
+        if all(key in self._config for key in ('client_id', 'client_secret', 'redirect_uris')):
             flow = OAuth2WebServerFlow(
                 client_id=self._config['client_id'],
                 client_secret=self._config['client_secret'],
@@ -223,7 +223,7 @@ class Spread():
                             msg = "Couldn't create spreadsheet.\n"
                             if 'accessNotConfigured' in err:
                                 msg += "Drive API has not been enabled. Enable it at " +\
-                                "https://console.developers.google.com/apis/api/drive/overview"
+                                       "https://console.developers.google.com/apis/api/drive/overview"
                             elif 'insufficientPermissions' in err:
                                 msg += "Delete {0} and authenticate again"\
                                        .format(self._creds_file)
@@ -258,7 +258,7 @@ class Spread():
             try:
                 self.sheet = self.sheets[sheet]
                 ix = sheet
-            except:
+            except Exception:
                 raise WorksheetNotFound("Invalid sheet index {0}".format(sheet))
         else:
             ix, self.sheet = self._find_sheet(sheet)
@@ -547,7 +547,7 @@ class Spread():
                 if is_current:
                     self.sheet = None
                 return True
-            except:
+            except Exception:
                 pass
         return False
 
