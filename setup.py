@@ -19,7 +19,7 @@ dependency_links = [x.strip().replace('git+', '') for x in all_reqs
                     if x.startswith('git+')]
 
 # get the dependencies and installs
-with open(os.path.join(here, 'requirements_dev.txt'), encoding='utf-8') as f:
+with open(path.join(here, 'requirements_dev.txt'), encoding='utf-8') as f:
     dev_requires = f.read().split('\n')
 
 setup(
