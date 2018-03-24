@@ -62,7 +62,7 @@ class Spread():
     client = None
 
     # chunk range request: https://github.com/burnash/gspread/issues/375
-    _max_range_chunk_size = 200000
+    _max_range_chunk_size = 1000000
 
     def __init__(self, user, spread, sheet=None, config=None,
                  create_spread=False, create_sheet=False):
