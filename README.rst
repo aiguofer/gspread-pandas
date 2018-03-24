@@ -10,7 +10,7 @@ Links:
 
 -  `Documentation <https://aiguofer.github.io/gspread-pandas/>`_
 -  `Source code <https://github.com/aiguofer/gspread-pandas>`_
--  `Short video tutorial <https://youtu.be/2yIcNYzfzPw>`_
+-  `Short video tutorial <https://youtu.be/2yIcNYzfzPw>`_
 
 Overview
 ========
@@ -26,19 +26,20 @@ Some key goals/features:
 -  Automatically handle token refreshes
 -  Enable handling of frozen rows and columns
 -  Enable handling of merged cells
+-  Nicely handle large data sets and retries
 
 Installation / Usage
 ====================
 
 To install use pip:
 
-::
+.. code-block:: console
 
     $ pip install gspread-pandas
 
 Or clone the repo:
 
-::
+.. code-block:: console
 
     $ git clone https://github.com/aiguofer/gspread-pandas.git
     $ python setup.py install
@@ -102,7 +103,7 @@ access to.
 Contributing
 ============
 
-::
+.. code-block:: console
 
     $ git clone https://github.com/aiguofer/gspread-pandas.git && cd gspread-pandas
     $ pip install -e ".[dev]"
@@ -148,13 +149,13 @@ and `issue 354 <https://github.com/burnash/gspread/issues/354>`_ but, in short, 
 solution is to either install a specific version of ``certifi`` that works for you,
 or remove it altogether.
 
-::
+.. code-block:: console
 
    pip install certifi==2015.4.28
 
 or
 
-::
+.. code-block:: console
 
    pip uninstall certifi
 
