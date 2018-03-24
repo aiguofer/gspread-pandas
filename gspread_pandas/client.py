@@ -271,12 +271,7 @@ class Spread():
         if isinstance(sheet, int):
             try:
                 self.sheet = self.sheets[sheet]
-<<<<<<< HEAD
-                ix = sheet
             except Exception:
-=======
-            except:
->>>>>>> No longer need to load sheet metadata in open_sheet
                 raise WorksheetNotFound("Invalid sheet index {0}".format(sheet))
         else:
             self.sheet = self.find_sheet(sheet)
