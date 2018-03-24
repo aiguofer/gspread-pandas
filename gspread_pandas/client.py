@@ -64,9 +64,6 @@ class Spread():
     # chunk range request: https://github.com/burnash/gspread/issues/375
     _max_range_chunk_size = 200000
 
-    # chunk update_cells: https://github.com/burnash/gspread/issues/384
-    _max_update_chunk_size = 40000
-
     def __init__(self, user, spread, sheet=None, config=None,
                  create_spread=False, create_sheet=False):
         """
@@ -430,8 +427,7 @@ class Spread():
             for val, cell in zip(val_chunks, cells):
                 cell.value = val
 
-            for cells_chunk in chunks(cells, self._max_update_chunk_size):
-                self._retry_update(cells_chunk)
+            self._retry_update(cells)
 
     @_ensure_auth
     def _retry_get_all_values(self, n=3):
