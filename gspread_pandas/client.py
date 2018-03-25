@@ -597,7 +597,7 @@ class Spread():
         self.update_cells(
             start=start,
             end=(req_rows, req_cols),
-            vals=[val for row in df_list for val in row]
+            vals=[str(val) for row in df_list for val in row]
         )
 
         self.freeze(None if not freeze_headers else header_size,
