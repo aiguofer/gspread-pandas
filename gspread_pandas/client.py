@@ -219,36 +219,41 @@ class Spread():
         :param bool create: whether to create the spreadsheet if it doesn't exist,
             it wil use the ``spread`` value as the sheet title
         """
-        self.spread = None
+        id_regex = "[a-zA-Z0-9-_]{44}"
+        url_path = "docs.google.com/spreadsheet"
+
+        fetch_metadata = True
+
+        if match(id_regex, spread):
+            open_func = self.client.open_by_key
+        elif url_path in spread:
+            open_func = self.client.open_by_url
+        else:
+            open_func = self.client.open
+            fetch_metadata = False
 
         try:
-            self.spread = self.client.open(spread)
-        except SpreadsheetNotFound:
-            try:
-                self.spread = self.client.open_by_url(spread)
+            self.spread = open_func(spread)
+            if fetch_metadata:
                 self.spread.fetch_sheet_metadata()
-            except (SpreadsheetNotFound, NoValidUrlKeyFound, APIError):
+        except (SpreadsheetNotFound, NoValidUrlKeyFound, APIError):
+            if create:
                 try:
-                    self.spread = self.client.open_by_key(spread)
-                    self.spread.fetch_sheet_metadata()
-                except (SpreadsheetNotFound, APIError):
-                    if create:
-                        try:
-                            self.spread = self.client.create(spread)
-                        except RequestError as e:
-                            err = str(e)
-                            msg = "Couldn't create spreadsheet.\n"
-                            if 'accessNotConfigured' in err:
-                                msg += "Drive API has not been enabled. Enable it at " +\
-                                       "https://console.developers.google.com/apis/api/drive/overview"
-                            elif 'insufficientPermissions' in err:
-                                msg += "Delete {0} and authenticate again"\
-                                       .format(self._creds_file)
-                            else:
-                                msg += err
-                            raise Exception(msg)
+                    self.spread = self.client.create(spread)
+                except RequestError as e:
+                    err = str(e)
+                    msg = "Couldn't create spreadsheet.\n"
+                    if 'accessNotConfigured' in err:
+                        msg += "Drive API has not been enabled. Enable it at " +\
+                               "https://console.developers.google.com/apis/api/drive/overview"
+                    elif 'insufficientPermissions' in err:
+                        msg += "Delete {0} and authenticate again"\
+                               .format(self._creds_file)
                     else:
-                        raise SpreadsheetNotFound("Spreadsheet not found")
+                        msg += err
+                    raise Exception(msg)
+            else:
+                raise SpreadsheetNotFound("Spreadsheet not found")
 
     @_ensure_auth
     def open_sheet(self, sheet, create=False):
