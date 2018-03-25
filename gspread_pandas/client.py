@@ -17,7 +17,7 @@ from oauth2client.tools import run_flow, argparser
 
 from decorator import decorator
 import gspread
-from gspread.models import Worksheet
+from gspread.v4.models import Worksheet
 from gspread.utils import rowcol_to_a1, a1_to_rowcol
 from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
                                 NoValidUrlKeyFound, RequestError)
@@ -70,10 +70,10 @@ class Spread():
     Each user will be associated with specific OAuth credentials. The authenticated user
     will need the appropriate permissions to the Spreadsheet in order to interact with it.
     """
-    #: `(gspread.models.Spreadsheet)` - Currently open Spreadsheet
+    #: `(gspread.v4.models.Spreadsheet)` - Currently open Spreadsheet
     spread = None
 
-    #: `(gspread.models.Worksheet)` - Currently open Worksheet
+    #: `(gspread.v4.models.Worksheet)` - Currently open Worksheet
     sheet = None
 
     #: `(str)` - E-mail for the currently authenticated user
