@@ -103,6 +103,8 @@ access to.
 Contributing
 ============
 
+To install the development environment:
+
 .. code-block:: console
 
     $ git clone https://github.com/aiguofer/gspread-pandas.git && cd gspread-pandas
@@ -117,7 +119,7 @@ Example
 
     from __future__ import print_function
     import pandas as pd
-    from gspread_pandas import Spread
+    from gspread_pandas import Spread, Client
 
     file_name = "http://stats.idre.ucla.edu/stat/data/binary.csv"
     df = pd.read_csv(file_name)
@@ -134,6 +136,14 @@ Example
     spread.update_cells((1,1), (1,2), ['Created by:', spread.email])
     print(spread)
     # <gspread_pandas.client.Spread - User: '<example_user>@gmail.com', Spread: 'Example Spreadsheet', Sheet: 'New Test Sheet'>
+
+    # You can now first instanciate a Client separately and query folders and instanciate other Spread objects by passing in the Client
+    client = Client('example_user')
+    # Assumming you have a dir called 'example dir' with sheets in it
+    available_sheets = client.find_spreadsheet_files_in_folders('example dir')
+    spreads = []
+    for sheet in available_sheets.get('example dir', []):
+        spreads.append(Spread(client, sheet['id']))
 
 Troubleshooting
 ===============

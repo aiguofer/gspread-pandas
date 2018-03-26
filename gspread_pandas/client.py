@@ -3,12 +3,11 @@ from __future__ import print_function
 from re import match
 from os import path
 
-from builtins import str, range
+from builtins import str, range, super
 from past.builtins import basestring
 
 import numpy as np
 import pandas as pd
-import gspread
 
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
@@ -16,50 +15,164 @@ from oauth2client.service_account import ServiceAccountCredentials
 from oauth2client.tools import run_flow, argparser
 
 from decorator import decorator
-import gspread
+
 from gspread.v4.models import Worksheet
 from gspread.utils import rowcol_to_a1, a1_to_rowcol
 from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
                                 NoValidUrlKeyFound, RequestError)
 from gspread.v4.exceptions import APIError
+from gspread.v4.client import Client as ClientV4
 from gspread_pandas.conf import get_config
 from gspread_pandas.util import (chunks, parse_df_col_names,
                                  parse_sheet_index, parse_sheet_headers,
                                  create_frozen_request, fillna)
 
 
-__all__ = ['Spread']
-
-default_scope = [
-    'https://spreadsheets.google.com/feeds',
-    'https://www.googleapis.com/auth/drive',
-    'https://www.googleapis.com/auth/userinfo.email'
-]
+__all__ = ['Spread', 'Client']
 
 ROW = 0
 COL = 1
 
-def list_spreadsheet_files_patched(self):
-    files = []
-    page_token = ''
-    url = "https://www.googleapis.com/drive/v3/files"
-    params = {
-        'q': "mimeType='application/vnd.google-apps.spreadsheet'",
-        "pageSize": 1000
-    }
+class Client(ClientV4):
+    """
+    The gspread_pandas :class:`Client` extends :class:`Client <gspread.v4.client.Client>`
+    and authenticates using credentials stored in ``gspread_pandas`` config.
 
-    while page_token is not None:
-        if page_token:
-            params['pageToken'] = page_token
+    This class also adds a few convenience methods to explore the user's google drive
+    for spreadsheets.
+    """
+    #: `(list)` - Feeds included by default for the OAuth2 scope
+    default_scope = [
+        'https://spreadsheets.google.com/feeds',
+        'https://www.googleapis.com/auth/drive',
+        'https://www.googleapis.com/auth/userinfo.email'
+    ]
 
-        res = self.request('get', url, params=params).json()
-        files.extend(res['files'])
-        page_token = res.get('nextPageToken', None)
+    _email = None
 
-    return files
+    def __init__(self, user, config=None, scope=None):
+        """
+        :param str user: string indicating the key to a users credentials,
+            which will be stored in a file (by default they will be stored in
+            ``~/.config/gspread_pandas/creds/<user>`` but can be modified with ``creds_dir``
+            property in config)
+        :param dict config: optional, if you want to provide an alternate configuration,
+            see :meth:`get_config <gspread_pandas.conf.get_config>`
+        :param list scope: optional, if you'd like to provide your own scope
+        """
+        self._config = config or get_config()
+        self._creds_file = path.join(self._config['creds_dir'], user)
+        self.scope = scope or self.default_scope
+        self._login()
 
+    def _authorize(self):
+        if all(key in self._config for key in ('client_id',
+                                               'client_secret',
+                                               'redirect_uris')):
+            flow = OAuth2WebServerFlow(
+                client_id=self._config['client_id'],
+                client_secret=self._config['client_secret'],
+                redirect_uri=self._config['redirect_uris'][0],
+                scope=self.scope)
 
-gspread.v4.client.Client.list_spreadsheet_files = list_spreadsheet_files_patched
+            storage = Storage(self._creds_file)
+            args = argparser.parse_args(args=['--noauth_local_webserver'])
+
+            return run_flow(flow, storage, args)
+
+        if 'private_key_id' in self._config:
+            return ServiceAccountCredentials.from_json_keyfile_dict(self._config,
+                                                                    self.scope)
+
+        raise Exception("Unknown config file format")
+
+    def _login(self):
+        creds = None
+
+        if path.exists(self._creds_file):
+            creds = Storage(self._creds_file).locked_get()
+        else:
+            creds = self._authorize()
+
+        super().__init__(creds)
+        super().login()
+
+    @decorator
+    def _ensure_auth(func, self, *args, **kwargs):
+        self.login()
+        return func(self, *args, **kwargs)
+
+    def get_email(self):
+        """Return the email address of the user"""
+        if not self._email:
+            try:
+                self._email = self.request('get',
+                                           'https://www.googleapis.com/userinfo/v2/me')\
+                                  .json()['email']
+            except Exception:
+                print("""
+                Couldn't retrieve email. Delete {0} and authenticate again
+                """.format(self._creds_file))
+
+        return self._email
+
+    @_ensure_auth
+    def _make_drive_request(self, q):
+        files = []
+        page_token = ''
+        url = "https://www.googleapis.com/drive/v3/files"
+        params = {
+            'q': q,
+            "pageSize": 1000
+        }
+
+        while page_token is not None:
+            if page_token:
+                params['pageToken'] = page_token
+
+            res = self.request('get', url, params=params).json()
+            files.extend(res['files'])
+            page_token = res.get('nextPageToken', None)
+
+        return files
+
+    def list_spreadsheet_files(self):
+        """Return all spreadsheets that the user has access to"""
+        q = "mimeType='application/vnd.google-apps.spreadsheet'"
+        return self._make_drive_request(q)
+
+    def list_spreadsheet_files_in_folder(self, folder_id):
+        """Return all spreadsheets that the user has access to in a sepcific folder.
+
+        :param str folder_id: ID of a folder, see :meth:`find_folders <find_folders>`
+        """
+        q = ("mimeType='application/vnd.google-apps.spreadsheet'"
+             " and '{0}' in parents".format(folder_id))
+
+        return self._make_drive_request(q)
+
+    def find_folders(self, folder_name_query):
+        """Return all folders that the user has access to containing
+        ``folder_name_query`` in the name
+
+        :param str folder_name_query: Case insensitive string to search in folder name
+        """
+        q = ("mimeType='application/vnd.google-apps.folder'"
+             " and name contains '{0}'".format(folder_name_query))
+
+        return self._make_drive_request(q)
+
+    def find_spreadsheet_files_in_folders(self, folder_name_query):
+        """Return all spreadsheets that the user has access to in all the folders that
+        contain ``folder_name_query`` in the name. Returns as a dict with each key being
+        the folder name and the value being a list of spreadsheet files
+
+        :param str folder_name_query: Case insensitive string to search in folder name
+        """
+        results = {}
+        for res in self.find_folders(folder_name_query):
+            results[res['name']] = self.list_spreadsheet_files_in_folder(res['id'])
+        return results
 
 
 class Spread():
@@ -76,22 +189,20 @@ class Spread():
     #: `(gspread.v4.models.Worksheet)` - Currently open Worksheet
     sheet = None
 
-    #: `(str)` - E-mail for the currently authenticated user
-    email = ''
-
-    #: `(gspread.client.Client)` - Current gspread Client
+    #: `(Client)` - Instance of gspread_pandas :class:`Client <gspread_pandas.client.Client>`
     client = None
 
     # chunk range request: https://github.com/burnash/gspread/issues/375
     _max_range_chunk_size = 1000000
 
-    def __init__(self, user, spread, sheet=None, config=None,
-                 create_spread=False, create_sheet=False):
+    def __init__(self, user_or_client, spread, sheet=None, config=None,
+                 create_spread=False, create_sheet=False, scope=None):
         """
-        :param str user: string indicating the key to a users credentials, which will
-            be stored in a file (by default they will be stored in
+        :param str user_or_client: string indicating the key to a users credentials,
+            which will be stored in a file (by default they will be stored in
             ``~/.config/gspread_pandas/creds/<user>`` but can be modified with ``creds_dir``
-            property in config)
+            property in config) or an instance of a
+            :class:`Client <gspread_pandas.client.Client>`
         :param str spread: name, url, or id of the spreadsheet; must have read access by
             the authenticated user,
             see :meth:`open_spread <gspread_pandas.client.Spread.open_spread>`
@@ -103,11 +214,14 @@ class Spread():
             it wil use the ``spread`` value as the sheet title
         :param bool create_spread: whether to create the sheet if it doesn't exist,
             it wil use the ``spread`` value as the sheet title
+        :param list scope: optional, if you'd like to provide your own scope
         """
-        self._config = config or get_config()
-        self._creds_file = path.join(self._config['creds_dir'], user)
-        self._login()
-        self.email = self._get_email()
+        if isinstance(user_or_client, Client):
+            self.client = user_or_client
+        elif isinstance(user_or_client, basestring):
+            self.client = Client(user_or_client, config, scope)
+        else:
+            raise TypeError('user_or_client needs to be a string or Client object')
 
         self.open(spread, sheet, create_sheet, create_spread)
 
@@ -121,6 +235,11 @@ class Spread():
         if self.sheet:
             meta.append("Sheet: '{0}'".format(self.sheet.title))
         return base.format(", ".join(meta))
+
+    @property
+    def email(self):
+        """`(str)` - E-mail for the currently authenticated user"""
+        return self.client.get_email()
 
     @property
     def url(self):
@@ -148,49 +267,6 @@ class Spread():
     def _ensure_auth(func, self, *args, **kwargs):
         self.client.login()
         return func(self, *args, **kwargs)
-
-    def _get_email(self):
-        try:
-            return self\
-                .client\
-                .session\
-                .get('https://www.googleapis.com/userinfo/v2/me')\
-                .json()['email']
-        except Exception:
-            print("""
-            Couldn't retrieve email. Delete {0} and authenticate again
-            """.format(self._creds_file))
-
-    def _authorize(self):
-        if all(key in self._config for key in ('client_id',
-                                               'client_secret',
-                                               'redirect_uris')):
-            flow = OAuth2WebServerFlow(
-                client_id=self._config['client_id'],
-                client_secret=self._config['client_secret'],
-                redirect_uri=self._config['redirect_uris'][0],
-                scope=default_scope)
-
-            storage = Storage(self._creds_file)
-            args = argparser.parse_args(args=['--noauth_local_webserver'])
-
-            return run_flow(flow, storage, args)
-
-        if 'private_key_id' in self._config:
-            return ServiceAccountCredentials.from_json_keyfile_dict(self._config,
-                                                                    default_scope)
-
-        raise Exception("Unknown config file format")
-
-    def _login(self):
-        creds = None
-
-        if path.exists(self._creds_file):
-            creds = Storage(self._creds_file).locked_get()
-        else:
-            creds = self._authorize()
-
-        self.client = gspread.authorize(creds)
 
     def open(self, spread, sheet=None, create_sheet=False, create_spread=False):
         """
@@ -248,7 +324,7 @@ class Spread():
                                "https://console.developers.google.com/apis/api/drive/overview"
                     elif 'insufficientPermissions' in err:
                         msg += "Delete {0} and authenticate again"\
-                               .format(self._creds_file)
+                               .format(self.client._creds_file)
                     else:
                         msg += err
                     raise Exception(msg)
