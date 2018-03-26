@@ -9,6 +9,11 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Added
+~~~~~
+
+-  There is now a separate ``Client`` class that extends the gspread v4 Client class and adds some functionalty. This includes a monkeypatche and hacky workarounds for gspread 2.0 issues. Once they get fixed upstream I need to remove these.
+
 Changed
 ~~~~~~~
 
@@ -16,10 +21,9 @@ Changed
 -  No longer need to chunk update requests, and range requests can use larger chunks
 -  Some code improvements enabled by gspread 2.0
 -  Removed deprecated params and functions
--  Added monkeypatches and hacky workarounds for gspread 2.0 issues. Once they get fixed upstream I need to remove these.
 
 [0.16.1] - 2018-03-24
----------------------
+-----------------------------
 
 Fixed
 ~~~~~
@@ -27,7 +31,7 @@ Fixed
 -  Set up correct credentials for travis pypi push
 
 [0.16.0] - 2018-03-24
----------------------
+-----------------------------
 
 Added
 ~~~~~
@@ -51,7 +55,7 @@ Changed
 -  Deleted update_pypi.sh as releases are now handled by travis
 
 [0.15.6] - 2018-03-12
----------------------
+-----------------------------
 
 Fixed
 ~~~~~
@@ -59,7 +63,7 @@ Fixed
 -  Remove code accidentally pushed by build
 
 [0.15.5] - 2018-03-12
----------------------
+-----------------------------
 
 Fixed
 ~~~~~
@@ -67,7 +71,7 @@ Fixed
 -  Added dependency version limit for gspread; will remove in next version
 
 [0.15.4] - 2018-02-13
----------------------
+-----------------------------
 
 Fixed
 ~~~~~
@@ -81,7 +85,7 @@ Added
 -  You can now use service account credentials in the config (thanks @marcojetson)
 
 [0.15.3] - 2017-11-21
----------------------
+-----------------------------
 
 Changed
 ~~~~~~~
@@ -89,7 +93,7 @@ Changed
 -  Always return an Index object from parse_sheet_headers
 
 [0.15.2] - 2017-11-18
----------------------
+-----------------------------
 
 Fixed
 ~~~~~
@@ -102,7 +106,7 @@ Changed
 -  Minimum Pandas version .20 now required
 
 [0.15.1] - 2017-10-05
----------------------
+-----------------------------
 
 Fixed
 ~~~~~
@@ -112,7 +116,7 @@ Fixed
 -  Cast keys() to a list to fix Python 3 compat
 
 [0.15.0] - 2017-09-11
----------------------
+-----------------------------
 
 Changed
 ~~~~~~~
@@ -127,7 +131,7 @@ Fixed
 -  df_to_sheet won't fail when categorical columns have nulls
 
 [0.14.3] - 2017-06-22
----------------------
+-----------------------------
 
 Changed
 ~~~~~~~
@@ -136,7 +140,7 @@ Changed
 -  Worksheet object can now be passed it to most functions with ``sheet`` param
 
 [0.14.2] - 2017-06-18
----------------------
+-----------------------------
 
 Added
 ~~~~~
@@ -149,7 +153,7 @@ Fixed
 -  Fixed retry for _retry_get_all_values
 
 [0.14.1] - 2017-06-05
----------------------
+-----------------------------
 
 Changed
 -------
@@ -160,7 +164,7 @@ Changed
 -  More robust way to get index when a new sheet is created
 
 [0.14.0] - 2017-05-25
----------------------
+-----------------------------
 
 Added
 ~~~~~
@@ -181,7 +185,7 @@ Fixed
 -  Prevent error when index > number of columns in ``sheet_to_df``
 
 [0.13.0] - 2017-04-28
----------------------
+-----------------------------
 
 Added
 ~~~~~
@@ -191,7 +195,7 @@ Added
    in order to use it
 
 [0.12.1] - 2017-04-25
----------------------
+-----------------------------
 
 Changed
 ~~~~~~~
@@ -209,7 +213,7 @@ Fixed
 -  The list of sheets is now refreshed when one is deleted
 
 [0.12.0] - 2017-03-31
----------------------
+-----------------------------
 
 Added
 ~~~~~
@@ -223,7 +227,7 @@ Fixed
 -  You can now pass ``replace=True`` when a sheet has frozen rows/cols
 
 [0.11.2] - 2017-03-22
----------------------
+-----------------------------
 
 Changed
 ~~~~~~~
@@ -231,7 +235,7 @@ Changed
 -  Minor change to README
 
 [0.11.1] - 2017-03-22
----------------------
+-----------------------------
 
 Added
 ~~~~~
@@ -249,7 +253,7 @@ Fixed
 -  Fixed clearing only rows with ``clear_sheet``
 
 [0.11.0] - 2017-02-14
----------------------
+-----------------------------
 
 Changed
 ~~~~~~~
@@ -264,7 +268,7 @@ Fixed
 -  Fixed changelog
 
 [0.10.1] - 2017-01-26
----------------------
+-----------------------------
 
 Added
 ~~~~~
@@ -278,7 +282,7 @@ Changed
 
 
 [0.10.0] - 2017-01-18
----------------------
+-----------------------------
 
 Added
 ~~~~~
@@ -312,7 +316,7 @@ Deprecated
    param
 
 [0.9] - 2016-12-07
-------------------
+-----------------------------
 
 Added
 ~~~~~
@@ -336,7 +340,7 @@ Fixed
 -  Fixed the use of ``start_row`` > 1
 
 [0.8] - 2016-11-11
-------------------
+-----------------------------
 
 Added
 ~~~~~
@@ -349,7 +353,7 @@ Fixed
 -  Oauth flow now uses correct properties
 
 [0.7] - 2016-11-10
-------------------
+-----------------------------
 
 Changed
 ~~~~~~~
@@ -357,7 +361,7 @@ Changed
 -  Made python 3 compatible using future
 
 [0.6] - 2016-10-27
-------------------
+-----------------------------
 
 Changed
 ~~~~~~~
@@ -366,7 +370,7 @@ Changed
 -  Raise error when missing google client config file
 
 [0.5] - 2016-10-19
-------------------
+-----------------------------
 
 Changed
 ~~~~~~~
@@ -374,7 +378,7 @@ Changed
 -  Improve decorators more using ``decorator.decorator``
 
 [0.4] - 2016-10-19
-------------------
+-----------------------------
 
 Added
 ~~~~~
@@ -387,7 +391,7 @@ Changed
 -  Improve decorators using ``functools.wraps``
 
 [0.3] - 2016-10-19
-------------------
+-----------------------------
 
 Changed
 ~~~~~~~
@@ -398,7 +402,7 @@ Changed
    re-creating
 
 [0.2] - 2016-10-12
-------------------
+-----------------------------
 
 Added
 ~~~~~
@@ -408,7 +412,7 @@ Added
 -  Add requirements
 
 [0.1] - 2016-10-11
-------------------
+-----------------------------
 
 Added
 ~~~~~
