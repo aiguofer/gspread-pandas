@@ -43,6 +43,8 @@ setup(
     include_package_data=True,
     author='Diego Fernandez',
     install_requires=install_requires,
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
     extras_require={
         'dev': dev_requires
     },

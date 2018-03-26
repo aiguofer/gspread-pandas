@@ -1,8 +1,9 @@
 pip
 sphinx
 sphinx_rtd_theme
-nose
 coverage
 twine
 bumpversion
 tox
+flake8
+pytest
