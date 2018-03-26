@@ -28,7 +28,7 @@ setup(
     description='A package to easily open an instance of a Google spreadsheet and interact with worksheets through Pandas DataFrames.',
     long_description=long_description,
     url='https://github.com/aiguofer/gspread-pandas',
-    download_url='https://github.com/aiguofer/gspread-pandas/tarball/' +
+    download_url='https://github.com/aiguofer/gspread-pandas/tarball/v' +
     __version__,
     license='BSD',
     classifiers=[

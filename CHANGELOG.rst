@@ -8,6 +8,13 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Changed
+~~~~~~~
+
+-  Replace pypi-publisher with twine in dev reqs
+-  Change download url, now it should match the tags from bumpversion
+
 [1.0.0] - 2018-03-26
 -----------------------------
 
