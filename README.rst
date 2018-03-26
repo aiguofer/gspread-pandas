@@ -2,7 +2,17 @@
 Getting Started
 ===============
 
-|PyPI version|
+.. image:: https://img.shields.io/pypi/v/gspread-pandas.svg
+        :target: https://pypi.python.org/pypi/gspread-pandas
+        :alt: PyPI Version
+
+.. image:: https://img.shields.io/travis/aiguofer/gspread-pandas.svg
+        :target: https://travis-ci.org/aiguofer/gspread-pandas
+        :alt: Travis-CI Build Status
+
+.. image:: https://readthedocs.org/projects/gspread-pandas/badge/?version=latest
+        :target: https://gspread-pandas.readthedocs.io/en/latest/?badge=latest
+        :alt: Documentation Status
 
 author: Diego Fernandez
 
@@ -184,7 +194,3 @@ to be valid. Just run this in shell:
    python -c "from gspread_pandas import Spread; Spread('<user_key>','')"
 
 Then follow the instructions to create and store the OAuth creds.
-
-
-.. |PyPI version| image:: https://badge.fury.io/py/gspread-pandas.svg
-   :target: https://badge.fury.io/py/gspread-pandas
