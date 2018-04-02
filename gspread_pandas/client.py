@@ -195,6 +195,9 @@ class Spread():
     # chunk range request: https://github.com/burnash/gspread/issues/375
     _max_range_chunk_size = 1000000
 
+    # `(dict)` - Spreadsheet metadata
+    _spread_metadata = None
+
     def __init__(self, user_or_client, spread, sheet=None, config=None,
                  create_spread=False, create_sheet=False, scope=None):
         """
@@ -251,10 +254,9 @@ class Spread():
         """`(list)` - List of available Worksheets"""
         return self.spread.worksheets()
 
-    @property
-    def _spread_metadata(self):
-        """`(dict)` - Spreadsheet metadata"""
-        return self.spread.fetch_sheet_metadata()
+    def refresh_spread_metadata(self):
+        """Refresh spreadsheet metadata"""
+        self._spread_metadata = self.spread.fetch_sheet_metadata()
 
     @property
     def _sheet_metadata(self):
@@ -298,24 +300,21 @@ class Spread():
         id_regex = "[a-zA-Z0-9-_]{44}"
         url_path = "docs.google.com/spreadsheet"
 
-        fetch_metadata = True
-
         if match(id_regex, spread):
             open_func = self.client.open_by_key
         elif url_path in spread:
             open_func = self.client.open_by_url
         else:
             open_func = self.client.open
-            fetch_metadata = False
 
         try:
             self.spread = open_func(spread)
-            if fetch_metadata:
-                self.spread.fetch_sheet_metadata()
+            self.refresh_spread_metadata()
         except (SpreadsheetNotFound, NoValidUrlKeyFound, APIError):
             if create:
                 try:
                     self.spread = self.client.create(spread)
+                    self.refresh_spread_metadata()
                 except RequestError as e:
                     err = str(e)
                     msg = "Couldn't create spreadsheet.\n"
@@ -368,6 +367,7 @@ class Spread():
         :param int cols: number of columns (default 1)
         """
         self.spread.add_worksheet(name, rows, cols)
+        self.refresh_spread_metadata()
         self.open_sheet(name)
 
     @_ensure_auth
@@ -622,6 +622,9 @@ class Spread():
                 return True
             except Exception:
                 pass
+
+        self.refresh_spread_metadata()
+
         return False
 
     @_ensure_auth
@@ -722,3 +725,5 @@ class Spread():
         self.client.bath_update({
             'requests': [create_frozen_request(self.sheet.id, rows, cols)]
         })
+
+        self.refresh_spread_metadata()
