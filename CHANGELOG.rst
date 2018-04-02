@@ -8,6 +8,14 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Changed
+~~~~~~~
+
+-  Some dependency changes
+-  Travis deploy will only happen on python 3.6
+-  Changes to reduce number of fetch_sheet_metadata calls
+
 [1.0.1] - 2018-03-26
 -----------------------------
 
