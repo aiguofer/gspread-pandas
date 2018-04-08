@@ -525,7 +525,7 @@ class Spread():
     def _retry_update(self, cells, n=3):
         """Call self.sheet.update_cells with retry"""
         try:
-            self.sheet.update_cells(cells)
+            self.sheet.update_cells(cells, 'USER_ENTERED')
         except Exception as e:
             if n > 0:
                 self._retry_update(cells, n-1)

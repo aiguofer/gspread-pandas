@@ -8,6 +8,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Fixed
+~~~~~
+
+-  Change ValueInputOption to USER_ENTERED so dates and numbers are parsed correctly in Google Sheets
+
 [1.0.3] - 2018-04-02
 -----------------------------
 
