@@ -8,6 +8,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Fixed
+~~~~~
+
+-  Added limit to gspread version since 3.0 broke gspread-pandas
+
 [1.0.4] - 2018-04-08
 -----------------------------
 
