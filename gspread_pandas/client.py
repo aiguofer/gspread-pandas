@@ -9,12 +9,9 @@ from past.builtins import basestring
 import numpy as np
 import pandas as pd
 
-from oauth2client.client import OAuth2WebServerFlow
-from oauth2client.file import Storage
-from oauth2client.service_account import ServiceAccountCredentials
-from oauth2client.tools import run_flow, argparser
-
 from decorator import decorator
+
+from oauth2client.client import OAuth2Credentials
 
 from gspread.v4.models import Worksheet
 from gspread.utils import rowcol_to_a1, a1_to_rowcol
@@ -22,7 +19,7 @@ from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
                                 NoValidUrlKeyFound, RequestError)
 from gspread.v4.exceptions import APIError
 from gspread.v4.client import Client as ClientV4
-from gspread_pandas.conf import get_config
+from gspread_pandas.conf import get_creds, get_config, default_scope
 from gspread_pandas.exceptions import (GspreadPandasException, NoWorksheetException,
                                 MissMatchException)
 from gspread_pandas.util import (chunks, parse_df_col_names,
@@ -43,58 +40,31 @@ class Client(ClientV4):
     This class also adds a few convenience methods to explore the user's google drive
     for spreadsheets.
     """
-    #: `(list)` - Feeds included by default for the OAuth2 scope
-    default_scope = [
-        'https://spreadsheets.google.com/feeds',
-        'https://www.googleapis.com/auth/drive',
-        'https://www.googleapis.com/auth/userinfo.email'
-    ]
-
     _email = None
 
-    def __init__(self, user, config=None, scope=None):
+    def __init__(self, user_or_creds, config=get_config(), scope=default_scope):
         """
-        :param str user: string indicating the key to a users credentials,
+        :param str user_or_creds: string indicating the key to a users credentials,
             which will be stored in a file (by default they will be stored in
-            ``~/.config/gspread_pandas/creds/<user>`` but can be modified with ``creds_dir``
-            property in config)
+            ``~/.config/gspread_pandas/creds/<user>`` but can be modified with
+            ``creds_dir`` property in config) or an instance of
+            :class:`OAuth2Credentials <oauth2client.client.OAuth2Credentials>`
         :param dict config: optional, if you want to provide an alternate configuration,
             see :meth:`get_config <gspread_pandas.conf.get_config>`
         :param list scope: optional, if you'd like to provide your own scope
         """
-        self._config = config or get_config()
-        self._creds_file = path.join(self._config['creds_dir'], user)
-        self.scope = scope or self.default_scope
-        self._login()
+        #: `(list)` - Feeds included for the OAuth2 scope
+        self.scope = scope
+        self._login(user_or_creds, config)
 
-    def _authorize(self):
-        if all(key in self._config for key in ('client_id',
-                                               'client_secret',
-                                               'redirect_uris')):
-            flow = OAuth2WebServerFlow(
-                client_id=self._config['client_id'],
-                client_secret=self._config['client_secret'],
-                redirect_uri=self._config['redirect_uris'][0],
-                scope=self.scope)
-
-            storage = Storage(self._creds_file)
-            args = argparser.parse_args(args=['--noauth_local_webserver'])
-
-            return run_flow(flow, storage, args)
-
-        if 'private_key_id' in self._config:
-            return ServiceAccountCredentials.from_json_keyfile_dict(self._config,
-                                                                    self.scope)
-
-        raise Exception("Unknown config file format")
-
-    def _login(self):
-        creds = None
-
-        if path.exists(self._creds_file):
-            creds = Storage(self._creds_file).locked_get()
+    def _login(self, user_or_creds, config):
+        if isinstance(user_or_creds, OAuth2Credentials):
+            creds = user_or_creds
+        elif isinstance(user_or_creds, basestring):
+            creds = get_creds(user_or_creds, config, self.scope)
         else:
-            creds = self._authorize()
+            raise TypeError('user_or_client needs to be a string '
+                            'or OAuth2Credentials object')
 
         super().__init__(creds)
         super().login()
@@ -113,8 +83,8 @@ class Client(ClientV4):
                                   .json()['email']
             except Exception:
                 print("""
-                Couldn't retrieve email. Delete {0} and authenticate again
-                """.format(self._creds_file))
+                Couldn't retrieve email. Delete credentials and authenticate again
+                """)
 
         return self._email
 
@@ -200,10 +170,10 @@ class Spread():
     # `(dict)` - Spreadsheet metadata
     _spread_metadata = None
 
-    def __init__(self, user_or_client, spread, sheet=None, config=None,
-                 create_spread=False, create_sheet=False, scope=None):
+    def __init__(self, user_creds_or_client, spread, sheet=None, config=get_config(),
+                 create_spread=False, create_sheet=False, scope=default_scope):
         """
-        :param str user_or_client: string indicating the key to a users credentials,
+        :param str user_creds_or_client: string indicating the key to a users credentials,
             which will be stored in a file (by default they will be stored in
             ``~/.config/gspread_pandas/creds/<user>`` but can be modified with ``creds_dir``
             property in config) or an instance of a
@@ -221,12 +191,13 @@ class Spread():
             it wil use the ``spread`` value as the sheet title
         :param list scope: optional, if you'd like to provide your own scope
         """
-        if isinstance(user_or_client, Client):
-            self.client = user_or_client
-        elif isinstance(user_or_client, basestring):
-            self.client = Client(user_or_client, config, scope)
+        if isinstance(user_creds_or_client, Client):
+            self.client = user_creds_or_client
+        elif isinstance(user_creds_or_client, (basestring, OAuth2Credentials)):
+            self.client = Client(user_creds_or_client, config, scope)
         else:
-            raise TypeError('user_or_client needs to be a string or Client object')
+            raise TypeError('user_creds_or_client needs to be a string, '
+                            'OAuth2Credentials, or Client object')
 
         self.open(spread, sheet, create_sheet, create_spread)
 
@@ -324,8 +295,7 @@ class Spread():
                         msg += "Drive API has not been enabled. Enable it at " +\
                                "https://console.developers.google.com/apis/api/drive/overview"
                     elif 'insufficientPermissions' in err:
-                        msg += "Delete {0} and authenticate again"\
-                               .format(self.client._creds_file)
+                        msg += "Delete credentialso and authenticate again"
                     else:
                         msg += err
                     raise GspreadPandasException(msg)

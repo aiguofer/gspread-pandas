@@ -8,6 +8,13 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Changed
+~~~~~~~
+
+-  Moved a lot of the credential handling into functions in gspread_pandas.conf
+-  New ``get_creds`` function allows you to get ``OAuth2Credentials`` and pass them in to a ``Client`` or ``Spread``
+
 [1.0.5] - 2018-04-14
 -----------------------------
 

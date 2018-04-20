@@ -1,29 +1,63 @@
 import json
-from os import path, makedirs
+from os import path, makedirs, environ
 
-_default_dir = path.expanduser('~/.config/gspread_pandas')
+from oauth2client.client import OAuth2WebServerFlow
+from oauth2client.file import Storage
+from oauth2client.service_account import ServiceAccountCredentials
+from oauth2client.tools import run_flow, argparser
+
+from gspread_pandas.exceptions import ConfigException
+
+__all__ = [
+    'default_scope',
+    'get_config',
+    'get_creds'
+]
+
+_default_dir = '~/.config/gspread_pandas'
 _default_file = 'google_secret.json'
 
+default_scope = [
+    'https://spreadsheets.google.com/feeds',
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/userinfo.email'
+]
+
+def _get_config_dir():
+    """Get the config directory. It will first look in the environment variable
+    GSPREAD_PANDAS_CONFIG_DIR, but if it's not set it'll use ~/.config/gspread_pandas.
+    """
+    return path.expanduser(environ.get('GSPREAD_PANDAS_CONFIG_DIR',
+                                       _default_dir))
+
+
 def ensure_path(pth):
+    """Create path if it doesn't exist"""
     if not path.exists(pth):
         makedirs(pth)
 
-def get_config(conf_dir=_default_dir, file_name=_default_file):
+
+def get_config(conf_dir=_get_config_dir(), file_name=_default_file):
     """
     Get config for Google client. Looks in ~/.config/gspread_pandas/google_secret.json
-    by default, can override with conf_dir and file_name
+    by default but you can override it with conf_dir and file_name. The creds_dir
+    value will be set to conf_dir/creds; if you'd like to override that you can do
+    so by calling this function and editing
 
     Download json from https://console.developers.google.com/apis/credentials
     """
-    # Migrate config, this can be deleted in 1.0
-    _migrate_config()
     creds_dir = path.join(conf_dir, 'creds')
     ensure_path(creds_dir)
 
     cfg_file = path.join(conf_dir, file_name)
 
     if not path.exists(cfg_file):
-        raise IOError('No Google client config found.\nPlease download json from https://console.developers.google.com/apis/credentials and save as ~/.config/gspread_pandas/google_secret.json')
+        raise IOError(
+            'No Google client config found.\n'
+            'Please download json from '
+            'https://console.developers.google.com/apis/credentials and '
+            'save as ~/.config/gspread_pandas/google_secret.json'
+        )
 
     with open(cfg_file) as f:
         cfg = json.load(f)
@@ -35,9 +69,43 @@ def get_config(conf_dir=_default_dir, file_name=_default_file):
     cfg['creds_dir'] = creds_dir
     return cfg
 
-def _migrate_config():
-    old_dir = path.expanduser('~/.google/')
-    if path.exists(path.join(old_dir, _default_file)):
-        import shutil
-        shutil.move(old_dir, _default_dir)
-        print("Config migrated from {0} to {1}".format(old_dir, _default_dir))
+
+def get_creds(user=None, config=get_config(), scope=default_scope):
+    """
+    Get google OAuth2Credentials for the given user. If the user doesn't have previous
+    creds, they will go through the OAuth flow to get new credentials which
+    will be saved for use later.
+
+    Alternatively, it will get credentials from a service account
+    """
+    if 'private_key_id' in config:
+        return ServiceAccountCredentials.from_json_keyfile_dict(config,
+                                                                scope)
+
+    if user is None:
+        raise ConfigException("Need to provide a user key if not using "
+                              "a service account")
+    if 'creds_dir' not in config:
+        raise ConfigException("Config needs to have the property creds_dir set. "
+                              "User credentials will be stored in this location")
+
+    creds_file = path.join(config['creds_dir'], user)
+
+    if path.exists(creds_file):
+        return Storage(creds_file).locked_get()
+
+    if all(key in config for key in ('client_id',
+                                     'client_secret',
+                                     'redirect_uris')):
+        flow = OAuth2WebServerFlow(
+            client_id=config['client_id'],
+            client_secret=config['client_secret'],
+            redirect_uri=config['redirect_uris'][0],
+            scope=scope)
+
+        storage = Storage(creds_file)
+        args = argparser.parse_args(args=['--noauth_local_webserver'])
+
+        return run_flow(flow, storage, args)
+
+    raise ConfigException("Unknown config file format")
