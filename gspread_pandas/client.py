@@ -23,6 +23,8 @@ from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
 from gspread.v4.exceptions import APIError
 from gspread.v4.client import Client as ClientV4
 from gspread_pandas.conf import get_config
+from gspread_pandas.exceptions import (GspreadPandasException, NoWorksheetException,
+                                MissMatchException)
 from gspread_pandas.util import (chunks, parse_df_col_names,
                                  parse_sheet_index, parse_sheet_headers,
                                  create_frozen_request, fillna)
@@ -326,7 +328,7 @@ class Spread():
                                .format(self.client._creds_file)
                     else:
                         msg += err
-                    raise Exception(msg)
+                    raise GspreadPandasException(msg)
             else:
                 raise SpreadsheetNotFound("Spreadsheet not found")
 
@@ -387,7 +389,7 @@ class Spread():
             self.open_sheet(sheet)
 
         if not self.sheet:
-            raise Exception("No open worksheet")
+            raise NoWorksheetException("No open worksheet")
 
         vals = self._retry_get_all_values()
         vals = self._fix_merge_values(vals)[start_row - 1:]
@@ -407,7 +409,7 @@ class Spread():
                 # if we have headers but no data, set column headers on empty DF
                 df = df.reindex(columns=col_names)
             else:
-                raise Exception("Column headers don't match number of data columns")
+                raise MissMatchException("Column headers don't match number of data columns")
 
         return parse_sheet_index(df, index)
 
@@ -459,7 +461,7 @@ class Spread():
         num_cells = num_cols * num_rows
 
         if num_cells != len(vals):
-            raise Exception("Number of values needs to match number of cells")
+            raise MissMatchException("Number of values needs to match number of cells")
 
         chunk_rows = self._max_range_chunk_size // num_cols
         chunk_size = chunk_rows * num_cols
@@ -490,7 +492,7 @@ class Spread():
             self.open_sheet(sheet)
 
         if not self.sheet:
-            raise Exception("No open worksheet")
+            raise NoWorksheetException("No open worksheet")
 
         if start == end:
             return
@@ -503,7 +505,7 @@ class Spread():
             cells = self._retry_range(rng)
 
             if len(val_chunks) != len(cells):
-                raise Exception("Number of chunked values doesn't match number of cells")
+                raise MissMatchException("Number of chunked values doesn't match number of cells")
 
             for val, cell in zip(val_chunks, cells):
                 cell.value = val
@@ -576,7 +578,7 @@ class Spread():
             self.open_sheet(sheet)
 
         if not self.sheet:
-            raise Exception("No open worksheet")
+            raise NoWorksheetException("No open worksheet")
 
         frozen_rows = self._sheet_metadata['properties']['gridProperties']\
                           .get('frozenRowCount', 0)
@@ -650,7 +652,7 @@ class Spread():
             self.open_sheet(sheet, create=True)
 
         if not self.sheet:
-            raise Exception("No open worksheet")
+            raise NoWorksheetException("No open worksheet")
 
         index_size = df.index.nlevels
         header_size = df.columns.nlevels
@@ -717,7 +719,7 @@ class Spread():
             self.open_sheet(sheet, create=True)
 
         if not self.sheet:
-            raise Exception("No open worksheet")
+            raise NoWorksheetException("No open worksheet")
 
         if rows is None and cols is None:
             return
