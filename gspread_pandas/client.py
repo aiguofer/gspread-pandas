@@ -694,7 +694,7 @@ class Spread():
         if rows is None and cols is None:
             return
 
-        self.client.bath_update({
+        self.spread.batch_update({
             'requests': [create_frozen_request(self.sheet.id, rows, cols)]
         })
 

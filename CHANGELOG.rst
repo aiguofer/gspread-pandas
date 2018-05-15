@@ -13,6 +13,7 @@ Fixed
 ~~~~~
 
 -  Now works with gspread 3.0
+-  Spread.freeze is working again
 
 Changed
 ~~~~~~~
