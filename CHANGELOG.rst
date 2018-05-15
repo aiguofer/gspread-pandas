@@ -9,6 +9,11 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Fixed
+~~~~~
+
+-  Now works with gspread 3.0
+
 Changed
 ~~~~~~~
 

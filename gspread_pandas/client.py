@@ -13,12 +13,12 @@ from decorator import decorator
 
 from oauth2client.client import OAuth2Credentials
 
-from gspread.v4.models import Worksheet
+from gspread.models import Worksheet
 from gspread.utils import rowcol_to_a1, a1_to_rowcol
 from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
-                                NoValidUrlKeyFound, RequestError)
-from gspread.v4.exceptions import APIError
-from gspread.v4.client import Client as ClientV4
+                                NoValidUrlKeyFound)
+from gspread.exceptions import APIError
+from gspread.client import Client as ClientV4
 from gspread_pandas.conf import get_creds, get_config, default_scope
 from gspread_pandas.exceptions import (GspreadPandasException, NoWorksheetException,
                                 MissMatchException)
@@ -34,7 +34,7 @@ COL = 1
 
 class Client(ClientV4):
     """
-    The gspread_pandas :class:`Client` extends :class:`Client <gspread.v4.client.Client>`
+    The gspread_pandas :class:`Client` extends :class:`Client <gspread.client.Client>`
     and authenticates using credentials stored in ``gspread_pandas`` config.
 
     This class also adds a few convenience methods to explore the user's google drive
@@ -155,10 +155,10 @@ class Spread():
     Each user will be associated with specific OAuth credentials. The authenticated user
     will need the appropriate permissions to the Spreadsheet in order to interact with it.
     """
-    #: `(gspread.v4.models.Spreadsheet)` - Currently open Spreadsheet
+    #: `(gspread.models.Spreadsheet)` - Currently open Spreadsheet
     spread = None
 
-    #: `(gspread.v4.models.Worksheet)` - Currently open Worksheet
+    #: `(gspread.models.Worksheet)` - Currently open Worksheet
     sheet = None
 
     #: `(Client)` - Instance of gspread_pandas :class:`Client <gspread_pandas.client.Client>`
@@ -288,7 +288,7 @@ class Spread():
                 try:
                     self.spread = self.client.create(spread)
                     self.refresh_spread_metadata()
-                except RequestError as e:
+                except Exception as e:
                     err = str(e)
                     msg = "Couldn't create spreadsheet.\n"
                     if 'accessNotConfigured' in err:
