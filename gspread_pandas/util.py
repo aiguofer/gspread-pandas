@@ -92,6 +92,27 @@ def deprecate(message):
     import warnings
     warnings.warn(message, DeprecationWarning, stacklevel=2)
 
+
+def create_filter_request(sheet_id, start_row, end_row, start_col, end_col):
+    """
+    Create v4 API request to create a filter for a given worksheet.
+    """
+    filterSettings = {
+        "range": {
+            "sheetId": sheet_id,
+            "startRowIndex": start_row,
+            "endRowIndex": end_row,
+            "startColumnIndex": start_col,
+            "endColumnIndex": end_col
+        }
+    }
+    return [{
+        "setBasicFilter": {
+            "filter": filterSettings
+        }
+    }]
+
+
 def create_frozen_request(sheet_id, rows=None, cols=None):
     """
     Create v4 API request to freeze rows and/or columns for a
@@ -107,7 +128,7 @@ def create_frozen_request(sheet_id, rows=None, cols=None):
 
     changed_props = grid_properties.keys()
 
-    return {
+    return [{
         'update_sheet_properties': {
             'properties': {
                 'sheet_id': sheet_id,
@@ -115,7 +136,7 @@ def create_frozen_request(sheet_id, rows=None, cols=None):
             },
             'fields': 'grid_properties({0})'.format(', '.join(changed_props))
         }
-    }
+    }]
 
 
 def fillna(df, fill_value=''):

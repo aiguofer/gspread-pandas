@@ -570,7 +570,8 @@ class Spread():
 
     @_ensure_auth
     def df_to_sheet(self, df, index=True, headers=True, start=(1,1), replace=False,
-                    sheet=None, freeze_index=False, freeze_headers=False, fill_value=''):
+                    sheet=None, freeze_index=False, freeze_headers=False, fill_value='',
+                    add_filter=False):
         """
         Save a DataFrame into a worksheet.
 
@@ -586,6 +587,8 @@ class Spread():
         :param bool freeze_index: whether to freeze the index columns (default False)
         :param bool freeze_headers: whether to freeze the header rows (default False)
         :param str fill_value: value to fill nulls with (default '')
+        :param bool add_filter: whether to add a filter to the uploaded sheet (default
+            False)
         """
         if sheet:
             self.open_sheet(sheet, create=True)
@@ -628,6 +631,10 @@ class Spread():
         self.freeze(None if not freeze_headers else header_size,
                     None if not freeze_index else index_size)
 
+        if add_filter:
+            self.add_filter(header_size + start[0] - 2, req_rows,
+                            start[1] - 1, req_cols)
+
     def _fix_merge_values(self, vals):
         """Assign the top-left value to all cells in a merged range"""
         for merge in self._sheet_metadata.get('merges', []):
@@ -650,9 +657,10 @@ class Spread():
 
         :param int rows: the DataFrame to save
         :param int cols: whether to include the index in worksheet (default True)
-        :param str,int,Worksheet sheet: optional, if you want to open or create a different sheet
-            before freezing,
-            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>` (default None)
+        :param str,int,Worksheet sheet: optional, if you want to open or create a
+            different sheet before freezing,
+            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            (default None)
         """
         if sheet:
             self.open_sheet(sheet, create=True)
@@ -664,7 +672,42 @@ class Spread():
             return
 
         self.spread.batch_update({
-            'requests': [create_frozen_request(self.sheet.id, rows, cols)]
+            'requests': create_frozen_request(self.sheet.id, rows, cols)
         })
 
         self.refresh_spread_metadata()
+
+    @_ensure_auth
+    def add_filter(self, start_row=None, end_row=None, start_col=None,
+                   end_col=None, sheet=None):
+        """
+        Add filters to data in the open worksheet.
+
+        :param int start_row: First row to include in filter; this will be the
+            filter header (Default 0)
+        :param int end_row: Last row to include in filter (Default last row in sheet)
+        :param int start_col: First column to include in filter (Default 0)
+        :param int end_col: Last column to include in filter (Default last column
+            in sheet)
+        :param str,int,Worksheet sheet: optional, if you want to open or create a
+            different sheet before adding the filter,
+            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            (default None)
+        """
+        if sheet:
+            self.open_sheet(sheet, create=True)
+
+        if not self.sheet:
+            raise NoWorksheetException("No open worksheet")
+
+        dims = self.get_sheet_dims()
+
+        self.spread.batch_update({
+            'requests': create_filter_request(
+                self.sheet.id,
+                start_row or 0,
+                end_row or dims[0],
+                start_col or 0,
+                end_col or dims[1]
+            )
+        })

@@ -20,6 +20,11 @@ Changed
 
 -  Moved a lot of the credential handling into functions in gspread_pandas.conf
 -  New ``get_creds`` function allows you to get ``OAuth2Credentials`` and pass them in to a ``Client`` or ``Spread``
+Added
+~~~~~
+
+-  New function ``Spread.add_filter`` created so that you can add filters to worksheets
+-  New param ``add_filter`` added to ``Spread.df_to_sheet`` to add a filter to uploaded data
 
 [1.0.5] - 2018-04-14
 -----------------------------
