@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 from re import match
-from os import path
 
 from builtins import str, range, super
 from past.builtins import basestring
@@ -14,7 +13,6 @@ from decorator import decorator
 from oauth2client.client import OAuth2Credentials
 
 from gspread.models import Worksheet
-from gspread.utils import rowcol_to_a1, a1_to_rowcol
 from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
                                 NoValidUrlKeyFound)
 from gspread.exceptions import APIError
@@ -24,7 +22,8 @@ from gspread_pandas.exceptions import (GspreadPandasException, NoWorksheetExcept
                                 MissMatchException)
 from gspread_pandas.util import (chunks, parse_df_col_names,
                                  parse_sheet_index, parse_sheet_headers,
-                                 create_frozen_request, fillna)
+                                 create_frozen_request, create_filter_request,
+                                 fillna, get_cell_as_tuple, get_range)
 
 
 __all__ = ['Spread', 'Client']
@@ -289,15 +288,7 @@ class Spread():
                     self.spread = self.client.create(spread)
                     self.refresh_spread_metadata()
                 except Exception as e:
-                    err = str(e)
-                    msg = "Couldn't create spreadsheet.\n"
-                    if 'accessNotConfigured' in err:
-                        msg += "Drive API has not been enabled. Enable it at " +\
-                               "https://console.developers.google.com/apis/api/drive/overview"
-                    elif 'insufficientPermissions' in err:
-                        msg += "Delete credentialso and authenticate again"
-                    else:
-                        msg += err
+                    msg = "Couldn't create spreadsheet.\n" + str(e)
                     raise GspreadPandasException(msg)
             else:
                 raise SpreadsheetNotFound("Spreadsheet not found")
@@ -399,32 +390,10 @@ class Spread():
         return (self.sheet.row_count,
                 self.sheet.col_count) if self.sheet else None
 
-    def _get_range(self, start, end):
-        """Transform start and end to cell range like A1:B5"""
-        start_int = self._get_cell_as_tuple(start)
-        end_int = self._get_cell_as_tuple(end)
-
-        return "{0}:{1}".format(
-            rowcol_to_a1(*start_int),
-            rowcol_to_a1(*end_int)
-        )
-
-    def _get_cell_as_tuple(self, cell):
-        """Take cell in either format, validate, and return as tuple"""
-        if type(cell) == tuple:
-            if len(cell) != 2 or type(cell[0]) != int or type(cell[1]) != int:
-                raise TypeError("{0} is not a valid cell tuple".format(cell))
-            return cell
-        elif isinstance(cell, basestring):
-            if not match('[a-zA-Z]+[0-9]+', cell):
-                raise TypeError("{0} is not a valid address".format(cell))
-            return a1_to_rowcol(cell)
-        else:
-            raise TypeError("{0} is not a valid format".format(cell))
 
     def _get_update_chunks(self, start, end, vals):
-        start = self._get_cell_as_tuple(start)
-        end = self._get_cell_as_tuple(end)
+        start = get_cell_as_tuple(start)
+        end = get_cell_as_tuple(end)
 
         num_cols = end[COL] - start[COL] + 1
         num_rows = end[ROW] - start[ROW] + 1
@@ -470,7 +439,7 @@ class Spread():
         for start_cell, end_cell, val_chunks in self._get_update_chunks(start,
                                                                         end,
                                                                         vals):
-            rng = self._get_range(start_cell, end_cell)
+            rng = get_range(start_cell, end_cell)
 
             cells = self._retry_range(rng)
 
@@ -637,7 +606,7 @@ class Spread():
             header_rows = parse_df_col_names(df, index)
             df_list = header_rows + df_list
 
-        start = self._get_cell_as_tuple(start)
+        start = get_cell_as_tuple(start)
 
         sheet_rows, sheet_cols = self.get_sheet_dims()
         req_rows = len(df_list) + (start[ROW] - 1)

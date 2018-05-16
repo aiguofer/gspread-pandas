@@ -1,4 +1,8 @@
+from re import match
+
 import pandas as pd
+from gspread.utils import rowcol_to_a1, a1_to_rowcol
+
 
 def parse_sheet_index(df, index):
     """Parse sheet index into df index"""
@@ -11,6 +15,7 @@ def parse_sheet_index(df, index):
         # get rid of falsey index names
         df.index.name = df.index.name or None
     return df
+
 
 def parse_df_col_names(df, include_index):
     """Parse column names from a df into sheet headers"""
@@ -31,6 +36,7 @@ def parse_df_col_names(df, include_index):
 
     return headers
 
+
 def parse_sheet_headers(vals, header_rows):
     """Parse headers from a sheet into df columns"""
     col_names = None
@@ -45,11 +51,13 @@ def parse_sheet_headers(vals, header_rows):
 
     return col_names
 
+
 def _fix_sheet_header_level(header_names):
     for col_ix in range(len(header_names[0])):
         _shift_header_up(header_names, col_ix)
 
     return header_names
+
 
 def _shift_header_up(header_names, col_index, row_index=0,
                      shift_val=0, found_first=False):
@@ -72,10 +80,12 @@ def _shift_header_up(header_names, col_index, row_index=0,
             header_names[row_index][col_index] = ''
     return shift_val
 
+
 def chunks(lst, chunk_size):
     """Chunk a list into specified chunk sizes"""
     for i in range(0, len(lst), chunk_size):
         yield lst[i:i + chunk_size]
+
 
 def deprecate(message):
     """Display message about deprecation"""
@@ -115,3 +125,28 @@ def fillna(df, fill_value=''):
     for col in df.dtypes[df.dtypes == 'category'].index:
         df[col].cat.add_categories([fill_value])
     return df.fillna(fill_value)
+
+
+def get_cell_as_tuple(cell):
+    """Take cell in either format, validate, and return as tuple"""
+    if type(cell) == tuple:
+        if len(cell) != 2 or type(cell[0]) != int or type(cell[1]) != int:
+            raise TypeError("{0} is not a valid cell tuple".format(cell))
+        return cell
+    elif isinstance(cell, basestring):
+        if not match('[a-zA-Z]+[0-9]+', cell):
+            raise TypeError("{0} is not a valid address".format(cell))
+        return a1_to_rowcol(cell)
+    else:
+        raise TypeError("{0} is not a valid format".format(cell))
+
+
+def get_range(start, end):
+    """Transform start and end to cell range like A1:B5"""
+    start_int = get_cell_as_tuple(start)
+    end_int = get_cell_as_tuple(end)
+
+    return "{0}:{1}".format(
+        rowcol_to_a1(*start_int),
+        rowcol_to_a1(*end_int)
+    )
