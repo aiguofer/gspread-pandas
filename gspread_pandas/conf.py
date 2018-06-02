@@ -70,14 +70,20 @@ def get_config(conf_dir=_get_config_dir(), file_name=_default_file):
     return cfg
 
 
-def get_creds(user=None, config=get_config(), scope=default_scope):
-    """
-    Get google OAuth2Credentials for the given user. If the user doesn't have previous
+def get_creds(user=None, config=None, scope=default_scope):
+    """Get google OAuth2Credentials for the given user. If the user doesn't have previous
     creds, they will go through the OAuth flow to get new credentials which
     will be saved for use later.
 
     Alternatively, it will get credentials from a service account
+
+    :param user: string indicating user's credentials (Default value = None)
+    :param config: optional, own config can be passed in as a dict, otherwise if None is given it will call :meth:`get_config <get_config>` (Default value = None)
+    :param scope: optional, scope to use for Google Auth (Default value = default_scope)
+
     """
+    config = config or get_config()
+
     if 'private_key_id' in config:
         return ServiceAccountCredentials.from_json_keyfile_dict(config,
                                                                 scope)
