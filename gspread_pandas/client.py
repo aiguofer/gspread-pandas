@@ -41,7 +41,7 @@ class Client(ClientV4):
     """
     _email = None
 
-    def __init__(self, user_or_creds, config=get_config(), scope=default_scope):
+    def __init__(self, user_or_creds, config=None, scope=default_scope):
         """
         :param str user_or_creds: string indicating the key to a users credentials,
             which will be stored in a file (by default they will be stored in
@@ -169,7 +169,7 @@ class Spread():
     # `(dict)` - Spreadsheet metadata
     _spread_metadata = None
 
-    def __init__(self, user_creds_or_client, spread, sheet=None, config=get_config(),
+    def __init__(self, user_creds_or_client, spread, sheet=None, config=None,
                  create_spread=False, create_sheet=False, scope=default_scope):
         """
         :param str user_creds_or_client: string indicating the key to a users credentials,
