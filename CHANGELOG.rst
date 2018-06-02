@@ -20,6 +20,8 @@ Changed
 
 -  Moved a lot of the credential handling into functions in gspread_pandas.conf
 -  New ``get_creds`` function allows you to get ``OAuth2Credentials`` and pass them in to a ``Client`` or ``Spread``
+-  Some functions were moved to ``gspread_pandas.util``
+
 Added
 ~~~~~
 
