@@ -8,6 +8,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Changed
+~~~~~~~
+
+-  ``Spread.clear_sheet`` now doesn't resize to 0 since V4 is much more efficient at making batch updates. This should help prevent formulas that point to these sheets from breaking.
+
 [1.1.0] - 2018-06-02
 -----------------------------
 
