@@ -3,6 +3,11 @@ from re import match
 import pandas as pd
 from gspread.utils import rowcol_to_a1, a1_to_rowcol
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
 
 def parse_sheet_index(df, index):
     """Parse sheet index into df index"""
