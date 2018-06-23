@@ -8,6 +8,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Fixed
+~~~~~
+
+-  Fix issue with basestring usage
+
 [1.1.1] - 2018-06-13
 -----------------------------
 

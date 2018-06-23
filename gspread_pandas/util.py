@@ -1,5 +1,6 @@
 from re import match
 
+from past.builtins import basestring
 import pandas as pd
 from gspread.utils import rowcol_to_a1, a1_to_rowcol
 

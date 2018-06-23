@@ -17,7 +17,7 @@ from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
                                 NoValidUrlKeyFound)
 from gspread.exceptions import APIError
 from gspread.client import Client as ClientV4
-from gspread_pandas.conf import get_creds, get_config, default_scope
+from gspread_pandas.conf import get_creds, default_scope
 from gspread_pandas.exceptions import (GspreadPandasException, NoWorksheetException,
                                 MissMatchException)
 from gspread_pandas.util import (chunks, parse_df_col_names,
