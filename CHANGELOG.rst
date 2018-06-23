@@ -14,6 +14,11 @@ Fixed
 
 -  Fix issue with basestring usage
 
+Changed
+~~~~~~~
+
+-  Remove Python 3.4 from travis tests
+
 [1.1.1] - 2018-06-13
 -----------------------------
 
