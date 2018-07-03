@@ -7,7 +7,7 @@ from gspread.utils import rowcol_to_a1, a1_to_rowcol
 
 def parse_sheet_index(df, index):
     """Parse sheet index into df index"""
-    if index and len(df.columns) > index:
+    if index and len(df.columns) >= index:
         df = df.set_index(df.columns[index - 1])
         # if it was multi-index, the name is tuple;
         # choose last value in tuple since that is more common
