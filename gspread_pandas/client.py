@@ -595,7 +595,7 @@ class Spread():
         df_list = df.values.tolist()
 
         if headers:
-            header_rows = parse_df_col_names(df, index)
+            header_rows = parse_df_col_names(df, index, index_size)
             df_list = header_rows + df_list
 
         start = get_cell_as_tuple(start)

@@ -18,7 +18,7 @@ def parse_sheet_index(df, index):
     return df
 
 
-def parse_df_col_names(df, include_index):
+def parse_df_col_names(df, include_index, index_size=1):
     """Parse column names from a df into sheet headers"""
     headers = df.columns.tolist()
 
@@ -26,11 +26,12 @@ def parse_df_col_names(df, include_index):
     if len(headers) > 0 and type(headers[0]) == tuple:
         headers = [list(row) for row in zip(*headers)]
 
-        # Pandas sets index name as top level col name with reset_index
-        # Switch to low level since that is more natural
+        # Pandas sets index name as top level col name when using reset_index
+        # move the index name to lowest header level since that reads more natural
         if include_index:
-            headers[-1][0] = headers[0][0]
-            headers[0][0] = ''
+            for i in range(index_size):
+                headers[-1][i] = headers[0][i]
+                headers[0][i] = ''
     # handle regular columns
     else:
         headers = [headers]
