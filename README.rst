@@ -116,7 +116,7 @@ Handling Authentication
 -----------------------
 
 In the backend, the library is leveraging
-`Google's oauth2client <http://oauth2client.readthedocs.io/en/latest/`__ to
+`Google's oauth2client <http://oauth2client.readthedocs.io/en/latest/>`__ to
 handle authentication. It conveniently stores everything as described
 above so that you don't have to worry about boiler plate code to handle auth.
 However, if you need to customize how you handle authentication you can do so
