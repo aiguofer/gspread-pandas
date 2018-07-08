@@ -8,6 +8,19 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Added
+~~~~~
+
+-  Added unit tests for util
+
+Fixed
+~~~~~
+
+-  Fix parse_df_col_names when df has a multi-index
+-  Fix parse_sheet_index when using last column as index
+-  Fix fillna when using categorical variables
+
 [1.1.2] - 2018-06-23
 -----------------------------
 
