@@ -146,7 +146,8 @@ def fillna(df, fill_value=''):
     Replace null values with `fill_value`. Also replaces in categorical columns.
     """
     for col in df.dtypes[df.dtypes == 'category'].index:
-        df[col].cat.add_categories([fill_value])
+        if fill_value not in df[col].cat.categories:
+            df[col].cat.add_categories([fill_value], inplace=True)
     return df.fillna(fill_value)
 
 
