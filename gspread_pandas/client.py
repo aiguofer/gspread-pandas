@@ -2,34 +2,44 @@ from __future__ import print_function
 
 from re import match
 
-from builtins import str, range, super
-from past.builtins import basestring
-
 import numpy as np
 import pandas as pd
-
+from builtins import range, str, super
 from decorator import decorator
-
-from oauth2client.client import OAuth2Credentials
-
-from gspread.models import Worksheet
-from gspread.exceptions import (SpreadsheetNotFound, WorksheetNotFound,
-                                NoValidUrlKeyFound)
-from gspread.exceptions import APIError
 from gspread.client import Client as ClientV4
-from gspread_pandas.conf import get_creds, default_scope
-from gspread_pandas.exceptions import (GspreadPandasException, NoWorksheetException,
-                                MissMatchException)
-from gspread_pandas.util import (chunks, parse_df_col_names,
-                                 parse_sheet_index, parse_sheet_headers,
-                                 create_frozen_request, create_filter_request,
-                                 fillna, get_cell_as_tuple, get_range)
+from gspread.exceptions import (
+    APIError,
+    NoValidUrlKeyFound,
+    SpreadsheetNotFound,
+    WorksheetNotFound,
+)
+from gspread.models import Worksheet
+from oauth2client.client import OAuth2Credentials
+from past.builtins import basestring
 
+from gspread_pandas.conf import default_scope, get_creds
+from gspread_pandas.exceptions import (
+    GspreadPandasException,
+    MissMatchException,
+    NoWorksheetException,
+)
+from gspread_pandas.util import (
+    chunks,
+    create_filter_request,
+    create_frozen_request,
+    fillna,
+    get_cell_as_tuple,
+    get_range,
+    parse_df_col_names,
+    parse_sheet_headers,
+    parse_sheet_index,
+)
 
-__all__ = ['Spread', 'Client']
+__all__ = ["Spread", "Client"]
 
 ROW = 0
 COL = 1
+
 
 class Client(ClientV4):
     """
@@ -39,6 +49,7 @@ class Client(ClientV4):
     This class also adds a few convenience methods to explore the user's google drive
     for spreadsheets.
     """
+
     _email = None
 
     def __init__(self, user_or_creds, config=None, scope=default_scope):
@@ -62,8 +73,10 @@ class Client(ClientV4):
         elif isinstance(user_or_creds, basestring):
             creds = get_creds(user_or_creds, config, self.scope)
         else:
-            raise TypeError('user_or_client needs to be a string '
-                            'or OAuth2Credentials object')
+            raise TypeError(
+                "user_or_client needs to be a string "
+                "or OAuth2Credentials object"
+            )
 
         super().__init__(creds)
         super().login()
@@ -77,33 +90,32 @@ class Client(ClientV4):
         """Return the email address of the user"""
         if not self._email:
             try:
-                self._email = self.request('get',
-                                           'https://www.googleapis.com/userinfo/v2/me')\
-                                  .json()['email']
+                self._email = self.request(
+                    "get", "https://www.googleapis.com/userinfo/v2/me"
+                ).json()["email"]
             except Exception:
-                print("""
+                print(
+                    """
                 Couldn't retrieve email. Delete credentials and authenticate again
-                """)
+                """
+                )
 
         return self._email
 
     @_ensure_auth
     def _make_drive_request(self, q):
         files = []
-        page_token = ''
+        page_token = ""
         url = "https://www.googleapis.com/drive/v3/files"
-        params = {
-            'q': q,
-            "pageSize": 1000
-        }
+        params = {"q": q, "pageSize": 1000}
 
         while page_token is not None:
             if page_token:
-                params['pageToken'] = page_token
+                params["pageToken"] = page_token
 
-            res = self.request('get', url, params=params).json()
-            files.extend(res['files'])
-            page_token = res.get('nextPageToken', None)
+            res = self.request("get", url, params=params).json()
+            files.extend(res["files"])
+            page_token = res.get("nextPageToken", None)
 
         return files
 
@@ -117,8 +129,10 @@ class Client(ClientV4):
 
         :param str folder_id: ID of a folder, see :meth:`find_folders <find_folders>`
         """
-        q = ("mimeType='application/vnd.google-apps.spreadsheet'"
-             " and '{0}' in parents".format(folder_id))
+        q = (
+            "mimeType='application/vnd.google-apps.spreadsheet'"
+            " and '{0}' in parents".format(folder_id)
+        )
 
         return self._make_drive_request(q)
 
@@ -128,8 +142,10 @@ class Client(ClientV4):
 
         :param str folder_name_query: Case insensitive string to search in folder name
         """
-        q = ("mimeType='application/vnd.google-apps.folder'"
-             " and name contains '{0}'".format(folder_name_query))
+        q = (
+            "mimeType='application/vnd.google-apps.folder'"
+            " and name contains '{0}'".format(folder_name_query)
+        )
 
         return self._make_drive_request(q)
 
@@ -142,11 +158,13 @@ class Client(ClientV4):
         """
         results = {}
         for res in self.find_folders(folder_name_query):
-            results[res['name']] = self.list_spreadsheet_files_in_folder(res['id'])
+            results[res["name"]] = self.list_spreadsheet_files_in_folder(
+                res["id"]
+            )
         return results
 
 
-class Spread():
+class Spread:
     """
     Simple wrapper for gspread to interact with Pandas. It holds an instance of
     an 'open' spreadsheet, an 'open' worksheet, and a list of available worksheets.
@@ -154,6 +172,7 @@ class Spread():
     Each user will be associated with specific OAuth credentials. The authenticated user
     will need the appropriate permissions to the Spreadsheet in order to interact with it.
     """
+
     #: `(gspread.models.Spreadsheet)` - Currently open Spreadsheet
     spread = None
 
@@ -169,8 +188,16 @@ class Spread():
     # `(dict)` - Spreadsheet metadata
     _spread_metadata = None
 
-    def __init__(self, user_creds_or_client, spread, sheet=None, config=None,
-                 create_spread=False, create_sheet=False, scope=default_scope):
+    def __init__(
+        self,
+        user_creds_or_client,
+        spread,
+        sheet=None,
+        config=None,
+        create_spread=False,
+        create_sheet=False,
+        scope=default_scope,
+    ):
         """
         :param str user_creds_or_client: string indicating the key to a users credentials,
             which will be stored in a file (by default they will be stored in
@@ -195,8 +222,10 @@ class Spread():
         elif isinstance(user_creds_or_client, (basestring, OAuth2Credentials)):
             self.client = Client(user_creds_or_client, config, scope)
         else:
-            raise TypeError('user_creds_or_client needs to be a string, '
-                            'OAuth2Credentials, or Client object')
+            raise TypeError(
+                "user_creds_or_client needs to be a string, "
+                "OAuth2Credentials, or Client object"
+            )
 
         self.open(spread, sheet, create_sheet, create_spread)
 
@@ -219,7 +248,9 @@ class Spread():
     @property
     def url(self):
         """`(str)` - Url for this spreadsheet"""
-        return 'https://docs.google.com/spreadsheets/d/{0}'.format(self.spread.id)
+        return "https://docs.google.com/spreadsheets/d/{0}".format(
+            self.spread.id
+        )
 
     @property
     def sheets(self):
@@ -235,14 +266,16 @@ class Spread():
         """`(dict)` - Metadata for currently open worksheet"""
         if self.sheet:
             ix = self._find_sheet(self.sheet.title)[0]
-            return self._spread_metadata['sheets'][ix]
+            return self._spread_metadata["sheets"][ix]
 
     @decorator
     def _ensure_auth(func, self, *args, **kwargs):
         self.client.login()
         return func(self, *args, **kwargs)
 
-    def open(self, spread, sheet=None, create_sheet=False, create_spread=False):
+    def open(
+        self, spread, sheet=None, create_sheet=False, create_spread=False
+    ):
         """
         Open a spreadsheet, and optionally a worksheet. See
         :meth:`open_spread <gspread_pandas.Spread.open_spread>` and
@@ -308,7 +341,9 @@ class Spread():
             try:
                 self.sheet = self.sheets[sheet]
             except Exception:
-                raise WorksheetNotFound("Invalid sheet index {0}".format(sheet))
+                raise WorksheetNotFound(
+                    "Invalid sheet index {0}".format(sheet)
+                )
         else:
             self.sheet = self.find_sheet(sheet)
 
@@ -353,15 +388,17 @@ class Spread():
             raise NoWorksheetException("No open worksheet")
 
         vals = self._retry_get_all_values()
-        vals = self._fix_merge_values(vals)[start_row - 1:]
+        vals = self._fix_merge_values(vals)[start_row - 1 :]
 
         col_names = parse_sheet_headers(vals, header_rows)
 
         # remove rows where everything is null, then replace nulls with ''
-        df = pd.DataFrame(vals[header_rows or 0:])\
-               .replace('', np.nan)\
-               .dropna(how='all')\
-               .fillna('')
+        df = (
+            pd.DataFrame(vals[header_rows or 0 :])
+            .replace("", np.nan)
+            .dropna(how="all")
+            .fillna("")
+        )
 
         if col_names is not None:
             if len(df.columns) == len(col_names):
@@ -370,7 +407,9 @@ class Spread():
                 # if we have headers but no data, set column headers on empty DF
                 df = df.reindex(columns=col_names)
             else:
-                raise MissMatchException("Column headers don't match number of data columns")
+                raise MissMatchException(
+                    "Column headers don't match number of data columns"
+                )
 
         return parse_sheet_index(df, index)
 
@@ -387,9 +426,11 @@ class Spread():
         if sheet:
             self.open_sheet(sheet)
 
-        return (self.sheet.row_count,
-                self.sheet.col_count) if self.sheet else None
-
+        return (
+            (self.sheet.row_count, self.sheet.col_count)
+            if self.sheet
+            else None
+        )
 
     def _get_update_chunks(self, start, end, vals):
         start = get_cell_as_tuple(start)
@@ -400,7 +441,9 @@ class Spread():
         num_cells = num_cols * num_rows
 
         if num_cells != len(vals):
-            raise MissMatchException("Number of values needs to match number of cells")
+            raise MissMatchException(
+                "Number of values needs to match number of cells"
+            )
 
         chunk_rows = self._max_range_chunk_size // num_cols
         chunk_size = chunk_rows * num_cols
@@ -408,11 +451,13 @@ class Spread():
         end_cell = (start[ROW] - 1, 0)
 
         for val_chunks in chunks(vals, int(chunk_size)):
-            start_cell = (end_cell[ROW] + 1,
-                          start[COL])
-            end_cell = (min(start_cell[ROW] + chunk_rows - 1,
-                            start[ROW] + num_rows - 1),
-                        end[COL])
+            start_cell = (end_cell[ROW] + 1, start[COL])
+            end_cell = (
+                min(
+                    start_cell[ROW] + chunk_rows - 1, start[ROW] + num_rows - 1
+                ),
+                end[COL],
+            )
             yield start_cell, end_cell, val_chunks
 
     @_ensure_auth
@@ -436,15 +481,17 @@ class Spread():
         if start == end:
             return
 
-        for start_cell, end_cell, val_chunks in self._get_update_chunks(start,
-                                                                        end,
-                                                                        vals):
+        for start_cell, end_cell, val_chunks in self._get_update_chunks(
+            start, end, vals
+        ):
             rng = get_range(start_cell, end_cell)
 
             cells = self._retry_range(rng)
 
             if len(val_chunks) != len(cells):
-                raise MissMatchException("Number of chunked values doesn't match number of cells")
+                raise MissMatchException(
+                    "Number of chunked values doesn't match number of cells"
+                )
 
             for val, cell in zip(val_chunks, cells):
                 cell.value = val
@@ -458,7 +505,7 @@ class Spread():
             return self.sheet.get_all_values()
         except Exception as e:
             if n > 0:
-                self._retry_get_all_values(n-1)
+                self._retry_get_all_values(n - 1)
             else:
                 raise e
 
@@ -466,10 +513,10 @@ class Spread():
     def _retry_update(self, cells, n=3):
         """Call self.sheet.update_cells with retry"""
         try:
-            self.sheet.update_cells(cells, 'USER_ENTERED')
+            self.sheet.update_cells(cells, "USER_ENTERED")
         except Exception as e:
             if n > 0:
-                self._retry_update(cells, n-1)
+                self._retry_update(cells, n - 1)
             else:
                 raise e
 
@@ -480,14 +527,17 @@ class Spread():
             return self.sheet.range(rng)
         except Exception as e:
             if n > 0:
-                self._retry_range(rng, n-1)
+                self._retry_range(rng, n - 1)
             else:
                 raise e
 
     def _find_sheet(self, sheet):
         """Find a worksheet and return with index"""
         for ix, worksheet in enumerate(self.sheets):
-            if isinstance(sheet, basestring) and sheet.lower() == worksheet.title.lower():
+            if (
+                isinstance(sheet, basestring)
+                and sheet.lower() == worksheet.title.lower()
+            ):
                 return ix, worksheet
             if isinstance(sheet, Worksheet) and sheet == worksheet:
                 return ix, worksheet
@@ -524,7 +574,7 @@ class Spread():
         self.update_cells(
             start=(1, 1),
             end=(rows, cols),
-            vals=['' for i in range(0, rows * cols)]
+            vals=["" for i in range(0, rows * cols)],
         )
 
     @_ensure_auth
@@ -558,9 +608,19 @@ class Spread():
         return False
 
     @_ensure_auth
-    def df_to_sheet(self, df, index=True, headers=True, start=(1,1), replace=False,
-                    sheet=None, freeze_index=False, freeze_headers=False, fill_value='',
-                    add_filter=False):
+    def df_to_sheet(
+        self,
+        df,
+        index=True,
+        headers=True,
+        start=(1, 1),
+        replace=False,
+        sheet=None,
+        freeze_index=False,
+        freeze_headers=False,
+        fill_value="",
+        add_filter=False,
+    ):
         """
         Save a DataFrame into a worksheet.
 
@@ -609,33 +669,42 @@ class Spread():
             self.clear_sheet(req_rows, req_cols)
         else:
             # make sure sheet is large enough
-            self.sheet.resize(max(sheet_rows, req_rows), max(sheet_cols, req_cols))
+            self.sheet.resize(
+                max(sheet_rows, req_rows), max(sheet_cols, req_cols)
+            )
 
         self.update_cells(
             start=start,
             end=(req_rows, req_cols),
-            vals=[str(val) for row in df_list for val in row]
+            vals=[str(val) for row in df_list for val in row],
         )
 
-        self.freeze(None if not freeze_headers else header_size,
-                    None if not freeze_index else index_size)
+        self.freeze(
+            None if not freeze_headers else header_size,
+            None if not freeze_index else index_size,
+        )
 
         if add_filter:
-            self.add_filter(header_size + start[0] - 2, req_rows,
-                            start[1] - 1, req_cols)
+            self.add_filter(
+                header_size + start[0] - 2, req_rows, start[1] - 1, req_cols
+            )
 
     def _fix_merge_values(self, vals):
         """Assign the top-left value to all cells in a merged range"""
-        for merge in self._sheet_metadata.get('merges', []):
-            start_row, end_row = merge['startRowIndex'], merge['endRowIndex']
-            start_col, end_col = merge['startColumnIndex'], merge['endColumnIndex']
+        for merge in self._sheet_metadata.get("merges", []):
+            start_row, end_row = merge["startRowIndex"], merge["endRowIndex"]
+            start_col, end_col = (
+                merge["startColumnIndex"],
+                merge["endColumnIndex"],
+            )
 
             # ignore merge cells outside the data range
             if start_row < len(vals) and start_col < len(vals[0]):
                 orig_val = vals[start_row][start_col]
                 for row in vals[start_row:end_row]:
-                    row[start_col:end_col] = [orig_val for i in
-                                              range(start_col, end_col)]
+                    row[start_col:end_col] = [
+                        orig_val for i in range(start_col, end_col)
+                    ]
 
         return vals
 
@@ -660,15 +729,21 @@ class Spread():
         if rows is None and cols is None:
             return
 
-        self.spread.batch_update({
-            'requests': create_frozen_request(self.sheet.id, rows, cols)
-        })
+        self.spread.batch_update(
+            {"requests": create_frozen_request(self.sheet.id, rows, cols)}
+        )
 
         self.refresh_spread_metadata()
 
     @_ensure_auth
-    def add_filter(self, start_row=None, end_row=None, start_col=None,
-                   end_col=None, sheet=None):
+    def add_filter(
+        self,
+        start_row=None,
+        end_row=None,
+        start_col=None,
+        end_col=None,
+        sheet=None,
+    ):
         """
         Add filters to data in the open worksheet.
 
@@ -691,12 +766,14 @@ class Spread():
 
         dims = self.get_sheet_dims()
 
-        self.spread.batch_update({
-            'requests': create_filter_request(
-                self.sheet.id,
-                start_row or 0,
-                end_row or dims[0],
-                start_col or 0,
-                end_col or dims[1]
-            )
-        })
+        self.spread.batch_update(
+            {
+                "requests": create_filter_request(
+                    self.sheet.id,
+                    start_row or 0,
+                    end_row or dims[0],
+                    start_col or 0,
+                    end_col or dims[1],
+                )
+            }
+        )

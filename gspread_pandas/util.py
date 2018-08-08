@@ -1,8 +1,8 @@
 from re import match
 
-from past.builtins import basestring
 import pandas as pd
-from gspread.utils import rowcol_to_a1, a1_to_rowcol
+from gspread.utils import a1_to_rowcol, rowcol_to_a1
+from past.builtins import basestring
 
 
 def parse_sheet_index(df, index):
@@ -31,7 +31,7 @@ def parse_df_col_names(df, include_index, index_size=1):
         if include_index:
             for i in range(index_size):
                 headers[-1][i] = headers[0][i]
-                headers[0][i] = ''
+                headers[0][i] = ""
     # handle regular columns
     else:
         headers = [headers]
@@ -61,37 +61,40 @@ def _fix_sheet_header_level(header_names):
     return header_names
 
 
-def _shift_header_up(header_names, col_index, row_index=0,
-                     shift_val=0, found_first=False):
+def _shift_header_up(
+    header_names, col_index, row_index=0, shift_val=0, found_first=False
+):
     """Recursively shift headers up so that top level is not empty"""
     rows = len(header_names)
     if row_index < rows:
         current_value = header_names[row_index][col_index]
 
-        if current_value == '' and not found_first:
+        if current_value == "" and not found_first:
             shift_val += 1
         else:
             found_first = True
 
-        shift_val = _shift_header_up(header_names, col_index, row_index + 1,
-                                     shift_val, found_first)
+        shift_val = _shift_header_up(
+            header_names, col_index, row_index + 1, shift_val, found_first
+        )
         if shift_val <= row_index:
             header_names[row_index - shift_val][col_index] = current_value
 
         if row_index + shift_val >= rows:
-            header_names[row_index][col_index] = ''
+            header_names[row_index][col_index] = ""
     return shift_val
 
 
 def chunks(lst, chunk_size):
     """Chunk a list into specified chunk sizes"""
     for i in range(0, len(lst), chunk_size):
-        yield lst[i:i + chunk_size]
+        yield lst[i : i + chunk_size]
 
 
 def deprecate(message):
     """Display message about deprecation"""
     import warnings
+
     warnings.warn(message, DeprecationWarning, stacklevel=2)
 
 
@@ -105,14 +108,10 @@ def create_filter_request(sheet_id, start_row, end_row, start_col, end_col):
             "startRowIndex": start_row,
             "endRowIndex": end_row,
             "startColumnIndex": start_col,
-            "endColumnIndex": end_col
+            "endColumnIndex": end_col,
         }
     }
-    return [{
-        "setBasicFilter": {
-            "filter": filterSettings
-        }
-    }]
+    return [{"setBasicFilter": {"filter": filterSettings}}]
 
 
 def create_frozen_request(sheet_id, rows=None, cols=None):
@@ -123,29 +122,33 @@ def create_frozen_request(sheet_id, rows=None, cols=None):
     grid_properties = {}
 
     if rows >= 0:
-        grid_properties['frozen_row_count'] = rows
+        grid_properties["frozen_row_count"] = rows
 
     if cols >= 0:
-        grid_properties['frozen_column_count'] = cols
+        grid_properties["frozen_column_count"] = cols
 
     changed_props = grid_properties.keys()
 
-    return [{
-        'update_sheet_properties': {
-            'properties': {
-                'sheet_id': sheet_id,
-                'grid_properties': grid_properties
-            },
-            'fields': 'grid_properties({0})'.format(', '.join(changed_props))
+    return [
+        {
+            "update_sheet_properties": {
+                "properties": {
+                    "sheet_id": sheet_id,
+                    "grid_properties": grid_properties,
+                },
+                "fields": "grid_properties({0})".format(
+                    ", ".join(changed_props)
+                ),
+            }
         }
-    }]
+    ]
 
 
-def fillna(df, fill_value=''):
+def fillna(df, fill_value=""):
     """
     Replace null values with `fill_value`. Also replaces in categorical columns.
     """
-    for col in df.dtypes[df.dtypes == 'category'].index:
+    for col in df.dtypes[df.dtypes == "category"].index:
         if fill_value not in df[col].cat.categories:
             df[col].cat.add_categories([fill_value], inplace=True)
     return df.fillna(fill_value)
@@ -158,7 +161,7 @@ def get_cell_as_tuple(cell):
             raise TypeError("{0} is not a valid cell tuple".format(cell))
         return cell
     elif isinstance(cell, basestring):
-        if not match('[a-zA-Z]+[0-9]+', cell):
+        if not match("[a-zA-Z]+[0-9]+", cell):
             raise TypeError("{0} is not a valid address".format(cell))
         return a1_to_rowcol(cell)
     else:
@@ -170,7 +173,4 @@ def get_range(start, end):
     start_int = get_cell_as_tuple(start)
     end_int = get_cell_as_tuple(end)
 
-    return "{0}:{1}".format(
-        rowcol_to_a1(*start_int),
-        rowcol_to_a1(*end_int)
-    )
+    return "{0}:{1}".format(rowcol_to_a1(*start_int), rowcol_to_a1(*end_int))
