@@ -20,29 +20,50 @@ default_scope = [
 ]
 
 
-def _get_config_dir():
+def get_config_dir():
     """Get the config directory. It will first look in the environment variable
-    GSPREAD_PANDAS_CONFIG_DIR, but if it's not set it'll use ~/.config/gspread_pandas.
+    GSPREAD_PANDAS_CONFIG_DIR, but if it's not set it'll use ~/.config/gspread_pandas
     """
     return path.expanduser(
         environ.get("GSPREAD_PANDAS_CONFIG_DIR", _default_dir)
     )
 
 
-def ensure_path(pth):
-    """Create path if it doesn't exist"""
-    if not path.exists(pth):
-        makedirs(pth)
+def ensure_path(full_path):
+    """Create path if it doesn't exist
 
+    Parameters
+    ----------
+    full_path : str
+        Path to create if needed
 
-def get_config(conf_dir=_get_config_dir(), file_name=_default_file):
+    Returns
+    -------
+
     """
-    Get config for Google client. Looks in ~/.config/gspread_pandas/google_secret.json
+    if not path.exists(full_path):
+        makedirs(full_path)
+
+
+def get_config(conf_dir=get_config_dir(), file_name=_default_file):
+    """Get config for Google client. Looks in ~/.config/gspread_pandas/google_secret.json
     by default but you can override it with conf_dir and file_name. The creds_dir
     value will be set to conf_dir/creds; if you'd like to override that you can do
     so by calling this function and editing
 
     Download json from https://console.developers.google.com/apis/credentials
+
+    Parameters
+    ----------
+    conf_dir : str
+        Full path to config dir (Default value = get_config_dir())
+    file_name : str
+        (Default value = "google_secret.json")
+
+    Returns
+    -------
+    dict
+        Dict with necessary contents of google_secret.json
     """
     creds_dir = path.join(conf_dir, "creds")
     ensure_path(creds_dir)
@@ -75,9 +96,18 @@ def get_creds(user=None, config=None, scope=default_scope):
 
     Alternatively, it will get credentials from a service account
 
-    :param user: string indicating user's credentials (Default value = None)
-    :param config: optional, own config can be passed in as a dict, otherwise if None is given it will call :meth:`get_config <get_config>` (Default value = None)
-    :param scope: optional, scope to use for Google Auth (Default value = default_scope)
+    Parameters
+    ----------
+    user : str
+        Unique key indicating user's credentials (Default value = None)
+    config : dict
+        Optional, own config can be passed in as a dict, otherwise if None is given it
+        will call :meth:`get_config <get_config>` (Default value = None)
+    scope : list
+        Optional, scope to use for Google Auth (Default value = default_scope)
+
+    Returns
+    -------
 
     """
     config = config or get_config()
@@ -87,8 +117,9 @@ def get_creds(user=None, config=None, scope=default_scope):
 
     if user is None:
         raise ConfigException(
-            "Need to provide a user key if not using " "a service account"
+            "Need to provide a user key if not using a service account"
         )
+
     if "creds_dir" not in config:
         raise ConfigException(
             "Config needs to have the property creds_dir set. "
