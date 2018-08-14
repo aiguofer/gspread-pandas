@@ -8,4 +8,4 @@ tox
 flake8
 pytest
 pre-commit
-black; python_version >= 3.6
+black;python_version>="3.6"
