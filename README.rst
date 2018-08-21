@@ -26,11 +26,17 @@ Overview
 ========
 
 A package to easily open an instance of a Google spreadsheet and
-interact with worksheets through Pandas DataFrames.
+interact with worksheets through Pandas DataFrames. It enables you to
+easily pull data from Google spreadsheets into DataFrames as well as
+push data into spreadsheets from DataFrames. It leverages
+`gspread <https://github.com/burnash/gspread/>`__ in the backend for
+most of the heavylifting, but it has a lot of added functionality
+to handle things specific to working with DataFrames as well as
+some extra nice to have features.
 
 Some key goals/features:
 
--  Nicely handle headers and indexes.
+-  Nicely handle headers and indexes
 -  Run on Jupyter, headless server, and/or scripts
 -  Allow storing different user credentials
 -  Automatically handle token refreshes
