@@ -135,14 +135,20 @@ using the ``GSPREAD_PANDAS_CONFIG_DIR`` env var. You can also generate your own
 Contributing
 ============
 
-To install the development environment:
+Code should be run through black, isort, and flake8 before being merged. Pre-commit
+takes care of it for you, but you need to have Python 3 installed to be able to run
+black. To contribute, please fork the repo, create a feature branch, push it to your
+repo, then create a pull request.
+
+To install and set up the environment after you fork it (replace `aiguofer` with your
+username):
 
 .. code-block:: console
 
     $ git clone https://github.com/aiguofer/gspread-pandas.git && cd gspread-pandas
     $ pip install -e ".[dev]"
+    $ pre-commit install
 
-TBD
 
 Example
 =======
@@ -169,7 +175,8 @@ Example
     print(spread)
     # <gspread_pandas.client.Spread - User: '<example_user>@gmail.com', Spread: 'Example Spreadsheet', Sheet: 'New Test Sheet'>
 
-    # You can now first instanciate a Client separately and query folders and instanciate other Spread objects by passing in the Client
+    # You can now first instanciate a Client separately and query folders and
+    # instanciate other Spread objects by passing in the Client
     client = Client('example_user')
     # Assumming you have a dir called 'example dir' with sheets in it
     available_sheets = client.find_spreadsheet_files_in_folders('example dir')
@@ -186,7 +193,8 @@ SSL Error
 If you're getting an SSL related error or can't seem to be able to open existing
 spreadsheets that you have access to, you might be running into an issue caused by
 ``certifi``. This has mainly been experienced on RHEL and CentOS running Python 2.7.
-You can read more about it in `issue 223 <https://github.com/burnash/gspread/issues/223>`_
+You can read more about it in `issue 223
+<https://github.com/burnash/gspread/issues/223>`_
 and `issue 354 <https://github.com/burnash/gspread/issues/354>`_ but, in short, the
 solution is to either install a specific version of ``certifi`` that works for you,
 or remove it altogether.
