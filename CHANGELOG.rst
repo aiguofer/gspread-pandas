@@ -8,6 +8,25 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Added
+~~~~~
+
+-  Add config files and pre-commit hooks for isort, black, and flake8
+-  Add config files for isort, black, and flake8
+
+Fixed
+~~~~~
+
+-  Fixed clear_sheet when there are frozen rows/cols
+-  Small fixes in README
+
+Changed
+~~~~~~~
+
+-  Changed from reST docstrings to numpy docstrings
+-  Updated README to include more in contributing section
+
 [1.1.3] - 2018-07-07
 -----------------------------
 
