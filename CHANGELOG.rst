@@ -8,6 +8,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Fixed
+~~~~~
+
+-  Fixed __version__ string for bumpversion using black
+
 [1.2.0] - 2018-08-30
 -----------------------------
 
