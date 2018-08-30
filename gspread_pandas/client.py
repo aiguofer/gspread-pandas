@@ -748,10 +748,23 @@ class Spread:
         if not self.sheet:
             raise NoWorksheetException("No open worksheet")
 
-        self.sheet.resize(rows, cols)
+        # TODO: if my merge request goes through, use sheet.frozen_*_count
+        frozen_rows = self._sheet_metadata["properties"]["gridProperties"].get(
+            "frozenRowCount", 0
+        )
+        frozen_cols = self._sheet_metadata["properties"]["gridProperties"].get(
+            "frozenColCount", 0
+        )
+
+        row_resize = max(rows, frozen_rows + 1)
+        col_resize = max(cols, frozen_cols + 1)
+
+        self.sheet.resize(row_resize, col_resize)
 
         self.update_cells(
-            start=(1, 1), end=(rows, cols), vals=["" for i in range(0, rows * cols)]
+            start=(1, 1),
+            end=(row_resize, col_resize),
+            vals=["" for i in range(0, row_resize * col_resize)],
         )
 
     @_ensure_auth
