@@ -80,8 +80,7 @@ class Client(ClientV4):
             creds = get_creds(user_or_creds, config, self.scope)
         else:
             raise TypeError(
-                "user_or_client needs to be a string "
-                "or OAuth2Credentials object"
+                "user_or_client needs to be a string or OAuth2Credentials object"
             )
 
         super().__init__(creds)
@@ -210,9 +209,7 @@ class Client(ClientV4):
         """
         results = {}
         for res in self.find_folders(folder_name_query):
-            results[res["name"]] = self.list_spreadsheet_files_in_folder(
-                res["id"]
-            )
+            results[res["name"]] = self.list_spreadsheet_files_in_folder(res["id"])
         return results
 
 
@@ -312,9 +309,7 @@ class Spread:
     @property
     def url(self):
         """`(str)` - Url for this spreadsheet"""
-        return "https://docs.google.com/spreadsheets/d/{0}".format(
-            self.spread.id
-        )
+        return "https://docs.google.com/spreadsheets/d/{0}".format(self.spread.id)
 
     @property
     def sheets(self):
@@ -337,9 +332,7 @@ class Spread:
         self.client.login()
         return func(self, *args, **kwargs)
 
-    def open(
-        self, spread, sheet=None, create_sheet=False, create_spread=False
-    ):
+    def open(self, spread, sheet=None, create_sheet=False, create_spread=False):
         """Open a spreadsheet, and optionally a worksheet. See
         :meth:`open_spread <gspread_pandas.Spread.open_spread>` and
         :meth:`open_sheet <gspread_pandas.Spread.open_sheet>`.
@@ -432,9 +425,7 @@ class Spread:
             try:
                 self.sheet = self.sheets[sheet]
             except Exception:
-                raise WorksheetNotFound(
-                    "Invalid sheet index {0}".format(sheet)
-                )
+                raise WorksheetNotFound("Invalid sheet index {0}".format(sheet))
         else:
             self.sheet = self.find_sheet(sheet)
 
@@ -543,11 +534,7 @@ class Spread:
         if sheet:
             self.open_sheet(sheet)
 
-        return (
-            (self.sheet.row_count, self.sheet.col_count)
-            if self.sheet
-            else None
-        )
+        return (self.sheet.row_count, self.sheet.col_count) if self.sheet else None
 
     def _get_update_chunks(self, start, end, vals):
         start = get_cell_as_tuple(start)
@@ -558,9 +545,7 @@ class Spread:
         num_cells = num_cols * num_rows
 
         if num_cells != len(vals):
-            raise MissMatchException(
-                "Number of values needs to match number of cells"
-            )
+            raise MissMatchException("Number of values needs to match number of cells")
 
         chunk_rows = self._max_range_chunk_size // num_cols
         chunk_size = chunk_rows * num_cols
@@ -570,9 +555,7 @@ class Spread:
         for val_chunks in chunks(vals, int(chunk_size)):
             start_cell = (end_cell[ROW] + 1, start[COL])
             end_cell = (
-                min(
-                    start_cell[ROW] + chunk_rows - 1, start[ROW] + num_rows - 1
-                ),
+                min(start_cell[ROW] + chunk_rows - 1, start[ROW] + num_rows - 1),
                 end[COL],
             )
             yield start_cell, end_cell, val_chunks
@@ -768,9 +751,7 @@ class Spread:
         self.sheet.resize(rows, cols)
 
         self.update_cells(
-            start=(1, 1),
-            end=(rows, cols),
-            vals=["" for i in range(0, rows * cols)],
+            start=(1, 1), end=(rows, cols), vals=["" for i in range(0, rows * cols)]
         )
 
     @_ensure_auth
@@ -889,9 +870,7 @@ class Spread:
             self.clear_sheet(req_rows, req_cols)
         else:
             # make sure sheet is large enough
-            self.sheet.resize(
-                max(sheet_rows, req_rows), max(sheet_cols, req_cols)
-            )
+            self.sheet.resize(max(sheet_rows, req_rows), max(sheet_cols, req_cols))
 
         self.update_cells(
             start=start,
@@ -927,10 +906,7 @@ class Spread:
         """
         for merge in self._sheet_metadata.get("merges", []):
             start_row, end_row = merge["startRowIndex"], merge["endRowIndex"]
-            start_col, end_col = (
-                merge["startColumnIndex"],
-                merge["endColumnIndex"],
-            )
+            start_col, end_col = (merge["startColumnIndex"], merge["endColumnIndex"])
 
             # ignore merge cells outside the data range
             if start_row < len(vals) and start_col < len(vals[0]):
@@ -980,12 +956,7 @@ class Spread:
 
     @_ensure_auth
     def add_filter(
-        self,
-        start_row=None,
-        end_row=None,
-        start_col=None,
-        end_col=None,
-        sheet=None,
+        self, start_row=None, end_row=None, start_col=None, end_col=None, sheet=None
     ):
         """Add filters to data in the open worksheet.
 
