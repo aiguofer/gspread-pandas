@@ -8,6 +8,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Fixed
+~~~~~
+
+-  Fix passing only one of freeze_index or freeze_headers = True
+
 [1.2.1] - 2018-08-30
 -----------------------------
 
