@@ -938,9 +938,9 @@ class Spread:
         Parameters
         ----------
         rows : int
-            the DataFrame to save (Default value = None)
+            number of rows to freeze (default None)
         cols : int
-            whether to include the index in worksheet (default True)
+            number of columns to freeze (default None)
         sheet : str,int,Worksheet
             optional, if you want to open or create a
             different sheet before freezing,
