@@ -391,16 +391,23 @@ class Spread:
         try:
             self.spread = open_func(spread)
             self.refresh_spread_metadata()
-        except (SpreadsheetNotFound, NoValidUrlKeyFound, APIError):
+        except (SpreadsheetNotFound, NoValidUrlKeyFound, APIError) as error:
             if create:
                 try:
                     self.spread = self.client.create(spread)
                     self.refresh_spread_metadata()
                 except Exception as e:
                     msg = "Couldn't create spreadsheet.\n" + str(e)
-                    raise GspreadPandasException(msg)
+                    new_error = GspreadPandasException(msg)
+            elif isinstance(error, SpreadsheetNotFound) or "NOT_FOUND" in str(error):
+                new_error = SpreadsheetNotFound("Spreadsheet not found")
             else:
-                raise SpreadsheetNotFound("Spreadsheet not found")
+                new_error = error
+
+        # Raise new exception outside of except block for a python2/3 way to avoid
+        # "During handling of the above exception, another exception occurred"
+        if "new_error" in locals() and isinstance(new_error, Exception):
+            raise new_error
 
     @_ensure_auth
     def open_sheet(self, sheet, create=False):
@@ -423,10 +430,9 @@ class Spread:
         """
         self.sheet = None
         if isinstance(sheet, int):
-            try:
-                self.sheet = self.sheets[sheet]
-            except Exception:
+            if sheet >= len(self.sheets) or sheet < -1 * len(self.sheets):
                 raise WorksheetNotFound("Invalid sheet index {0}".format(sheet))
+            self.sheet = self.sheets[sheet]
         else:
             self.sheet = self.find_sheet(sheet)
 
@@ -633,7 +639,10 @@ class Spread:
             if n > 0:
                 return self._retry_func(func, n - 1)
             else:
-                raise e
+                error = e
+
+        if "error" in locals():
+            raise error
 
     def _find_sheet(self, sheet):
         """Find a worksheet and return with index
