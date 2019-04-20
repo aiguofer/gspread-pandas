@@ -1,5 +1,6 @@
 from re import match
 
+import numpy as np
 import pandas as pd
 from gspread.utils import a1_to_rowcol, rowcol_to_a1
 from past.builtins import basestring
@@ -105,16 +106,19 @@ def create_filter_request(sheet_id, start_row, end_row, start_col, end_col):
     """
     Create v4 API request to create a filter for a given worksheet.
     """
-    filterSettings = {
-        "range": {
-            "sheetId": sheet_id,
-            "startRowIndex": start_row,
-            "endRowIndex": end_row,
-            "startColumnIndex": start_col,
-            "endColumnIndex": end_col,
+    return {
+        "setBasicFilter": {
+            "filter": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "startRowIndex": start_row,
+                    "endRowIndex": end_row,
+                    "startColumnIndex": start_col,
+                    "endColumnIndex": end_col,
+                }
+            }
         }
     }
-    return [{"setBasicFilter": {"filter": filterSettings}}]
 
 
 def create_frozen_request(sheet_id, rows=None, cols=None):
@@ -153,7 +157,11 @@ def fillna(df, fill_value=""):
 def get_cell_as_tuple(cell):
     """Take cell in either format, validate, and return as tuple"""
     if type(cell) == tuple:
-        if len(cell) != 2 or type(cell[0]) != int or type(cell[1]) != int:
+        if (
+            len(cell) != 2
+            or not np.issubdtype(type(cell[ROW]), np.integer)
+            or not np.issubdtype(type(cell[COL]), np.integer)
+        ):
             raise TypeError("{0} is not a valid cell tuple".format(cell))
         return cell
     elif isinstance(cell, basestring):

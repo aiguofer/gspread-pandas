@@ -61,10 +61,10 @@ class Client(ClientV4):
     config : dict
         optional, if you want to provide an alternate configuration,
         see :meth:`get_config <gspread_pandas.conf.get_config>`
-        (Default value = None)
+        (default None)
     scope : list
         optional, if you'd like to provide your own scope
-        (Default value = default_scope)
+        (default default_scope)
 
     """
 
@@ -241,16 +241,16 @@ class Spread:
         (default None)
     config : dict
         optional, if you want to provide an alternate configuration,
-        see :meth:`get_config <gspread_pandas.conf.get_config>` (Default value = None)
+        see :meth:`get_config <gspread_pandas.conf.get_config>` (default None)
     create_sheet : bool
         whether to create the spreadsheet if it doesn't exist,
-        it wil use the ``spread`` value as the sheet title (Default value = False)
+        it wil use the ``spread`` value as the sheet title (default False)
     create_spread : bool
         whether to create the sheet if it doesn't exist,
-        it wil use the ``spread`` value as the sheet title (Default value = False)
+        it wil use the ``spread`` value as the sheet title (default False)
     scope : list
         optional, if you'd like to provide your own scope
-        (Default value = default_scope)
+        (default default_scope)
 
     """
 
@@ -344,13 +344,13 @@ class Spread:
         spread : str
             name, url, or id of Spreadsheet
         sheet : str,int
-            name or index of Worksheet (Default value = None)
+            name or index of Worksheet (default None)
         create_sheet : bool
             whether to create the spreadsheet if it doesn't exist,
-            it wil use the ``spread`` value as the sheet title (Default value = False)
+            it wil use the ``spread`` value as the sheet title (default False)
         create_spread : bool
             whether to create the sheet if it doesn't exist,
-            it wil use the ``spread`` value as the sheet title (Default value = False)
+            it wil use the ``spread`` value as the sheet title (default False)
 
         Returns
         -------
@@ -372,7 +372,7 @@ class Spread:
             name, url, or id of Spreadsheet
         create : bool
             whether to create the spreadsheet if it doesn't exist,
-            it wil use the ``spread`` value as the sheet title (Default value = False)
+            it wil use the ``spread`` value as the sheet title (default False)
 
         Returns
         -------
@@ -626,7 +626,7 @@ class Spread:
         func : function
             Function to call
         n : int
-            Number of times to retry (Default value = 3)
+            Number of times to retry (default 3)
 
         Returns
         -------
@@ -863,7 +863,7 @@ class Spread:
 
         if add_filter:
             self.add_filter(
-                header_size + start[0] - 2, req_rows, start[1] - 1, req_cols
+                header_size + start[ROW] - 2, req_rows, start[COL] - 1, req_cols
             )
 
     def _fix_merge_values(self, vals):
@@ -932,6 +932,7 @@ class Spread:
 
         self.refresh_spread_metadata()
 
+    # TODO: Change params to just use start and end (see merge_cells and update_cells)
     @_ensure_auth
     def add_filter(
         self, start_row=None, end_row=None, start_col=None, end_col=None, sheet=None
@@ -942,13 +943,13 @@ class Spread:
         ----------
         start_row : int
             First row to include in filter; this will be the
-            filter header (Default 0)
+            filter header (default 0)
         end_row : int
-            Last row to include in filter (Default last row in sheet)
+            Last row to include in filter (default last row in sheet)
         start_col : int
-            First column to include in filter (Default 0)
+            First column to include in filter (default 0)
         end_col : int
-            Last column to include in filter (Default last column
+            Last column to include in filter (default last column
             in sheet)
         sheet : str,int,Worksheet
             optional, if you want to open or create a
@@ -974,9 +975,9 @@ class Spread:
                 "requests": create_filter_request(
                     self.sheet.id,
                     start_row or 0,
-                    end_row or dims[0],
+                    end_row or dims[ROW],
                     start_col or 0,
-                    end_col or dims[1],
+                    end_col or dims[COL],
                 )
             }
         )
