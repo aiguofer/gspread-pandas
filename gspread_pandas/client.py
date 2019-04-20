@@ -25,9 +25,12 @@ from gspread_pandas.exceptions import (
     NoWorksheetException,
 )
 from gspread_pandas.util import (
+    COL,
+    ROW,
     chunks,
     create_filter_request,
     create_frozen_request,
+    create_merge_cells_request,
     fillna,
     get_cell_as_tuple,
     get_range,
@@ -37,9 +40,6 @@ from gspread_pandas.util import (
 )
 
 __all__ = ["Spread", "Client"]
-
-ROW = 0
-COL = 1
 
 
 class Client(ClientV4):
@@ -978,4 +978,38 @@ class Spread:
                     end_col or dims[1],
                 )
             }
+        )
+
+    @_ensure_auth
+    def merge_cells(self, start, end, merge_type="MERGE_ALL", sheet=None):
+        """Merge cells between the start and end cells. Use merge_type if you want
+        to change the behavior of the merge.
+
+        Parameters
+        ----------
+        start : tuple,str
+            Tuple indicating (row, col) or string like 'A1'
+        end : tuple, str
+            Tuple indicating (row, col) or string like 'A1'
+        merge_type : str
+            One of MERGE_ALL, MERGE_ROWS, or MERGE_COLUMNS (default "MERGE_ALL")
+        sheet : str,int,Worksheet
+            optional, if you want to open or create a
+            different sheet before adding the filter,
+            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            (default None)
+
+        Returns
+        -------
+        None
+
+        """
+        if sheet:
+            self.open_sheet(sheet, create=True)
+
+        if not self.sheet:
+            raise NoWorksheetException("No open worksheet")
+
+        self.spread.batch_update(
+            {"requests": create_merge_cells_request(self.sheet.id, start, end)}
         )

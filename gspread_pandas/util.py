@@ -4,6 +4,9 @@ import pandas as pd
 from gspread.utils import a1_to_rowcol, rowcol_to_a1
 from past.builtins import basestring
 
+ROW = 0
+COL = 1
+
 
 def parse_sheet_index(df, index):
     """Parse sheet index into df index"""
@@ -167,3 +170,25 @@ def get_range(start, end):
     end_int = get_cell_as_tuple(end)
 
     return "{0}:{1}".format(rowcol_to_a1(*start_int), rowcol_to_a1(*end_int))
+
+
+def create_merge_cells_request(sheet_id, start, end, merge_type="MERGE_ALL"):
+    """
+    Create v4 API request to merge rows and/or columns for a
+    given worksheet.
+    """
+    start = get_cell_as_tuple(start)
+    end = get_cell_as_tuple(end)
+
+    return {
+        "mergeCells": {
+            "range": {
+                "sheetId": sheet_id,
+                "startRowIndex": start[ROW] - 1,
+                "endRowIndex": end[ROW],
+                "startColumnIndex": start[COL] - 1,
+                "endColumnIndex": end[COL],
+            },
+            "mergeType": merge_type,
+        }
+    }
