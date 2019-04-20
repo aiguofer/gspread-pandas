@@ -902,9 +902,9 @@ class Spread:
         Parameters
         ----------
         rows : int
-            number of rows to freeze (default None)
+            number of rows to freeze, use 0 to 'unfreeze' (default None)
         cols : int
-            number of columns to freeze (default None)
+            number of columns to freeze, use 0 to 'unfreeze' (default None)
         sheet : str,int,Worksheet
             optional, if you want to open or create a
             different sheet before freezing,
