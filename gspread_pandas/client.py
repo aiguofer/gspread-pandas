@@ -31,6 +31,7 @@ from gspread_pandas.util import (
     create_filter_request,
     create_frozen_request,
     create_merge_cells_request,
+    create_unmerge_cells_request,
     fillna,
     get_cell_as_tuple,
     get_range,
@@ -1012,4 +1013,39 @@ class Spread:
 
         self.spread.batch_update(
             {"requests": create_merge_cells_request(self.sheet.id, start, end)}
+        )
+
+    @_ensure_auth
+    def unmerge_cells(self, start="A1", end=None, sheet=None):
+        """Unmerge all cells between the start and end cells. Use defaults to unmerge
+        all cells in the sheet.
+
+        Parameters
+        ----------
+        start : tuple,str
+            Tuple indicating (row, col) or string like 'A1' (default A1)
+        end : tuple,str
+            Tuple indicating (row, col) or string like 'A1' (default last cell in sheet)
+        sheet : str,int,Worksheet
+            optional, if you want to open or create a
+            different sheet before adding the filter,
+            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            (default None)
+
+        Returns
+        -------
+        None
+
+        """
+        if sheet:
+            self.open_sheet(sheet, create=True)
+
+        if not self.sheet:
+            raise NoWorksheetException("No open worksheet")
+
+        if end is None:
+            end = self.get_sheet_dims()
+
+        self.spread.batch_update(
+            {"requests": create_unmerge_cells_request(self.sheet.id, start, end)}
         )

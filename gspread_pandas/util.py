@@ -192,3 +192,24 @@ def create_merge_cells_request(sheet_id, start, end, merge_type="MERGE_ALL"):
             "mergeType": merge_type,
         }
     }
+
+
+def create_unmerge_cells_request(sheet_id, start, end):
+    """
+    Create v4 API request to unmerge rows and/or columns for a
+    given worksheet.
+    """
+    start = get_cell_as_tuple(start)
+    end = get_cell_as_tuple(end)
+
+    return {
+        "unmergeCells": {
+            "range": {
+                "sheetId": sheet_id,
+                "startRowIndex": start[ROW] - 1,
+                "endRowIndex": end[ROW],
+                "startColumnIndex": start[COL] - 1,
+                "endColumnIndex": end[COL],
+            }
+        }
+    }
