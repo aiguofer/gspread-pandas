@@ -37,7 +37,9 @@ def parse_df_col_names(df, include_index, index_size=1):
         # move the index name to lowest header level since that reads more natural
         if include_index:
             for i in range(index_size):
-                headers[-1][i] = headers[0][i]
+                # Pandas sets the index's column name as "index" if it doesn't have a
+                # name so we need to clean that up
+                headers[-1][i] = headers[0][i] if headers[0][i] != "index" else ""
                 headers[0][i] = ""
     # handle regular columns
     else:
