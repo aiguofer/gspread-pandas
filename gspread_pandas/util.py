@@ -8,8 +8,8 @@ from gspread.exceptions import APIError
 from gspread.utils import a1_to_rowcol, rowcol_to_a1
 from past.builtins import basestring
 
-ROW = 0
-COL = 1
+ROW = START = 0
+COL = END = 1
 
 
 def parse_sheet_index(df, index):
@@ -247,3 +247,76 @@ def monkey_patch_request(client, retry_delay=10):
             raise error
 
     client.request = request
+
+
+def create_merge_headers_request(sheet_id, headers, start, index_size):
+    """
+    Create v4 API request to merge labels for a given worksheet.
+    """
+    request = []
+    start = get_cell_as_tuple(start)
+
+    if isinstance(headers, pd.MultiIndex):
+        merge_cells = get_col_merge_ranges(headers)
+        request.append(
+            [
+                create_merge_cells_request(
+                    sheet_id,
+                    (start[ROW] + row_ix, col_rng[START] + start[COL] + index_size),
+                    (start[ROW] + row_ix, col_rng[END] + start[COL] + index_size),
+                )
+                for row_ix, row in enumerate(merge_cells)
+                for col_rng in row
+            ]
+        )
+
+    return request
+
+
+def get_col_merge_ranges(index):
+    """Get list of ranges to be merged for each level of columns. For each level,
+    same values will only be merged if they share the same label for the level above.
+    """
+    labels = index.codes if hasattr(index, "codes") else index.labels
+    # Dummy range indicating the full size, this is removed at the end
+    ranges = [[(0, len(labels[0]))]]
+
+    for ix, index_level in enumerate(labels[:]):
+        index_ranges = []
+        for rng in ranges[ix]:
+            index_ranges.extend(
+                get_contiguous_ranges(index_level, rng[START], rng[END])
+            )
+        ranges.append(index_ranges)
+
+    ranges.pop(0)
+    return ranges
+
+
+def get_contiguous_ranges(lst, lst_start, lst_end):
+    """Get list of tuples, each indicating the range of contiguous equal values in the lst
+    between lst_start and lst_end. Everything is 0 indexed.
+
+    For example, get_contiguous_ranges([0, 0, 0, 1, 1], 1, 4) = [(1, 2), (3, 4)]
+    [(the 2nd and 3rd items are both 0), (the 4th and 5th items are both 1)]
+    """
+    prev_val = None
+    index_ranges = []
+    lst_section = lst[lst_start : lst_end + 1]
+    rng_start = lst_section[START]
+
+    for ix, val in enumerate(lst_section):
+        # If there's more than 1 value in the range and there's a change in val
+        if rng_start < ix - 1 and prev_val != val:
+            # Save the rng until the previous val
+            index_ranges.append((lst_start + rng_start, lst_start + ix - 1))
+        # If this is the last val and the val is still the same
+        elif ix == len(lst_section) - 1 and prev_val == val:
+            # Save the rng including the last val
+            index_ranges.append((lst_start + rng_start, lst_start + ix))
+
+        if prev_val != val:
+            rng_start = ix
+
+        prev_val = val
+    return index_ranges

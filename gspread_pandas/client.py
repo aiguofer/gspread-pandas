@@ -31,6 +31,7 @@ from gspread_pandas.util import (
     create_filter_request,
     create_frozen_request,
     create_merge_cells_request,
+    create_merge_headers_request,
     create_unmerge_cells_request,
     fillna,
     get_cell_as_tuple,
@@ -784,6 +785,7 @@ class Spread:
         freeze_headers=False,
         fill_value="",
         add_filter=False,
+        merge_headers=False,
     ):
         """Save a DataFrame into a worksheet.
 
@@ -812,8 +814,10 @@ class Spread:
         fill_value : str
             value to fill nulls with (default '')
         add_filter : bool
-            whether to add a filter to the uploaded sheet (default
-            False)
+            whether to add a filter to the uploaded sheet (default False)
+        merge_headers : bool
+            whether to merge cells in the header that have the same value
+            (default False)
 
 
         Returns
@@ -827,6 +831,7 @@ class Spread:
         if not self.sheet:
             raise NoWorksheetException("No open worksheet")
 
+        header = df.columns
         index_size = df.index.nlevels
         header_size = df.columns.nlevels
 
@@ -867,6 +872,15 @@ class Spread:
         if add_filter:
             self.add_filter(
                 header_size + start[ROW] - 2, req_rows, start[COL] - 1, req_cols
+            )
+
+        if merge_headers:
+            self.spread.batch_update(
+                {
+                    "requests": create_merge_headers_request(
+                        self.sheet.id, header, start, index_size
+                    )
+                }
             )
 
     def _fix_merge_values(self, vals):

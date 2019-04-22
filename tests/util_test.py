@@ -22,18 +22,14 @@ def df_empty():
 @pytest.fixture
 def df_multiheader():
     data = [[1, 2], [3, 4]]
-    cols = pd.MultiIndex.from_tuples(
-        [("col1", "subcol1"), ("col1", "subcol2")]
-    )
+    cols = pd.MultiIndex.from_tuples([("col1", "subcol1"), ("col1", "subcol2")])
     return pd.DataFrame(data, columns=cols)
 
 
 @pytest.fixture
 def df_multiheader_w_index():
     data = [[1, 2], [3, 4]]
-    cols = pd.MultiIndex.from_tuples(
-        [("col1", "subcol1"), ("col1", "subcol2")]
-    )
+    cols = pd.MultiIndex.from_tuples([("col1", "subcol1"), ("col1", "subcol2")])
     df = pd.DataFrame(data, columns=cols)
     df.index.name = "test_index"
     return df.reset_index()
@@ -42,9 +38,7 @@ def df_multiheader_w_index():
 @pytest.fixture
 def df_multiheader_w_multiindex():
     data = [[1, 2], [3, 4]]
-    cols = pd.MultiIndex.from_tuples(
-        [("col1", "subcol1"), ("col1", "subcol2")]
-    )
+    cols = pd.MultiIndex.from_tuples([("col1", "subcol1"), ("col1", "subcol2")])
     ix = pd.MultiIndex.from_tuples(
         [("row1", "subrow1"), ("row1", "subrow2")], names=["l1", "l2"]
     )
@@ -104,14 +98,9 @@ def test_parse_df_col_names_multiheader_w_index(df_multiheader_w_index):
     assert util.parse_df_col_names(df_multiheader_w_index, True) == expected
 
 
-def test_parse_df_col_names_multiheader_w_multiindex(
-    df_multiheader_w_multiindex
-):
+def test_parse_df_col_names_multiheader_w_multiindex(df_multiheader_w_multiindex):
     expected = [["", "", "col1", "col1"], ["l1", "l2", "subcol1", "subcol2"]]
-    assert (
-        util.parse_df_col_names(df_multiheader_w_multiindex, True, 2)
-        == expected
-    )
+    assert util.parse_df_col_names(df_multiheader_w_multiindex, True, 2) == expected
 
 
 def test_parse_sheet_headers_empty(data_empty):
@@ -153,3 +142,21 @@ def test_fillna(df):
 
 def test_get_range():
     assert util.get_range("a1", (3, 3)) == "A1:C3"
+
+
+def test_get_contiguous_ranges():
+    tests = [
+        ([0], []),
+        ([0, 0], [(0, 1)]),
+        ([0, 1], []),
+        ([0, 0, 0], [(0, 2)]),
+        ([0, 0, 1], [(0, 1)]),
+        ([0, 1, 1], [(1, 2)]),
+        ([0, 1, 0], []),
+        ([0, 0, 1, 1], [(0, 1), (2, 3)]),
+        ([0, 0, 1, 1, 0, 0], [(0, 1), (2, 3), (4, 5)]),
+        ([0, 1, 1, 1, 1, 0], [(1, 4)]),
+    ]
+
+    for test in tests:
+        assert util.get_contiguous_ranges(test[0], 0, 100) == test[1]
