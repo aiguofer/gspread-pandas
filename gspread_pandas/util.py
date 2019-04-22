@@ -1,7 +1,10 @@
 from re import match
+from time import sleep
 
 import numpy as np
 import pandas as pd
+from gspread.client import Client as ClientV4
+from gspread.exceptions import APIError
 from gspread.utils import a1_to_rowcol, rowcol_to_a1
 from past.builtins import basestring
 
@@ -221,3 +224,26 @@ def create_unmerge_cells_request(sheet_id, start, end):
             }
         }
     }
+
+
+def monkey_patch_request(client, retry_delay=10):
+    """Monkey patch gspread's Client.request to auto-retry with a delay when you get a
+    100s RESOURCE_EXCHAUSTED error.
+    """
+
+    def request(*args, **kwargs):
+        try:
+            return ClientV4.request(client, *args, **kwargs)
+        except APIError as e:
+            error = str(e)
+            # Only retry on 100s quota breaches
+            if "RESOURCE_EXHAUSTED" in error and "100s" in error:
+                sleep(retry_delay)
+                return request(*args, **kwargs)
+            else:
+                error = e
+
+        if "error" in locals():
+            raise error
+
+    client.request = request

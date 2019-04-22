@@ -35,6 +35,7 @@ from gspread_pandas.util import (
     fillna,
     get_cell_as_tuple,
     get_range,
+    monkey_patch_request,
     parse_df_col_names,
     parse_sheet_headers,
     parse_sheet_index,
@@ -289,6 +290,8 @@ class Spread:
                 "user_creds_or_client needs to be a string, "
                 "OAuth2Credentials, or Client object"
             )
+
+        monkey_patch_request(self.client)
 
         self.open(spread, sheet, create_sheet, create_spread)
 
