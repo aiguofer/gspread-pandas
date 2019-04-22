@@ -1,10 +1,11 @@
 from __future__ import print_function
 
+from builtins import range, str, super
+from functools import partial
 from re import match
 
 import numpy as np
 import pandas as pd
-from builtins import range, str, super
 from decorator import decorator
 from gspread.client import Client as ClientV4
 from gspread.exceptions import (
@@ -488,7 +489,7 @@ class Spread:
         if not self.sheet:
             raise NoWorksheetException("No open worksheet")
 
-        vals = self._retry_get_all_values()
+        vals = self._retry_func(self.sheet.get_all_values)
         vals = self._fix_merge_values(vals)[start_row - 1 :]
 
         col_names = parse_sheet_headers(vals, header_rows)
@@ -597,7 +598,7 @@ class Spread:
         ):
             rng = get_range(start_cell, end_cell)
 
-            cells = self._retry_range(rng)
+            cells = self._retry_func(partial(self.sheet.range, rng))
 
             if len(val_chunks) != len(cells):
                 raise MissMatchException(
@@ -607,76 +608,30 @@ class Spread:
             for val, cell in zip(val_chunks, cells):
                 cell.value = val
 
-            self._retry_update(cells)
+            self._retry_func(partial(self.sheet.update_cells, cells, "USER_ENTERED"))
 
     @_ensure_auth
-    def _retry_get_all_values(self, n=3):
-        """Call self.sheet.update_cells with retry
+    def _retry_func(self, func, n=3):
+        """Call func with retry
 
         Parameters
         ----------
+        func : function
+            Function to call
         n : int
             Number of times to retry (Default value = 3)
 
         Returns
         -------
-        None
+        object
+            Value from func
 
         """
         try:
-            return self.sheet.get_all_values()
+            return func()
         except Exception as e:
             if n > 0:
-                self._retry_get_all_values(n - 1)
-            else:
-                raise e
-
-    @_ensure_auth
-    def _retry_update(self, cells, n=3):
-        """Call self.sheet.update_cells with retry
-
-        Parameters
-        ----------
-        cells : list
-            Cells to update
-        n : int
-            Number of times to retry (Default value = 3)
-
-        Returns
-        -------
-        None
-
-        """
-        try:
-            self.sheet.update_cells(cells, "USER_ENTERED")
-        except Exception as e:
-            if n > 0:
-                self._retry_update(cells, n - 1)
-            else:
-                raise e
-
-    @_ensure_auth
-    def _retry_range(self, rng, n=3):
-        """Call self.sheet.range with retry
-
-        Parameters
-        ----------
-        rng : str
-            Range of cells in format like A1:B5
-
-        n : int
-            Number of times to retry (Default value = 3)
-
-        Returns
-        -------
-        None
-
-        """
-        try:
-            return self.sheet.range(rng)
-        except Exception as e:
-            if n > 0:
-                self._retry_range(rng, n - 1)
+                return self._retry_func(func, n - 1)
             else:
                 raise e
 
