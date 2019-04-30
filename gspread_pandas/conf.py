@@ -5,6 +5,7 @@ from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 from oauth2client.service_account import ServiceAccountCredentials
 from oauth2client.tools import argparser, run_flow
+from past.builtins import basestring
 
 from gspread_pandas.exceptions import ConfigException
 
@@ -24,9 +25,7 @@ def get_config_dir():
     """Get the config directory. It will first look in the environment variable
     GSPREAD_PANDAS_CONFIG_DIR, but if it's not set it'll use ~/.config/gspread_pandas
     """
-    return path.expanduser(
-        environ.get("GSPREAD_PANDAS_CONFIG_DIR", _default_dir)
-    )
+    return path.expanduser(environ.get("GSPREAD_PANDAS_CONFIG_DIR", _default_dir))
 
 
 def ensure_path(full_path):
@@ -89,7 +88,7 @@ def get_config(conf_dir=get_config_dir(), file_name=_default_file):
     return cfg
 
 
-def get_creds(user=None, config=None, scope=default_scope):
+def get_creds(user="default", config=None, scope=default_scope):
     """Get google OAuth2Credentials for the given user. If the user doesn't have previous
     creds, they will go through the OAuth flow to get new credentials which
     will be saved for use later.
@@ -99,7 +98,8 @@ def get_creds(user=None, config=None, scope=default_scope):
     Parameters
     ----------
     user : str
-        Unique key indicating user's credentials (Default value = None)
+        Unique key indicating user's credentials. This is not necessary when using
+        a Service Account and will be ignored (Default value = "default")
     config : dict
         Optional, own config can be passed in as a dict, otherwise if None is given it
         will call :meth:`get_config <get_config>` (Default value = None)
@@ -115,9 +115,9 @@ def get_creds(user=None, config=None, scope=default_scope):
     if "private_key_id" in config:
         return ServiceAccountCredentials.from_json_keyfile_dict(config, scope)
 
-    if user is None:
+    if not isinstance(user, basestring):
         raise ConfigException(
-            "Need to provide a user key if not using a service account"
+            "Need to provide a user key as a string if not using a service account"
         )
 
     if "creds_dir" not in config:
@@ -131,10 +131,7 @@ def get_creds(user=None, config=None, scope=default_scope):
     if path.exists(creds_file):
         return Storage(creds_file).locked_get()
 
-    if all(
-        key in config
-        for key in ("client_id", "client_secret", "redirect_uris")
-    ):
+    if all(key in config for key in ("client_id", "client_secret", "redirect_uris")):
         flow = OAuth2WebServerFlow(
             client_id=config["client_id"],
             client_secret=config["client_secret"],

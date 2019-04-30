@@ -25,6 +25,17 @@ Fixed
 -  When the index has no name and you have a multi-level header, it will
    no longer fill in "index" as the index header
 
+Deprecated
+~~~~~~~~~~
+
+-  Spread will no longer use the 'user_creds_or_client' param in v2. Instead, it
+   will have optional 'credentials', 'client', and 'user' params. If creds or a
+   client are passed, the user will be ignored. Otherwise, it'll use the user,
+   which will default to "default"
+-  Client will no longer use the 'user_or_creds' param in v2. Instead, it
+   will have optional 'credentials' and 'user' params. If creds passed, the user
+   will be ignored. Otherwise, it'll use the user, which will default to "default"
+
 Changed
 ~~~~~~~
 
@@ -34,6 +45,7 @@ Changed
 -  When opening a new Spreadsheet, the SpreadsheetNotFound exception will no longer
    be a "catchall" for any errors. If an error other than actually not finding the
    Spreadsheet occurs, it'll be raised.
+-  Default value for the user param in util.get_config was changed to "default"
 
 [1.2.2] - 2019-04-15
 -----------------------------

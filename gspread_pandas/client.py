@@ -33,6 +33,7 @@ from gspread_pandas.util import (
     create_merge_cells_request,
     create_merge_headers_request,
     create_unmerge_cells_request,
+    deprecate,
     fillna,
     get_cell_as_tuple,
     get_range,
@@ -55,11 +56,12 @@ class Client(ClientV4):
     Parameters
     ----------
     user_or_creds : str
-        string indicating the key to a users credentials,
+        (deprecated, will be renamed to 'user' in v2) string indicating
+        the key to a users credentials,
         which will be stored in a file (by default they will be stored in
         ``~/.config/gspread_pandas/creds/<user>`` but can be modified with
         ``creds_dir`` property in config) or an instance of
-        :class:`OAuth2Credentials <oauth2client.client.OAuth2Credentials>`
+        :class:`OAuth2Credentials <oauth2client.client.OAuth2Credentials>`.
     config : dict
         optional, if you want to provide an alternate configuration,
         see :meth:`get_config <gspread_pandas.conf.get_config>`
@@ -67,24 +69,43 @@ class Client(ClientV4):
     scope : list
         optional, if you'd like to provide your own scope
         (default default_scope)
-
+    credentials : OAuth2Credentials
+        optional, pass credentials if you have those already (default None)
     """
 
     _email = None
 
-    def __init__(self, user_or_creds, config=None, scope=default_scope):
+    def __init__(
+        self,
+        user_or_creds,
+        config=None,
+        scope=default_scope,
+        credentials=None,
+        _deprecation_notice=True,
+    ):
         #: `(list)` - Feeds included for the OAuth2 scope
         self.scope = scope
-        self._login(user_or_creds, config)
+        self._login(user_or_creds, config, credentials, _deprecation_notice)
 
-    def _login(self, user_or_creds, config):
-        if isinstance(user_or_creds, OAuth2Credentials):
+    def _login(self, user_or_creds, config, credentials, _deprecation_notice):
+        if isinstance(credentials, OAuth2Credentials):
+            creds = credentials
+        elif isinstance(user_or_creds, OAuth2Credentials):
+            if _deprecation_notice:
+                deprecate(
+                    "user_or_creds will be changed to 'user' in v2, please use "
+                    "'credentials'"
+                )
             creds = user_or_creds
         elif isinstance(user_or_creds, basestring):
+            if _deprecation_notice:
+                deprecate(
+                    "user_or_creds will become optional and be renamed to 'user' in v2"
+                )
             creds = get_creds(user_or_creds, config, self.scope)
         else:
             raise TypeError(
-                "user_or_client needs to be a string or OAuth2Credentials object"
+                "user_or_creds needs to be a string or OAuth2Credentials object"
             )
 
         super().__init__(creds)
@@ -228,7 +249,7 @@ class Spread:
     Parameters
     ----------
     user_creds_or_client : str
-        string indicating the key to a users credentials,
+        (deprecated) string indicating the key to a users credentials,
         which will be stored in a file (by default they will be stored in
         ``~/.config/gspread_pandas/creds/<user>`` but can be modified with
         ``creds_dir`` property in config) or an instance of a
@@ -253,7 +274,17 @@ class Spread:
     scope : list
         optional, if you'd like to provide your own scope
         (default default_scope)
-
+    user : str
+        string indicating the key to a users credentials,
+        which will be stored in a file (by default they will be stored in
+        ``~/.config/gspread_pandas/creds/<user>`` but can be modified with
+        ``creds_dir`` property in config). If using a Service Account, this
+        will be ignored. (default "default")
+    credentials : OAuth2Credentials
+        optional, pass credentials if you have those already (default None)
+    client : Client
+        optionall, if you've already instanciated a Client, you can just pass
+        that and it'll be used instead (default None)
     """
 
     #: `(gspread.models.Spreadsheet)` - Currently open Spreadsheet
@@ -281,16 +312,37 @@ class Spread:
         create_spread=False,
         create_sheet=False,
         scope=default_scope,
+        user="default",
+        credentials=None,
+        client=None,
     ):
-        if isinstance(user_creds_or_client, Client):
-            self.client = user_creds_or_client
-        elif isinstance(user_creds_or_client, (basestring, OAuth2Credentials)):
-            self.client = Client(user_creds_or_client, config, scope)
-        else:
-            raise TypeError(
-                "user_creds_or_client needs to be a string, "
-                "OAuth2Credentials, or Client object"
+        if user_creds_or_client is not None:
+            deprecate(
+                "user_creds_or_client will be removed in v2. Use optional 'user',"
+                "'credentials' or 'client' params instead and pass None for "
+                "user_creds_or_client to prevent this message. If you only use"
+                "one set of creds, move ``~/.config/gspread_pandas/creds/<user>`` to "
+                "``~/.config/gspread_pandas/creds/default`` to avoid having to pass"
+                "the 'user' param every time"
             )
+            if isinstance(user_creds_or_client, Client):
+                self.client = user_creds_or_client
+            elif isinstance(user_creds_or_client, (basestring, OAuth2Credentials)):
+                self.client = Client(
+                    user_creds_or_client, config, scope, _deprecation_notice=False
+                )
+            else:
+                raise TypeError(
+                    "user_creds_or_client needs to be a string, "
+                    "OAuth2Credentials, or Client object"
+                )
+        else:
+            if isinstance(client, Client):
+                self.client = client
+            else:
+                self.client = Client(
+                    user, config, scope, credentials, _deprecation_notice=False
+                )
 
         monkey_patch_request(self.client)
 
