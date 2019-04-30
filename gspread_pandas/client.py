@@ -33,7 +33,6 @@ from gspread_pandas.util import (
     create_merge_cells_request,
     create_merge_headers_request,
     create_unmerge_cells_request,
-    deprecate,
     fillna,
     get_cell_as_tuple,
     get_range,
@@ -55,13 +54,12 @@ class Client(ClientV4):
 
     Parameters
     ----------
-    user_or_creds : str
-        (deprecated, will be renamed to 'user' in v2) string indicating
-        the key to a users credentials,
+    user : str
+        optional, string indicating the key to a users credentials,
         which will be stored in a file (by default they will be stored in
         ``~/.config/gspread_pandas/creds/<user>`` but can be modified with
-        ``creds_dir`` property in config) or an instance of
-        :class:`OAuth2Credentials <oauth2client.client.OAuth2Credentials>`.
+        ``creds_dir`` property in config). If using a Service Account, this
+        will be ignored. (default "default")
     config : dict
         optional, if you want to provide an alternate configuration,
         see :meth:`get_config <gspread_pandas.conf.get_config>`
@@ -76,36 +74,20 @@ class Client(ClientV4):
     _email = None
 
     def __init__(
-        self,
-        user_or_creds,
-        config=None,
-        scope=default_scope,
-        credentials=None,
-        _deprecation_notice=True,
+        self, user="default", config=None, scope=default_scope, credentials=None
     ):
         #: `(list)` - Feeds included for the OAuth2 scope
         self.scope = scope
-        self._login(user_or_creds, config, credentials, _deprecation_notice)
+        self._login(user, config, credentials)
 
-    def _login(self, user_or_creds, config, credentials, _deprecation_notice):
+    def _login(self, user, config, credentials):
         if isinstance(credentials, OAuth2Credentials):
             creds = credentials
-        elif isinstance(user_or_creds, OAuth2Credentials):
-            if _deprecation_notice:
-                deprecate(
-                    "user_or_creds will be changed to 'user' in v2, please use "
-                    "'credentials'"
-                )
-            creds = user_or_creds
-        elif isinstance(user_or_creds, basestring):
-            if _deprecation_notice:
-                deprecate(
-                    "user_or_creds will become optional and be renamed to 'user' in v2"
-                )
-            creds = get_creds(user_or_creds, config, self.scope)
+        elif isinstance(user, basestring):
+            creds = get_creds(user, config, self.scope)
         else:
             raise TypeError(
-                "user_or_creds needs to be a string or OAuth2Credentials object"
+                "Need to provide user as a string or credentials as OAuth2Credentials"
             )
 
         super().__init__(creds)
@@ -248,12 +230,6 @@ class Spread:
 
     Parameters
     ----------
-    user_creds_or_client : str
-        (deprecated) string indicating the key to a users credentials,
-        which will be stored in a file (by default they will be stored in
-        ``~/.config/gspread_pandas/creds/<user>`` but can be modified with
-        ``creds_dir`` property in config) or an instance of a
-        :class:`Client <gspread_pandas.client.Client>`
     spread : str
         name, url, or id of the spreadsheet; must have read access by
         the authenticated user,
@@ -305,7 +281,6 @@ class Spread:
 
     def __init__(
         self,
-        user_creds_or_client,
         spread,
         sheet=None,
         config=None,
@@ -316,33 +291,10 @@ class Spread:
         credentials=None,
         client=None,
     ):
-        if user_creds_or_client is not None:
-            deprecate(
-                "user_creds_or_client will be removed in v2. Use optional 'user',"
-                "'credentials' or 'client' params instead and pass None for "
-                "user_creds_or_client to prevent this message. If you only use"
-                "one set of creds, move ``~/.config/gspread_pandas/creds/<user>`` to "
-                "``~/.config/gspread_pandas/creds/default`` to avoid having to pass"
-                "the 'user' param every time"
-            )
-            if isinstance(user_creds_or_client, Client):
-                self.client = user_creds_or_client
-            elif isinstance(user_creds_or_client, (basestring, OAuth2Credentials)):
-                self.client = Client(
-                    user_creds_or_client, config, scope, _deprecation_notice=False
-                )
-            else:
-                raise TypeError(
-                    "user_creds_or_client needs to be a string, "
-                    "OAuth2Credentials, or Client object"
-                )
+        if isinstance(client, Client):
+            self.client = client
         else:
-            if isinstance(client, Client):
-                self.client = client
-            else:
-                self.client = Client(
-                    user, config, scope, credentials, _deprecation_notice=False
-                )
+            self.client = Client(user, config, scope, credentials)
 
         monkey_patch_request(self.client)
 
@@ -920,7 +872,7 @@ class Spread:
 
         if add_filter:
             self.add_filter(
-                header_size + start[ROW] - 2, req_rows, start[COL] - 1, req_cols
+                (header_size + start[ROW] - 2, start[COL] - 1), (req_rows, req_cols)
             )
 
         if merge_headers:
@@ -998,33 +950,12 @@ class Spread:
 
         self.refresh_spread_metadata()
 
-    # TODO: Change params to just use start and end (see merge_cells and update_cells)
     @_ensure_auth
-    def add_filter(
-        self,
-        start_row=None,
-        end_row=None,
-        start_col=None,
-        end_col=None,
-        start=None,
-        end=None,
-        sheet=None,
-    ):
+    def add_filter(self, start=None, end=None, sheet=None):
         """Add filters to data in the open worksheet.
 
         Parameters
         ----------
-        start_row : int
-            (deprecated, use 'start') First row to include in filter; this will be the
-            filter header (default 0)
-        end_row : int
-            (deprecated, use 'end') Last row to include in filter (default last row
-            in sheet)
-        start_col : int
-            (deprecated, use 'start') First column to include in filter (default 0)
-        end_col : int
-            (deprecated, use 'end') Last column to include in filter (default last
-            column in sheet)
         start : tuple,str
             Tuple indicating (row, col) or string like 'A1' (default 'A1')
         end : tuple, str
@@ -1049,29 +980,10 @@ class Spread:
 
         dims = self.get_sheet_dims()
 
-        if (
-            start_row is not None
-            or end_row is not None
-            or start_col is not None
-            or end_col is not None
-        ):
-            deprecate(
-                "start/end_row/col have been deprecated and will be removed in v2. "
-                "Use 'start' and 'end' instead"
-            )
-
-        if start is not None:
-            start_row, start_col = get_cell_as_tuple(start)
-
-        if end is not None:
-            end_row, end_col = get_cell_as_tuple(end)
-
         self.spread.batch_update(
             {
                 "requests": create_filter_request(
-                    self.sheet.id,
-                    (start_row or 0, start_col or 0),
-                    (end_row or dims[ROW], end_col or dims[COL]),
+                    self.sheet.id, start or (0, 0), end or dims
                 )
             }
         )
