@@ -44,6 +44,8 @@ Some key goals/features:
 -  Enable handling of merged cells
 -  Nicely handle large data sets and retries
 -  Enable creation of filters
+-  Handle retries when exceeding 100s quota
+-  Handle cell merges with option to merge multi-level header cells
 
 Installation / Usage
 ====================

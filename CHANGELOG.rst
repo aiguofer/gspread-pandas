@@ -8,6 +8,33 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Added
+~~~~~
+
+-  Function to merge_cells
+-  Function to unmerge_cells
+-  Option to merge_headers in df_to_sheet
+-  Retry when exceeding the 100s quota
+
+Fixed
+~~~~~
+
+-  Fix passing 0 for freeze_index or freeze_headers. This essentially
+   "unfreezes"
+-  When the index has no name and you have a multi-level header, it will
+   no longer fill in "index" as the index header
+
+Changed
+~~~~~~~
+
+-  Exceptions are no longer raised while handling another exception. This should
+   prevent the "During handling of the above exception, another exception occurred"
+   message
+-  When opening a new Spreadsheet, the SpreadsheetNotFound exception will no longer
+   be a "catchall" for any errors. If an error other than actually not finding the
+   Spreadsheet occurs, it'll be raised.
+
 [1.2.2] - 2019-04-15
 -----------------------------
 
