@@ -116,19 +116,22 @@ def deprecate(message):
     warnings.warn(message, DeprecationWarning, stacklevel=2)
 
 
-def create_filter_request(sheet_id, start_row, end_row, start_col, end_col):
+def create_filter_request(sheet_id, start, end):
     """
     Create v4 API request to create a filter for a given worksheet.
     """
+    start = get_cell_as_tuple(start)
+    end = get_cell_as_tuple(end)
+
     return {
         "setBasicFilter": {
             "filter": {
                 "range": {
                     "sheetId": sheet_id,
-                    "startRowIndex": start_row,
-                    "endRowIndex": end_row,
-                    "startColumnIndex": start_col,
-                    "endColumnIndex": end_col,
+                    "startRowIndex": start[ROW],
+                    "endRowIndex": end[ROW],
+                    "startColumnIndex": start[COL],
+                    "endColumnIndex": end[COL],
                 }
             }
         }

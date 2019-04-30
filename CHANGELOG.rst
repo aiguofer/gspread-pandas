@@ -35,6 +35,8 @@ Deprecated
 -  Client will no longer use the 'user_or_creds' param in v2. Instead, it
    will have optional 'credentials' and 'user' params. If creds passed, the user
    will be ignored. Otherwise, it'll use the user, which will default to "default"
+-  Spread.add_filter will be standardized to use 'start' and 'end' like other
+   functions and the start/end_row/col are deprecated and will be removed in v2
 
 Changed
 ~~~~~~~

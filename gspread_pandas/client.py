@@ -1004,22 +1004,35 @@ class Spread:
     # TODO: Change params to just use start and end (see merge_cells and update_cells)
     @_ensure_auth
     def add_filter(
-        self, start_row=None, end_row=None, start_col=None, end_col=None, sheet=None
+        self,
+        start_row=None,
+        end_row=None,
+        start_col=None,
+        end_col=None,
+        start=None,
+        end=None,
+        sheet=None,
     ):
         """Add filters to data in the open worksheet.
 
         Parameters
         ----------
         start_row : int
-            First row to include in filter; this will be the
+            (deprecated, use 'start') First row to include in filter; this will be the
             filter header (default 0)
         end_row : int
-            Last row to include in filter (default last row in sheet)
-        start_col : int
-            First column to include in filter (default 0)
-        end_col : int
-            Last column to include in filter (default last column
+            (deprecated, use 'end') Last row to include in filter (default last row
             in sheet)
+        start_col : int
+            (deprecated, use 'start') First column to include in filter (default 0)
+        end_col : int
+            (deprecated, use 'end') Last column to include in filter (default last
+            column in sheet)
+        start : tuple,str
+            Tuple indicating (row, col) or string like 'A1' (default 'A1')
+        end : tuple, str
+            Tuple indicating (row, col) or string like 'A1'
+            (default last cell in sheet)
         sheet : str,int,Worksheet
             optional, if you want to open or create a
             different sheet before adding the filter,
@@ -1039,14 +1052,29 @@ class Spread:
 
         dims = self.get_sheet_dims()
 
+        if (
+            start_row is not None
+            or end_row is not None
+            or start_col is not None
+            or end_col is not None
+        ):
+            deprecate(
+                "start/end_row/col have been deprecated and will be removed in v2. "
+                "Use 'start' and 'end' instead"
+            )
+
+        if start is not None:
+            start_row, start_col = get_cell_as_tuple(start)
+
+        if end is not None:
+            end_row, end_col = get_cell_as_tuple(end)
+
         self.spread.batch_update(
             {
                 "requests": create_filter_request(
                     self.sheet.id,
-                    start_row or 0,
-                    end_row or dims[ROW],
-                    start_col or 0,
-                    end_col or dims[COL],
+                    (start_row or 0, start_col or 0),
+                    (end_row or dims[ROW], end_col or dims[COL]),
                 )
             }
         )
