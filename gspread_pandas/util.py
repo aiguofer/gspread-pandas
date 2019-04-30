@@ -1,3 +1,4 @@
+import warnings
 from re import match
 from time import sleep
 
@@ -10,6 +11,7 @@ from past.builtins import basestring
 
 ROW = START = 0
 COL = END = 1
+DEPRECATION_WARNINGS_ENABLED = False
 
 
 def parse_sheet_index(df, index):
@@ -102,7 +104,14 @@ def chunks(lst, chunk_size):
 
 def deprecate(message):
     """Display message about deprecation"""
-    import warnings
+    global DEPRECATION_WARNINGS_ENABLED
+    # force enable DeprecationWarnings since most interactive shells have
+    # them disabled
+    if not DEPRECATION_WARNINGS_ENABLED:
+        DEPRECATION_WARNINGS_ENABLED = True
+        warnings.filterwarnings(
+            "default", ".*", category=DeprecationWarning, module="gspread_pandas"
+        )
 
     warnings.warn(message, DeprecationWarning, stacklevel=2)
 
