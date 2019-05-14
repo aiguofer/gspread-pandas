@@ -22,6 +22,15 @@ Links:
 -  `Source code <https://github.com/aiguofer/gspread-pandas>`_
 -  `Short video tutorial <https://youtu.be/2yIcNYzfzPw>`_
 
+.. attention:: There will be breaking API changes in v2. Mainly, I will be
+  making the ``user`` key optional and OAuth credentials will be stored under
+  a ``default`` file. This should make it easier to use for the common single
+  user case, as well as for those using ServiceAccount credentials. I'd love to hear
+  your opinion on `the issue <https://github.com/aiguofer/gspread-pandas/issues/24>`__.
+  I will also be standardizing the API for ``Spread.add_filter`` to match other functions.
+  Feel free to check out the current work on `the v2 branch 
+  <https://github.com/aiguofer/gspread-pandas/tree/v2>`__.
+
 Overview
 ========
 
