@@ -8,6 +8,17 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Fixed
+~~~~~
+
+-  Passing 0 to ``sheet``` param in any function should work now
+-  When using multi-row column headers in a spreadsheet, the index name
+   should now be better identified
+-  Spread;update_cells should now work when passing a single cell value
+-  When start != 'A1', freeze_rows/headers should now correctly freeze
+   the right amount of rows/headers so the index and columns are frozen
+
 [1.3.0] - 2019-04-30
 -----------------------------
 
