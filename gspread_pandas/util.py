@@ -18,10 +18,11 @@ def parse_sheet_index(df, index):
     """Parse sheet index into df index"""
     if index and len(df.columns) >= index:
         df = df.set_index(df.columns[index - 1])
-        # if it was multi-index, the name is tuple;
-        # choose last value in tuple since that is more common
+        # if column was MultiIndex, the name is a tuple;
+        # choose last non-empty value in tuple
+        # since that is more common
         if type(df.index.name) == tuple:
-            df.index.name = df.index.name[-1]
+            df.index.name = [x for x in df.index.name if x][-1]
         # get rid of falsey index names
         df.index.name = df.index.name or None
     return df
