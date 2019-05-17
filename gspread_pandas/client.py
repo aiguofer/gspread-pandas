@@ -653,9 +653,6 @@ class Spread:
         if not self.sheet:
             raise NoWorksheetException("No open worksheet")
 
-        if start == end:
-            return
-
         for start_cell, end_cell, val_chunks in self._get_update_chunks(
             start, end, vals
         ):
