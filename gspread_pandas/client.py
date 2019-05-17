@@ -914,8 +914,8 @@ class Spread:
         )
 
         self.freeze(
-            None if not freeze_headers else header_size,
-            None if not freeze_index else index_size,
+            None if not freeze_headers else header_size + start[ROW] - 1,
+            None if not freeze_index else index_size + start[COL] - 1,
         )
 
         if add_filter:
