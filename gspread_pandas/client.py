@@ -546,7 +546,7 @@ class Spread:
             DataFrame with the data from the Worksheet
 
         """
-        if sheet:
+        if sheet is not None:
             self.open_sheet(sheet)
 
         if not self.sheet:
@@ -595,7 +595,7 @@ class Spread:
             a tuple containing (num_rows,num_cols)
 
         """
-        if sheet:
+        if sheet is not None:
             self.open_sheet(sheet)
 
         return (self.sheet.row_count, self.sheet.col_count) if self.sheet else None
@@ -647,7 +647,7 @@ class Spread:
         None
 
         """
-        if sheet:
+        if sheet is not None:
             self.open_sheet(sheet)
 
         if not self.sheet:
@@ -763,7 +763,7 @@ class Spread:
         None
 
         """
-        if sheet:
+        if sheet is not None:
             self.open_sheet(sheet)
 
         if not self.sheet:
@@ -877,7 +877,7 @@ class Spread:
         None
 
         """
-        if sheet:
+        if sheet is not None:
             self.open_sheet(sheet, create=True)
 
         if not self.sheet:
@@ -986,7 +986,7 @@ class Spread:
         None
 
         """
-        if sheet:
+        if sheet is not None:
             self.open_sheet(sheet, create=True)
 
         if not self.sheet:
@@ -1044,7 +1044,7 @@ class Spread:
         None
 
         """
-        if sheet:
+        if sheet is not None:
             self.open_sheet(sheet, create=True)
 
         if not self.sheet:
@@ -1103,7 +1103,7 @@ class Spread:
         None
 
         """
-        if sheet:
+        if sheet is not None:
             self.open_sheet(sheet, create=True)
 
         if not self.sheet:
@@ -1135,7 +1135,7 @@ class Spread:
         None
 
         """
-        if sheet:
+        if sheet is not None:
             self.open_sheet(sheet, create=True)
 
         if not self.sheet:
