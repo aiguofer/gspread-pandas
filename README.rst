@@ -28,8 +28,17 @@ Links:
   user case, as well as for those using ServiceAccount credentials. I'd love to hear
   your opinion on `the issue <https://github.com/aiguofer/gspread-pandas/issues/24>`__.
   I will also be standardizing the API for ``Spread.add_filter`` to match other functions.
-  Feel free to check out the current work on `the v2 branch 
+  Feel free to check out the current work on `the v2 branch
   <https://github.com/aiguofer/gspread-pandas/tree/v2>`__.
+
+  To disable warnings:
+
+  .. code-block:: python
+
+        import warnings
+        warnings.filterwarnings(
+            "ignore", ".*", category=DeprecationWarning, module="gspread_pandas"
+        )
 
 Overview
 ========
