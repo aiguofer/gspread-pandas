@@ -35,10 +35,8 @@ Links:
 
   .. code-block:: python
 
-        import warnings
-        warnings.filterwarnings(
-            "ignore", ".*", category=DeprecationWarning, module="gspread_pandas"
-        )
+        import gspread_pandas.util as util
+        util.DEPRECATION_WARNINGS_ENABLED = False
 
 Overview
 ========
@@ -191,7 +189,7 @@ Example
 
     # Save DataFrame to worksheet 'New Test Sheet', create it first if it doesn't exist
     spread.df_to_sheet(df, index=False, sheet='New Test Sheet', start='A2', replace=True)
-    spread.update_cells((1,1), (1,2), ['Created by:', spread.email])
+    spread.update_cells('A1', 'A1', ['Created by:', spread.email])
     print(spread)
     # <gspread_pandas.client.Spread - User: '<example_user>@gmail.com', Spread: 'Example Spreadsheet', Sheet: 'New Test Sheet'>
 
