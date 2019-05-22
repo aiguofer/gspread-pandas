@@ -74,7 +74,7 @@ def get_config(conf_dir=get_config_dir(), file_name=_default_file):
             "No Google client config found.\n"
             "Please download json from "
             "https://console.developers.google.com/apis/credentials and "
-            "save as ~/.config/gspread_pandas/google_secret.json"
+            "save as {}".format(cfg_file)
         )
 
     with open(cfg_file) as f:
@@ -99,7 +99,7 @@ def get_creds(user="default", config=None, scope=default_scope):
     ----------
     user : str
         Unique key indicating user's credentials. This is not necessary when using
-        a Service Account and will be ignored (Default value = "default")
+        a ServiceAccount and will be ignored (Default value = "default")
     config : dict
         Optional, own config can be passed in as a dict, otherwise if None is given it
         will call :meth:`get_config <get_config>` (Default value = None)
