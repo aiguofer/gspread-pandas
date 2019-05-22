@@ -67,30 +67,28 @@ class Client(ClientV4):
     scope : list
         optional, if you'd like to provide your own scope
         (default default_scope)
-    credentials : OAuth2Credentials
+    creds : OAuth2Credentials
         optional, pass credentials if you have those already (default None)
     """
 
     _email = None
 
-    def __init__(
-        self, user="default", config=None, scope=default_scope, credentials=None
-    ):
+    def __init__(self, user="default", config=None, scope=default_scope, creds=None):
         #: `(list)` - Feeds included for the OAuth2 scope
         self.scope = scope
-        self._login(user, config, credentials)
+        self._login(user, config, creds)
 
-    def _login(self, user, config, credentials):
-        if isinstance(credentials, OAuth2Credentials):
-            creds = credentials
+    def _login(self, user, config, creds):
+        if isinstance(creds, OAuth2Credentials):
+            credentials = creds
         elif isinstance(user, basestring):
-            creds = get_creds(user, config, self.scope)
+            credentials = get_creds(user, config, self.scope)
         else:
             raise TypeError(
                 "Need to provide user as a string or credentials as OAuth2Credentials"
             )
 
-        super().__init__(creds)
+        super().__init__(credentials)
         super().login()
 
     @decorator
@@ -256,7 +254,7 @@ class Spread:
         ``~/.config/gspread_pandas/creds/<user>`` but can be modified with
         ``creds_dir`` property in config). If using a Service Account, this
         will be ignored. (default "default")
-    credentials : OAuth2Credentials
+    creds : OAuth2Credentials
         optional, pass credentials if you have those already (default None)
     client : Client
         optionall, if you've already instanciated a Client, you can just pass
@@ -288,13 +286,13 @@ class Spread:
         create_sheet=False,
         scope=default_scope,
         user="default",
-        credentials=None,
+        creds=None,
         client=None,
     ):
         if isinstance(client, Client):
             self.client = client
         else:
-            self.client = Client(user, config, scope, credentials)
+            self.client = Client(user, config, scope, creds)
 
         monkey_patch_request(self.client)
 
