@@ -22,22 +22,6 @@ Links:
 -  `Source code <https://github.com/aiguofer/gspread-pandas>`_
 -  `Short video tutorial <https://youtu.be/2yIcNYzfzPw>`_
 
-.. attention:: There will be breaking API changes in v2. Mainly, I will be
-  making the ``user`` key optional and OAuth credentials will be stored under
-  a ``default`` file. This should make it easier to use for the common single
-  user case, as well as for those using ServiceAccount credentials. I'd love to hear
-  your opinion on `the issue <https://github.com/aiguofer/gspread-pandas/issues/24>`__.
-  I will also be standardizing the API for ``Spread.add_filter`` to match other functions.
-  Feel free to check out the current work on `the v2 branch
-  <https://github.com/aiguofer/gspread-pandas/tree/v2>`__.
-
-  To disable warnings:
-
-  .. code-block:: python
-
-        import gspread_pandas.util as util
-        util.DEPRECATION_WARNINGS_ENABLED = False
-
 Overview
 ========
 
@@ -123,8 +107,9 @@ User Credentials
 Once you have your client credentials, you can have multiple user
 credentials stored in the same machine. This can be useful when you have
 a shared server (for example with a Jupyter notebook server) with
-multiple people that may want to use the library. The first parameter to
-``Spread`` must be the key identifying a user's credentials. The first
+multiple people that may want to use the library. The ``user`` parameter to
+``Spread`` must be the key identifying a user's credentials, by default it
+will store the creds using ``default`` as the key. The first
 time this is called for a specific key, you will have to authenticate
 through a text based OAuth prompt; this makes it possible to run on a headless
 server through ssh or through a Jupyter notebook. After this, the
@@ -181,8 +166,8 @@ Example
     df = pd.read_csv(file_name)
 
     # 'Example Spreadsheet' needs to already exist and your user must have access to it
-    spread = Spread('example_user', 'Example Spreadsheet')
-    # This will ask to authenticate if you haven't done so before for 'example_user'
+    spread = Spread('Example Spreadsheet')
+    # This will ask to authenticate if you haven't done so before
 
     # Display available worksheets
     spread.sheets
@@ -195,12 +180,12 @@ Example
 
     # You can now first instanciate a Client separately and query folders and
     # instanciate other Spread objects by passing in the Client
-    client = Client('example_user')
+    client = Client()
     # Assumming you have a dir called 'example dir' with sheets in it
     available_sheets = client.find_spreadsheet_files_in_folders('example dir')
     spreads = []
     for sheet in available_sheets.get('example dir', []):
-        spreads.append(Spread(client, sheet['id']))
+        spreads.append(Spread(sheet['id'], client=client))
 
 Troubleshooting
 ===============
