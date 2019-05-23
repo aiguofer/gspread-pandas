@@ -25,7 +25,7 @@ def get_config_dir():
     """Get the config directory. It will first look in the environment variable
     GSPREAD_PANDAS_CONFIG_DIR, but if it's not set it'll use ~/.config/gspread_pandas
     """
-    return path.expanduser(environ.get("GSPREAD_PANDAS_CONFIG_DIR", _default_dir))
+    return environ.get("GSPREAD_PANDAS_CONFIG_DIR", _default_dir)
 
 
 def ensure_path(full_path):
@@ -64,6 +64,7 @@ def get_config(conf_dir=get_config_dir(), file_name=_default_file):
     dict
         Dict with necessary contents of google_secret.json
     """
+    conf_dir = path.expanduser(conf_dir)
     creds_dir = path.join(conf_dir, "creds")
     ensure_path(creds_dir)
 
