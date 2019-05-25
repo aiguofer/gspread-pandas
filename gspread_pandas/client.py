@@ -6,7 +6,8 @@ from re import match
 
 import numpy as np
 import pandas as pd
-from decorator import decorator
+from google.auth.credentials import Credentials
+from google.auth.transport.requests import AuthorizedSession
 from gspread.client import Client as ClientV4
 from gspread.exceptions import (
     APIError,
@@ -15,7 +16,6 @@ from gspread.exceptions import (
     WorksheetNotFound,
 )
 from gspread.models import Worksheet
-from oauth2client.client import OAuth2Credentials
 from past.builtins import basestring
 
 from gspread_pandas.conf import default_scope, get_creds
@@ -28,6 +28,7 @@ from gspread_pandas.util import (
     COL,
     ROW,
     chunks,
+    convert_credentials,
     create_filter_request,
     create_frozen_request,
     create_merge_cells_request,
@@ -67,7 +68,7 @@ class Client(ClientV4):
     scope : list
         optional, if you'd like to provide your own scope
         (default default_scope)
-    creds : OAuth2Credentials
+    creds : google.auth.credentials.Credentials
         optional, pass credentials if you have those already (default None)
     """
 
@@ -76,25 +77,23 @@ class Client(ClientV4):
     def __init__(self, user="default", config=None, scope=default_scope, creds=None):
         #: `(list)` - Feeds included for the OAuth2 scope
         self.scope = scope
-        self._login(user, config, creds)
 
-    def _login(self, user, config, creds):
-        if isinstance(creds, OAuth2Credentials):
+        if isinstance(creds, Credentials):
             credentials = creds
+        elif creds is not None and "oauth2client" in creds.__module__:
+            credentials = convert_credentials(creds)
         elif isinstance(user, basestring):
             credentials = get_creds(user, config, self.scope)
         else:
             raise TypeError(
-                "Need to provide user as a string or credentials as OAuth2Credentials"
+                "Need to provide user as a string or credentials as "
+                "google.auth.credentials.Credentials"
             )
+        session = AuthorizedSession(credentials)
+        super().__init__(credentials, session)
 
-        super().__init__(credentials)
-        super().login()
-
-    @decorator
-    def _ensure_auth(func, self, *args, **kwargs):
-        self.login()
-        return func(self, *args, **kwargs)
+    def login(self):
+        pass
 
     def get_email(self):
         """Return the email address of the user
@@ -119,7 +118,6 @@ class Client(ClientV4):
 
         return self._email
 
-    @_ensure_auth
     def _make_drive_request(self, q):
         files = []
         page_token = ""
@@ -254,7 +252,7 @@ class Spread:
         ``~/.config/gspread_pandas/creds/<user>`` but can be modified with
         ``creds_dir`` property in config). If using a Service Account, this
         will be ignored. (default "default")
-    creds : OAuth2Credentials
+    creds : google.auth.credentials.Credentials
         optional, pass credentials if you have those already (default None)
     client : Client
         optionall, if you've already instanciated a Client, you can just pass
@@ -335,11 +333,6 @@ class Spread:
             ix = self._find_sheet(self.sheet.title)[0]
             return self._spread_metadata["sheets"][ix]
 
-    @decorator
-    def _ensure_auth(func, self, *args, **kwargs):
-        self.client.login()
-        return func(self, *args, **kwargs)
-
     def open(self, spread, sheet=None, create_sheet=False, create_spread=False):
         """Open a spreadsheet, and optionally a worksheet. See
         :meth:`open_spread <gspread_pandas.Spread.open_spread>` and
@@ -368,7 +361,6 @@ class Spread:
         if sheet is not None:
             self.open_sheet(sheet, create_sheet)
 
-    @_ensure_auth
     def open_spread(self, spread, create=False):
         """Open a spreadsheet. Authorized user must already have read access.
 
@@ -416,7 +408,6 @@ class Spread:
         if "new_error" in locals() and isinstance(new_error, Exception):
             raise new_error
 
-    @_ensure_auth
     def open_sheet(self, sheet, create=False):
         """Open a worksheet. Optionally, if the sheet doesn't exist then create it first
         (only when ``sheet`` is a str).
@@ -449,7 +440,6 @@ class Spread:
             else:
                 raise WorksheetNotFound("Worksheet not found")
 
-    @_ensure_auth
     def create_sheet(self, name, rows=1, cols=1):
         """Create a new worksheet with the given number of rows and cols.
 
@@ -473,7 +463,6 @@ class Spread:
         self.refresh_spread_metadata()
         self.open_sheet(name)
 
-    @_ensure_auth
     def sheet_to_df(self, index=1, header_rows=1, start_row=1, sheet=None):
         """Pull a worksheet into a DataFrame.
 
@@ -528,7 +517,6 @@ class Spread:
 
         return parse_sheet_index(df, index)
 
-    @_ensure_auth
     def get_sheet_dims(self, sheet=None):
         """Get the dimensions of the currently open Worksheet.
 
@@ -574,7 +562,6 @@ class Spread:
             )
             yield start_cell, end_cell, val_chunks
 
-    @_ensure_auth
     def update_cells(self, start, end, vals, sheet=None):
         """Update the values in a given range. The values should be listed in order
         from left to right across rows.
@@ -620,7 +607,6 @@ class Spread:
 
             self._retry_func(partial(self.sheet.update_cells, cells, "USER_ENTERED"))
 
-    @_ensure_auth
     def _retry_func(self, func, n=3):
         """Call func with retry
 
@@ -690,7 +676,6 @@ class Spread:
         """
         return self._find_sheet(sheet)[1]
 
-    @_ensure_auth
     def clear_sheet(self, rows=1, cols=1, sheet=None):
         """Reset open worksheet to a blank sheet with given dimensions.
 
@@ -735,7 +720,6 @@ class Spread:
             vals=["" for i in range(0, row_resize * col_resize)],
         )
 
-    @_ensure_auth
     def delete_sheet(self, sheet):
         """Delete a worksheet by title. Returns whether the sheet was deleted or not. If
         current sheet is deleted, the ``sheet`` property will be set to None.
@@ -771,7 +755,6 @@ class Spread:
 
         return False
 
-    @_ensure_auth
     def df_to_sheet(
         self,
         df,
@@ -912,7 +895,6 @@ class Spread:
 
         return vals
 
-    @_ensure_auth
     def freeze(self, rows=None, cols=None, sheet=None):
         """Freeze rows and/or columns for the open worksheet.
 
@@ -948,7 +930,6 @@ class Spread:
 
         self.refresh_spread_metadata()
 
-    @_ensure_auth
     def add_filter(self, start=None, end=None, sheet=None):
         """Add filters to data in the open worksheet.
 
@@ -986,7 +967,6 @@ class Spread:
             }
         )
 
-    @_ensure_auth
     def merge_cells(self, start, end, merge_type="MERGE_ALL", sheet=None):
         """Merge cells between the start and end cells. Use merge_type if you want
         to change the behavior of the merge.
@@ -1020,7 +1000,6 @@ class Spread:
             {"requests": create_merge_cells_request(self.sheet.id, start, end)}
         )
 
-    @_ensure_auth
     def unmerge_cells(self, start="A1", end=None, sheet=None):
         """Unmerge all cells between the start and end cells. Use defaults to unmerge
         all cells in the sheet.

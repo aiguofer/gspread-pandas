@@ -4,6 +4,7 @@ from time import sleep
 
 import numpy as np
 import pandas as pd
+from google.oauth2 import credentials as oauth2, service_account
 from gspread.client import Client as ClientV4
 from gspread.exceptions import APIError
 from gspread.utils import a1_to_rowcol, rowcol_to_a1
@@ -341,3 +342,40 @@ def get_contiguous_ranges(lst, lst_start, lst_end):
 
         prev_val = val
     return index_ranges
+
+
+def convert_credentials(credentials):
+    """Convert oauth2client credentials to google-auth."""
+    cls = credentials.__class__.__name__
+
+    if cls == "ServiceAccountCredentials":
+        return _convert_service_account(credentials)
+    elif cls == "OAuth2Credentials":
+        return _convert_oauth(credentials)
+
+    raise TypeError(
+        "Credentials need to be from either oauth2client or from google-auth."
+    )
+
+
+def _convert_oauth(credentials):
+    return oauth2.Credentials(
+        credentials.access_token,
+        credentials.refresh_token,
+        credentials.id_token,
+        credentials.token_uri,
+        credentials.client_id,
+        credentials.client_secret,
+        credentials.scopes,
+    )
+
+
+def _convert_service_account(credentials):
+    data = credentials.serialization_data
+    data["token_uri"] = credentials.token_uri
+    scopes = credentials._scopes.split() or [
+        "https://www.googleapis.com/auth/drive",
+        "https://spreadsheets.google.com/feeds",
+    ]
+
+    return service_account.Credentials.from_service_account_info(data, scopes=scopes)

@@ -1,10 +1,11 @@
 import json
+import sys
 from os import environ
 
-from oauth2client.client import OAuth2WebServerFlow
-from oauth2client.file import Storage
-from oauth2client.service_account import ServiceAccountCredentials
-from oauth2client.tools import argparser, run_flow
+from future.utils import reraise
+from google.oauth2.credentials import Credentials as OAuthCredentials
+from google.oauth2.service_account import Credentials as SACredentials
+from google_auth_oauthlib.flow import InstalledAppFlow
 from past.builtins import basestring
 
 from gspread_pandas.exceptions import ConfigException
@@ -21,9 +22,10 @@ _default_dir = "~/.config/gspread_pandas"
 _default_file = "google_secret.json"
 
 default_scope = [
-    "https://spreadsheets.google.com/feeds",
+    "openid",
     "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/spreadsheets",
 ]
 
 CONFIG_DIR_ENV_VAR = "GSPREAD_PANDAS_CONFIG_DIR"
@@ -86,22 +88,19 @@ def get_config(conf_dir=None, file_name=_default_file):
 
     with cfg_file.open() as fp:
         cfg = json.load(fp)
-        # Different type of App Creds have a different key
-        # and Service Accounts aren't nested
-        if len(cfg.keys()) == 1:
-            cfg = cfg[list(cfg.keys())[0]]
 
     cfg["creds_dir"] = conf_dir / "creds"
 
     return cfg
 
 
-def get_creds(user="default", config=None, scope=default_scope):
-    """Get google OAuth2Credentials for the given user. If the user doesn't have previous
-    creds, they will go through the OAuth flow to get new credentials which
-    will be saved for later use. Credentials will be saved in config['creds_dir'], if
-    this value is not set, then they will be stored in a folder named ``creds`` in the
-    default config dir (either ~/.config/gspread_pandas or $GSPREAD_PANDAS_CONFIG_DIR)
+def get_creds(user="default", config=None, scope=default_scope, save=True):
+    """Get google google.auth.credentials.Credentials for the given user. If the user
+    doesn't have previous creds, they will go through the OAuth flow to get new
+    credentials which will be saved for later use. Credentials will be saved in
+    config['creds_dir'], if this value is not set, then they will be stored in a folder
+    named ``creds`` in the default config dir (either ~/.config/gspread_pandas or
+    $GSPREAD_PANDAS_CONFIG_DIR)
 
     Alternatively, it will get credentials from a service account.
 
@@ -120,40 +119,54 @@ def get_creds(user="default", config=None, scope=default_scope):
 
     Returns
     -------
-    OAuth2Credentials, ServiceAccountCredentials
+    google.auth.credentials.Credentials
         Google credentials that can be used with gspread
     """
     config = config or get_config()
+    try:
+        if "private_key_id" in config:
+            return SACredentials.from_service_account_info(config, scopes=scope)
 
-    if "private_key_id" in config:
-        return ServiceAccountCredentials.from_json_keyfile_dict(config, scope)
+        if not isinstance(user, basestring):
+            raise ConfigException(
+                "Need to provide a user key as a string if not using a service account"
+            )
 
-    if not isinstance(user, basestring):
-        raise ConfigException(
-            "Need to provide a user key as a string if not using a service account"
+        if "creds_dir" not in config:
+            config["creds_dir"] = Path(get_config_dir(), "creds").expanduser()
+
+        ensure_path(config["creds_dir"])
+
+        creds_file = config["creds_dir"] / user
+
+        if Path(creds_file).exists():
+            # need to convert Path to string for python 2.7
+            return OAuthCredentials.from_authorized_user_file(str(creds_file))
+
+        flow = InstalledAppFlow.from_client_config(
+            config, scope, redirect_uri="urn:ietf:wg:oauth:2.0:oob"
         )
+        creds = flow.run_console()
 
-    if "creds_dir" not in config:
-        config["creds_dir"] = Path(get_config_dir(), "creds").expanduser()
+        if save:
+            save_creds(creds, creds_file)
 
-    ensure_path(config["creds_dir"])
+        return creds
+    except Exception:
+        exc_info = sys.exc_info()
 
-    creds_file = config["creds_dir"] / user
+    if "exc_info" in locals():
+        reraise(ConfigException, *exc_info[1:])
 
-    if Path(creds_file).exists():
-        return Storage(str(creds_file)).locked_get()
 
-    if all(key in config for key in ("client_id", "client_secret", "redirect_uris")):
-        flow = OAuth2WebServerFlow(
-            client_id=config["client_id"],
-            client_secret=config["client_secret"],
-            redirect_uri=config["redirect_uris"][0],
-            scope=scope,
-        )
+def save_creds(creds, filename):
+    creds_data = {
+        "refresh_token": creds.refresh_token,
+        "token_uri": creds.token_uri,
+        "client_id": creds.client_id,
+        "client_secret": creds.client_secret,
+        "scopes": creds.scopes,
+    }
 
-        storage = Storage(str(creds_file))
-        args = argparser.parse_args(args=["--noauth_local_webserver"])
-
-        return run_flow(flow, storage, args)
-
-    raise ConfigException("Unknown config file format")
+    with open(filename, "w") as outfile:
+        json.dump(creds_data, outfile)

@@ -1,7 +1,8 @@
 # Reqs
-oauth2client
 gspread>=3.0.0
 pandas>=0.20.0
 decorator
 future
 pathlib2;python_version=="2.7"
+google-auth
+google-auth-oauthlib

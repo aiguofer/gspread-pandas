@@ -3,8 +3,8 @@ import os
 
 import pytest
 from Crypto.PublicKey import RSA
-from oauth2client.client import OAuth2Credentials
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.credentials import Credentials as OAuth2Credentials
+from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 
 from gspread_pandas import conf, exceptions
 
@@ -153,10 +153,10 @@ class Test_get_creds:
             conf.get_creds(user=None)
 
     def test_oauth_first_time(self, mocker, set_oauth_config):
-        mocker.patch.object(conf, "run_flow")
-        conf.get_creds()
+        mocker.patch.object(conf.InstalledAppFlow, "run_console")
+        conf.get_creds(save=False)
         # python 3.5 doesn't have assert_called_once
-        assert conf.run_flow.call_count == 1
+        assert conf.InstalledAppFlow.run_console.call_count == 1
 
     def test_oauth_default(self, make_creds):
         assert isinstance(conf.get_creds(), OAuth2Credentials)
