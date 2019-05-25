@@ -20,12 +20,14 @@ default_scope = [
     "https://www.googleapis.com/auth/userinfo.email",
 ]
 
+CONFIG_DIR_ENV_VAR = "GSPREAD_PANDAS_CONFIG_DIR"
+
 
 def get_config_dir():
     """Get the config directory. It will first look in the environment variable
     GSPREAD_PANDAS_CONFIG_DIR, but if it's not set it'll use ~/.config/gspread_pandas
     """
-    return environ.get("GSPREAD_PANDAS_CONFIG_DIR", _default_dir)
+    return environ.get(CONFIG_DIR_ENV_VAR, _default_dir)
 
 
 def ensure_path(full_path):
@@ -44,7 +46,7 @@ def ensure_path(full_path):
         makedirs(full_path)
 
 
-def get_config(conf_dir=get_config_dir(), file_name=_default_file):
+def get_config(conf_dir=None, file_name=_default_file):
     """Get config for Google client. Looks in ~/.config/gspread_pandas/google_secret.json
     by default but you can override it with conf_dir and file_name. The creds_dir
     value will be set to conf_dir/creds and the directory will be created if it doesn't
@@ -65,7 +67,7 @@ def get_config(conf_dir=get_config_dir(), file_name=_default_file):
     dict
         Dict with necessary contents of google_secret.json
     """
-    conf_dir = path.expanduser(conf_dir)
+    conf_dir = path.expanduser(conf_dir if conf_dir else get_config_dir())
     cfg_file = path.join(conf_dir, file_name)
 
     if not path.exists(cfg_file):
