@@ -1,5 +1,5 @@
 import json
-from os import environ, makedirs, path
+from os import environ
 
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
@@ -8,6 +8,12 @@ from oauth2client.tools import argparser, run_flow
 from past.builtins import basestring
 
 from gspread_pandas.exceptions import ConfigException
+
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
+
 
 __all__ = ["default_scope", "get_config", "get_creds"]
 
@@ -42,8 +48,8 @@ def ensure_path(full_path):
     -------
     None
     """
-    if not path.exists(full_path):
-        makedirs(full_path)
+    if not Path(full_path).exists():
+        full_path.mkdir(parents=True, exist_ok=True)
 
 
 def get_config(conf_dir=None, file_name=_default_file):
@@ -67,10 +73,10 @@ def get_config(conf_dir=None, file_name=_default_file):
     dict
         Dict with necessary contents of google_secret.json
     """
-    conf_dir = path.expanduser(conf_dir if conf_dir else get_config_dir())
-    cfg_file = path.join(conf_dir, file_name)
+    conf_dir = Path(conf_dir if conf_dir else get_config_dir()).expanduser()
+    cfg_file = conf_dir / file_name
 
-    if not path.exists(cfg_file):
+    if not cfg_file.exists():
         raise IOError(
             "No Google client config found.\n"
             "Please download json from "
@@ -78,14 +84,14 @@ def get_config(conf_dir=None, file_name=_default_file):
             "save as {}".format(cfg_file)
         )
 
-    with open(cfg_file) as f:
-        cfg = json.load(f)
+    with cfg_file.open() as fp:
+        cfg = json.load(fp)
         # Different type of App Creds have a different key
         # and Service Accounts aren't nested
         if len(cfg.keys()) == 1:
             cfg = cfg[list(cfg.keys())[0]]
 
-    cfg["creds_dir"] = path.join(conf_dir, "creds")
+    cfg["creds_dir"] = conf_dir / "creds"
 
     return cfg
 
@@ -128,14 +134,14 @@ def get_creds(user="default", config=None, scope=default_scope):
         )
 
     if "creds_dir" not in config:
-        config["creds_dir"] = path.expanduser(path.join(get_config_dir(), "creds"))
+        config["creds_dir"] = Path(get_config_dir(), "creds").expanduser()
 
     ensure_path(config["creds_dir"])
 
-    creds_file = path.join(config["creds_dir"], user)
+    creds_file = config["creds_dir"] / user
 
-    if path.exists(creds_file):
-        return Storage(creds_file).locked_get()
+    if Path(creds_file).exists():
+        return Storage(str(creds_file)).locked_get()
 
     if all(key in config for key in ("client_id", "client_secret", "redirect_uris")):
         flow = OAuth2WebServerFlow(
@@ -145,7 +151,7 @@ def get_creds(user="default", config=None, scope=default_scope):
             scope=scope,
         )
 
-        storage = Storage(creds_file)
+        storage = Storage(str(creds_file))
         args = argparser.parse_args(args=["--noauth_local_webserver"])
 
         return run_flow(flow, storage, args)

@@ -8,11 +8,24 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 from gspread_pandas import conf, exceptions
 
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
+
+
+def decode(strg):
+    try:
+        strg = strg.decode()
+    except AttributeError:
+        pass
+    return strg
+
 
 def make_config(tmpdir_factory, config):
-    f = tmpdir_factory.mktemp("conf").join("google_secret.json")
-    f.write(json.dumps(config))
-    return os.path.split(f)
+    f = Path(tmpdir_factory.mktemp("conf").join("google_secret.json"))
+    f.write_text(decode(json.dumps(config)))
+    return f.parent, f.name
 
 
 @pytest.fixture
@@ -54,13 +67,13 @@ def unset_env():
 
 @pytest.fixture
 def set_oauth_config(request, oauth_config):
-    os.environ[conf.CONFIG_DIR_ENV_VAR] = oauth_config[0]
+    os.environ[conf.CONFIG_DIR_ENV_VAR] = str(oauth_config[0])
     request.addfinalizer(unset_env)
 
 
 @pytest.fixture
 def set_sa_config(request, sa_config):
-    os.environ[conf.CONFIG_DIR_ENV_VAR] = sa_config[0]
+    os.environ[conf.CONFIG_DIR_ENV_VAR] = str(sa_config[0])
     request.addfinalizer(unset_env)
 
 
@@ -105,11 +118,10 @@ def make_creds(oauth_config, set_oauth_config):
         "_class": "OAuth2Credentials",
         "_module": "oauth2client.client",
     }
-    creds_dir = os.path.join(oauth_config[0], "creds")
+    creds_dir = oauth_config[0] / "creds"
     conf.ensure_path(creds_dir)
 
-    with open(os.path.join(creds_dir, "default"), "w") as f:
-        json.dump(creds, f)
+    creds_dir.joinpath("default").write_text(decode(json.dumps(creds)))
 
 
 class Test_get_config:
@@ -142,7 +154,6 @@ class Test_get_creds:
     def test_oauth_first_time(self, mocker, set_oauth_config):
         mocker.patch.object(conf, "run_flow")
         conf.get_creds()
-        assert os.path.exists
         conf.run_flow.assert_called_once()
 
     def test_oauth_default(self, make_creds):
