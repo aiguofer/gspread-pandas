@@ -23,7 +23,8 @@ def decode(strg):
 
 
 def make_config(tmpdir_factory, config):
-    f = Path(tmpdir_factory.mktemp("conf").join("google_secret.json"))
+    # convert to str for python 3.5 compat
+    f = Path(str(tmpdir_factory.mktemp("conf").join("google_secret.json")))
     f.write_text(decode(json.dumps(config)))
     return f.parent, f.name
 
@@ -154,7 +155,8 @@ class Test_get_creds:
     def test_oauth_first_time(self, mocker, set_oauth_config):
         mocker.patch.object(conf, "run_flow")
         conf.get_creds()
-        conf.run_flow.assert_called_once()
+        # python 3.5 doesn't have assert_called_once
+        assert conf.run_flow.call_count == 1
 
     def test_oauth_default(self, make_creds):
         assert isinstance(conf.get_creds(), OAuth2Credentials)
