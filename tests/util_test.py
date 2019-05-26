@@ -1,11 +1,20 @@
+import json
+import warnings
+
 import numpy as np
 import pandas as pd
 import pytest
+from google.oauth2 import credentials, service_account
+from gspread.client import Client
+from gspread.exceptions import APIError
+from oauth2client.client import OAuth2Credentials
+from oauth2client.service_account import ServiceAccountCredentials
 
 from gspread_pandas import util
 
 TEST = 0
 ANSWER = 1
+DEMO_SHEET = "1u626GkYm1RAJSmHcGyd5_VsHNr_c_IfUcE_W-fQGxIM"
 
 
 @pytest.fixture
@@ -186,37 +195,82 @@ def test_get_cell_as_tuple():
             util.get_cell_as_tuple(test)
 
 
-class Test_create_filter_request:
-    pass
+def test_create_filter_request():
+    ret = util.create_filter_request("", "A1", "A1")
+    assert isinstance(ret, dict)
 
 
-class Test_create_frozen_request:
-    pass
+def test_create_frozen_request():
+    ret = util.create_frozen_request("", 1, 2)
+    assert isinstance(ret, dict)
 
 
-class Test_create_merge_cells_request:
-    pass
+def test_create_merge_cells_request():
+    ret = util.create_merge_cells_request("", "A1", "A1")
+    assert isinstance(ret, dict)
 
 
-class Test_create_unmerge_cells_request:
-    pass
+def test_create_unmerge_cells_request():
+    ret = util.create_unmerge_cells_request("", "A1", "A1")
+    assert isinstance(ret, dict)
 
 
-class Test_create_merge_headers_request:
-    pass
+def test_create_merge_headers_request(df_multiheader_blank_bottom):
+    ret = util.create_merge_headers_request(
+        "", df_multiheader_blank_bottom.columns, "A1", 0
+    )
+    assert isinstance(ret, list)
 
 
-class Test_deprecate:
-    pass
+def test_deprecate(recwarn):
+    with pytest.deprecated_call() as calls:
+        util.DEPRECATION_WARNINGS_ENABLED = False
+        util.deprecate("")
+        assert len(calls) == 1
+
+        util.DEPRECATION_WARNINGS_ENABLED = True
+        util.deprecate("")
+        assert warnings.filters[0][0] == "default"
+        assert len(calls) == 2
+
+        util.DEPRECATION_WARNINGS_ENABLED = False
+        util.deprecate("")
+        assert warnings.filters[0][0] == "ignore"
+        assert len(calls) == 3
 
 
-class Test_monkey_patch_request:
-    util.monkey_patch_request
-    pass
+def test_monkey_patch_request(authorizedsession_betamax_recorder):
+    session = authorizedsession_betamax_recorder.session
+    c = Client(session.credentials, session)
+    s = c.open_by_key(DEMO_SHEET)
+
+    # error gets turned into multiple lines by prettyjson serializer in betamax
+    # need to a regex class that includes newlines
+    with pytest.raises(APIError, match=r"100s[\s\S]+RESOURCE_EXHAUSTED"):
+        for i in range(200):
+            s.fetch_sheet_metadata()
+
+    retry_delay = 10 if pytest.RECORD else 0
+
+    util.monkey_patch_request(c, retry_delay)
+
+    for i in range(200):
+        s.fetch_sheet_metadata()
 
 
-class Test_get_col_merge_ranges:
-    pass
+def test_get_col_merge_ranges():
+    cols = pd.MultiIndex.from_arrays(
+        [
+            ["col1", "col1", "col2", "col2"],
+            ["subcol1", "subcol1", "subcol1", "subcol1"],
+            ["subsubcol1", "subsubcol2", "subsubcol2", "subsubcol2"],
+        ]
+    )
+    assert util.get_col_merge_ranges(cols) == [
+        [(0, 1), (2, 3)],
+        [(0, 1), (2, 3)],
+        [(2, 3)],
+    ]
 
 
 def test_fillna(df):
@@ -251,3 +305,11 @@ def test_get_contiguous_ranges():
 
     for test in tests:
         assert util.get_contiguous_ranges(test[TEST], 0, len(test[0])) == test[ANSWER]
+
+
+def test_convert(creds_json, sa_config_json):
+    oauth = OAuth2Credentials.from_json(json.dumps(creds_json))
+    sa = ServiceAccountCredentials.from_json_keyfile_dict(sa_config_json)
+
+    assert isinstance(util.convert_credentials(oauth), credentials.Credentials)
+    assert isinstance(util.convert_credentials(sa), service_account.Credentials)

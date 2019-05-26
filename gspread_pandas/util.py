@@ -16,6 +16,14 @@ DEPRECATION_WARNINGS_ENABLED = True
 _WARNINGS_ALREADY_ENABLED = False
 
 
+def decode(strg):
+    try:
+        strg = strg.decode()
+    except AttributeError:
+        pass
+    return strg
+
+
 def parse_sheet_index(df, index):
     """Parse sheet index into df index"""
     if index and len(df.columns) >= index:

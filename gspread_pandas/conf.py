@@ -9,6 +9,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from past.builtins import basestring
 
 from gspread_pandas.exceptions import ConfigException
+from gspread_pandas.util import decode
 
 try:
     from pathlib import Path
@@ -35,7 +36,7 @@ def get_config_dir():
     """Get the config directory. It will first look in the environment variable
     GSPREAD_PANDAS_CONFIG_DIR, but if it's not set it'll use ~/.config/gspread_pandas
     """
-    return environ.get(CONFIG_DIR_ENV_VAR, _default_dir)
+    return Path(environ.get(CONFIG_DIR_ENV_VAR, _default_dir)).expanduser()
 
 
 def ensure_path(full_path):
@@ -75,7 +76,7 @@ def get_config(conf_dir=None, file_name=_default_file):
     dict
         Dict with necessary contents of google_secret.json
     """
-    conf_dir = Path(conf_dir if conf_dir else get_config_dir()).expanduser()
+    conf_dir = Path(conf_dir).expanduser() if conf_dir else get_config_dir()
     cfg_file = conf_dir / file_name
 
     if not cfg_file.exists():
@@ -133,7 +134,7 @@ def get_creds(user="default", config=None, scope=default_scope, save=True):
             )
 
         if "creds_dir" not in config:
-            config["creds_dir"] = Path(get_config_dir(), "creds").expanduser()
+            config["creds_dir"] = get_config_dir() / "creds"
 
         ensure_path(config["creds_dir"])
 
@@ -149,7 +150,15 @@ def get_creds(user="default", config=None, scope=default_scope, save=True):
         creds = flow.run_console()
 
         if save:
-            save_creds(creds, creds_file)
+            creds_data = {
+                "refresh_token": creds.refresh_token,
+                "token_uri": creds.token_uri,
+                "client_id": creds.client_id,
+                "client_secret": creds.client_secret,
+                "scopes": creds.scopes,
+            }
+
+            creds_file.write_text(decode(json.dumps(creds_data)))
 
         return creds
     except Exception:
@@ -157,16 +166,3 @@ def get_creds(user="default", config=None, scope=default_scope, save=True):
 
     if "exc_info" in locals():
         reraise(ConfigException, *exc_info[1:])
-
-
-def save_creds(creds, filename):
-    creds_data = {
-        "refresh_token": creds.refresh_token,
-        "token_uri": creds.token_uri,
-        "client_id": creds.client_id,
-        "client_secret": creds.client_secret,
-        "scopes": creds.scopes,
-    }
-
-    with open(filename, "w") as outfile:
-        json.dump(creds_data, outfile)
