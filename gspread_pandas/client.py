@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 from builtins import range, str, super
-from functools import partial
 from re import match
 
 import numpy as np
@@ -491,7 +490,7 @@ class Spread:
         if not self.sheet:
             raise NoWorksheetException("No open worksheet")
 
-        vals = self._retry_func(self.sheet.get_all_values)
+        vals = self.sheet.get_all_values()
         vals = self._fix_merge_values(vals)[start_row - 1 :]
 
         col_names = parse_sheet_headers(vals, header_rows)
@@ -595,7 +594,7 @@ class Spread:
         ):
             rng = get_range(start_cell, end_cell)
 
-            cells = self._retry_func(partial(self.sheet.range, rng))
+            cells = self.sheet.range(rng)
 
             if len(val_chunks) != len(cells):
                 raise MissMatchException(
@@ -605,34 +604,7 @@ class Spread:
             for val, cell in zip(val_chunks, cells):
                 cell.value = val
 
-            self._retry_func(partial(self.sheet.update_cells, cells, "USER_ENTERED"))
-
-    def _retry_func(self, func, n=3):
-        """Call func with retry
-
-        Parameters
-        ----------
-        func : function
-            Function to call
-        n : int
-            Number of times to retry (default 3)
-
-        Returns
-        -------
-        object
-            Value from func
-
-        """
-        try:
-            return func()
-        except Exception as e:
-            if n > 0:
-                return self._retry_func(func, n - 1)
-            else:
-                error = e
-
-        if "error" in locals():
-            raise error
+            self.self.sheet.update_cells(cells, "USER_ENTERED")
 
     def _find_sheet(self, sheet):
         """Find a worksheet and return with index
