@@ -26,11 +26,15 @@ dist/
 
 # Installer logs
 pip-log.txt
+pip-wheel-metadata/
 
 # Unit test / coverage reports
 .coverage
 .tox
 nosetests.xml
+.pytest_cache
+htmlcov
+*,cover
 
 # Complexity
 output/*.html
@@ -49,3 +53,5 @@ output/
 
 # Pyenv
 .python-version
+
+google_secret.json
