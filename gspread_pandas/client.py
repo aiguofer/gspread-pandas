@@ -627,22 +627,22 @@ class Spread:
                 and sheet.lower() == worksheet.title.lower()
             ):
                 return ix, worksheet
-            if isinstance(sheet, Worksheet) and sheet == worksheet:
+            if isinstance(sheet, Worksheet) and sheet.id == worksheet.id:
                 return ix, worksheet
         return None, None
 
     def find_sheet(self, sheet):
-        """Find a given worksheet by title
+        """Find a given worksheet by title or by object comparison
 
         Parameters
         ----------
-        sheet : str
-            name of Worksheet
+        sheet : str,Worksheet
+            name of Worksheet or Worksheet object
 
         Returns
         -------
         Worksheet
-            a Worksheet by the given name or None if not found
+            the Worksheet by the given name or None if not found
 
 
         """
