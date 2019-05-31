@@ -1,6 +1,6 @@
 import json
 import sys
-from os import environ
+from os import environ, name
 
 from future.utils import reraise
 from google.oauth2.credentials import Credentials as OAuthCredentials
@@ -18,8 +18,10 @@ except ImportError:
 
 
 __all__ = ["default_scope", "get_config", "get_creds"]
-
-_default_dir = "~/.config/gspread_pandas"
+if name == "nt":
+    _default_dir = Path(environ.get("APPDATA")) / "gspread_pandas"
+else:
+    _default_dir = Path(environ.get("HOME")) / ".config" / "gspread_pandas"
 _default_file = "google_secret.json"
 
 default_scope = [
@@ -35,7 +37,7 @@ def get_config_dir():
     """Get the config directory. It will first look in the environment variable
     GSPREAD_PANDAS_CONFIG_DIR, but if it's not set it'll use ~/.config/gspread_pandas
     """
-    return Path(environ.get(CONFIG_DIR_ENV_VAR, _default_dir)).expanduser()
+    return Path(environ.get(CONFIG_DIR_ENV_VAR, _default_dir))
 
 
 def ensure_path(full_path):

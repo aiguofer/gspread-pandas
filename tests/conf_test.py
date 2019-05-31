@@ -1,8 +1,25 @@
+import os
+
 import pytest
 from google.oauth2.credentials import Credentials as OAuth2Credentials
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 
 from gspread_pandas import conf, exceptions
+
+try:
+    from pathlib import WindowsPath, PosixPath
+except ImportError:
+    from pathlib2 import WindowsPath, PosixPath
+
+
+def test_get_config_dir():
+    conf_dir = conf.get_config_dir()
+    if os.name == "nt":
+        assert isinstance(conf_dir, WindowsPath)
+        assert "AppData" in str(conf_dir)
+    else:
+        assert isinstance(conf_dir, PosixPath)
+        assert ".config" in str(conf_dir)
 
 
 class Test_get_config:
