@@ -59,6 +59,15 @@ def df_multiheader_w_multiindex():
 
 
 @pytest.fixture
+def df_multiheader_w_unnamed_multiindex():
+    data = [[1, 2], [3, 4]]
+    cols = pd.MultiIndex.from_tuples([("col1", "subcol1"), ("col1", "subcol2")])
+    ix = pd.MultiIndex.from_tuples([("row1", "subrow1"), ("row1", "subrow2")])
+    df = pd.DataFrame(data, columns=cols, index=ix)
+    return df.reset_index()
+
+
+@pytest.fixture
 def df_multiheader_blank_top():
     data = [[1], [3]]
     cols = pd.MultiIndex.from_tuples([("", "subcol1")])
@@ -141,6 +150,39 @@ class Test_parse_df_col_names:
     def test_multiheader_w_multiindex(self, df_multiheader_w_multiindex):
         expected = [["", "", "col1", "col1"], ["l1", "l2", "subcol1", "subcol2"]]
         assert util.parse_df_col_names(df_multiheader_w_multiindex, True, 2) == expected
+
+    def test_multiheader_no_index_flatten(self, df_multiheader):
+        expected = [["col1 subcol1", "col1 subcol2"]]
+        assert (
+            util.parse_df_col_names(df_multiheader, False, flatten_sep=" ") == expected
+        )
+
+    def test_multiheader_w_index_flatten(self, df_multiheader_w_index):
+        expected = [["test_index", "col1 subcol1", "col1 subcol2"]]
+        assert (
+            util.parse_df_col_names(df_multiheader_w_index, True, flatten_sep=" ")
+            == expected
+        )
+
+    def test_multiheader_w_multiindex_flatten(self, df_multiheader_w_multiindex):
+        expected = [["l1", "l2", "col1 subcol1", "col1 subcol2"]]
+        assert (
+            util.parse_df_col_names(
+                df_multiheader_w_multiindex, True, 2, flatten_sep=" "
+            )
+            == expected
+        )
+
+    def test_multiheader_w_unnamed_multiindex_flatten(
+        self, df_multiheader_w_unnamed_multiindex
+    ):
+        expected = [["", "", "col1 subcol1", "col1 subcol2"]]
+        assert (
+            util.parse_df_col_names(
+                df_multiheader_w_unnamed_multiindex, True, 2, flatten_sep=" "
+            )
+            == expected
+        )
 
 
 class Test_parse_sheet_headers:

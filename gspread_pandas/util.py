@@ -15,6 +15,9 @@ COL = END = 1
 DEPRECATION_WARNINGS_ENABLED = True
 _WARNINGS_ALREADY_ENABLED = False
 
+# assuming no one will be 10 levels deep
+auto_generated_index_names = ["level_{}".format(i) for i in range(10)] + ["index"]
+
 
 def decode(strg):
     try:
@@ -38,22 +41,38 @@ def parse_sheet_index(df, index):
     return df
 
 
-def parse_df_col_names(df, include_index, index_size=1):
+def parse_df_col_names(df, include_index, index_size=1, flatten_sep=None):
     """Parse column names from a df into sheet headers"""
     headers = df.columns.tolist()
 
     # handle multi-index headers
     if len(headers) > 0 and type(headers[0]) == tuple:
-        headers = [list(row) for row in zip(*headers)]
 
-        # Pandas sets index name as top level col name when using reset_index
-        # move the index name to lowest header level since that reads more natural
+        if isinstance(flatten_sep, basestring):
+            headers = [
+                [
+                    # Remove blank elements and join using sep
+                    flatten_sep.join([ele for ele in header if ele != ""])
+                    for header in headers
+                ]
+            ]
+        else:
+            headers = [list(row) for row in zip(*headers)]
+
+        # Pandas sets index name as top level col name when using reset_index;
+        # move the index name to bottom level since that reads more natural
         if include_index:
             for i in range(index_size):
+                top = headers[0]
+                bottom = headers[-1]
+
                 # Pandas sets the index's column name as "index" if it doesn't have a
                 # name so we need to clean that up
-                headers[-1][i] = headers[0][i] if headers[0][i] != "index" else ""
-                headers[0][i] = ""
+                bottom[i] = top[i] if top[i] not in auto_generated_index_names else ""
+
+                if len(headers) > 1:
+                    top[i] = ""
+
     # handle regular columns
     else:
         headers = [headers]

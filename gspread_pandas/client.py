@@ -744,6 +744,7 @@ class Spread:
         fill_value="",
         add_filter=False,
         merge_headers=False,
+        flatten_headers_sep=None,
     ):
         """Save a DataFrame into a worksheet.
 
@@ -776,6 +777,10 @@ class Spread:
         merge_headers : bool
             whether to merge cells in the header that have the same value
             (default False)
+        flatten_headers_sep : str
+            if you want to flatten your multi-headers to a single row,
+            you can pass the string that you'd like to use to concatenate
+            the levels, for example, ': ' (default None)
 
 
         Returns
@@ -800,7 +805,7 @@ class Spread:
         df_list = df.values.tolist()
 
         if headers:
-            header_rows = parse_df_col_names(df, index, index_size)
+            header_rows = parse_df_col_names(df, index, index_size, flatten_headers_sep)
             df_list = header_rows + df_list
 
         start = get_cell_as_tuple(start)
