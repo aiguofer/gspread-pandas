@@ -355,3 +355,34 @@ def test_convert(creds_json, sa_config_json):
 
     assert isinstance(util.convert_credentials(oauth), credentials.Credentials)
     assert isinstance(util.convert_credentials(sa), service_account.Credentials)
+
+
+def test_parse_permissions():
+    tests = [
+        (
+            "aiguo.fernandez@gmail.com",
+            {
+                "value": "aiguo.fernandez@gmail.com",
+                "perm_type": "user",
+                "role": "reader",
+            },
+        ),
+        (
+            "aiguofer.com|owner",
+            {"value": "aiguofer.com", "perm_type": "domain", "role": "owner"},
+        ),
+        ("anyone|writer", {"perm_type": "anyone", "role": "writer"}),
+        (
+            "difernan@redhat.com|no",
+            {
+                "value": "difernan@redhat.com",
+                "perm_type": "user",
+                "role": "reader",
+                "notify": False,
+            },
+        ),
+        ("anyone|link", {"perm_type": "anyone", "role": "reader", "with_link": True}),
+    ]
+
+    for test in tests:
+        assert util.parse_permission(test[TEST]) == test[ANSWER]

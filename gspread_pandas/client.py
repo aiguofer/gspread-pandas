@@ -38,6 +38,7 @@ from gspread_pandas.util import (
     get_range,
     monkey_patch_request,
     parse_df_col_names,
+    parse_permission,
     parse_sheet_headers,
     parse_sheet_index,
 )
@@ -256,6 +257,10 @@ class Spread:
     client : Client
         optionall, if you've already instanciated a Client, you can just pass
         that and it'll be used instead (default None)
+    permissions : list
+        a list of strings. See
+        :meth:`add_permissions <gspread_pandas.client.Spread.add_permissions>`
+        for the expected format
     """
 
     #: `(gspread.models.Spreadsheet)` - Currently open Spreadsheet
@@ -285,6 +290,7 @@ class Spread:
         user="default",
         creds=None,
         client=None,
+        permissions=None,
     ):
         if isinstance(client, Client):
             self.client = client
@@ -294,6 +300,9 @@ class Spread:
         monkey_patch_request(self.client)
 
         self.open(spread, sheet, create_sheet, create_spread)
+
+        if permissions:
+            self.add_permissions(permissions)
 
     def __repr__(self):
         base = "<gspread_pandas.client.Spread - '{0}'>"
@@ -782,7 +791,6 @@ class Spread:
             you can pass the string that you'd like to use to concatenate
             the levels, for example, ': ' (default None)
 
-
         Returns
         -------
         None
@@ -1014,3 +1022,54 @@ class Spread:
         self.spread.batch_update(
             {"requests": create_unmerge_cells_request(self.sheet.id, start, end)}
         )
+
+    def add_permissions(self, permissions):
+        """Add permissions to the current spreadsheet.
+
+        The format of each string should be:
+        ``<id>|(<group>)|(<role>)|(<notify>)|(<require_link>)`` where:
+
+        <id> - email address of group or individual, domain, or 'anyone'
+        <group> - optional, if the id is a group e-mail, this needs to be 'group' or
+            'grp'
+        <role> - optional, one of 'owner', 'writer', or 'reader'. If ommited, 'reader'
+            will be used
+        <notify> - optional, if you don't want to notify the user, pass 'no' or 'false'
+        <require_link> - optional, if you want to require the user to have the link,
+            pass 'link'
+
+        For example, to allow anyone with a link in the group admins@example.com to
+        write when they have a link, but without sending a notification to the group:
+        ``admins@example.com|grp|owner|false|link``
+
+        Or if you want to give user@example.com reader permissions without a
+        notification:
+        ``user@example.com|no``
+
+        Or to give anyone read access:
+        ``anyone``
+
+        Parameters
+        ----------
+        permissions : list
+            A list of strings meeting the above mentioned format.
+
+
+        Returns
+        -------
+        None
+
+        """
+        for perm in map(parse_permission, permissions):
+            self.client.insert_permission(
+                self.spread.id, perm.pop("value", None), **perm
+            )
+
+    def list_permissions(self):
+        """List all permissions for this Spreadsheet
+
+        Returns
+        -------
+        list
+            a list of dicts indicating the permissions on this spreadsheet"""
+        return self.client.list_permissions(self.spread.id)
