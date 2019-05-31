@@ -306,6 +306,10 @@ class Spread:
             meta.append("Sheet: '{0}'".format(self.sheet.title))
         return base.format(", ".join(meta))
 
+    def __iter__(self):
+        for sheet in self.sheets:
+            yield sheet
+
     @property
     def email(self):
         """`(str)` - E-mail for the currently authenticated user"""
