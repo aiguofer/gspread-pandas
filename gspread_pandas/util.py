@@ -4,6 +4,7 @@ from time import sleep
 
 import numpy as np
 import pandas as pd
+from future.utils import iteritems
 from google.oauth2 import credentials as oauth2, service_account
 from gspread.client import Client as ClientV4
 from gspread.exceptions import APIError
@@ -431,3 +432,58 @@ def parse_permission(perm):
             perm_dict["with_link"] = True
         perm_dict["role"] = perm_dict.get("role", "reader")
     return perm_dict
+
+
+def remove_keys(dct, keys=[]):
+    """Remove keys from a dict"""
+    return {key: val for key, val in iteritems(dct) if key not in keys}
+
+
+def remove_keys_from_list(lst, keys=[]):
+    """Remove keys from a list of dicts"""
+    return [remove_keys(ele, keys) for ele in lst]
+
+
+def add_paths(root, dirs):
+    """Recursively build a `path` property to each dir. Pass in the root dir and a
+    list of all available dirs.
+    """
+    # TODO: handle scenario with folders having more than one parent
+    children = [dr for dr in dirs if root["id"] in dr.get("parents", [])]
+    path = root.get("path", "")
+
+    for child in children:
+        child["path"] = path + "/" + child["name"]
+        add_paths(child, dirs)
+
+
+def folders_to_create(search_path, dirs, base_path=""):
+    """Recursively traverse through folder paths looking for the longest existing
+    subpath. Return the dir info of the longest subpath and the directories that
+    need to be created.
+    """
+    # Allow user to pass in a string, but use a list in the recursion
+    if isinstance(search_path, list):
+        parts = search_path
+    else:
+        parts = search_path.strip("/").split("/")
+
+    parent = [dr for dr in dirs if dr.get("path", "") == base_path]
+    if len(parent) == 0:
+        parent = {"id": "root"}
+    else:
+        parent = parent.pop()
+
+    # Stop if we ran out of parts to create
+    if len(parts) == 0:
+        return parent, []
+
+    base_path += "/" + parts[0]
+
+    dirs = [dr for dr in dirs if dr.get("path", "").startswith(base_path)]
+
+    # If there's base_path matches, then keep looking for a longer path
+    if len(dirs) > 0:
+        return folders_to_create(parts[1:], dirs, base_path)
+    else:
+        return parent, parts

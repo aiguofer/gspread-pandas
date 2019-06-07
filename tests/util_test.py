@@ -386,3 +386,89 @@ def test_parse_permissions():
 
     for test in tests:
         assert util.parse_permission(test[TEST]) == test[ANSWER]
+
+
+def test_remove_keys():
+    tests = [
+        ([{}], {}),
+        ([{}, ["stuff"]], {}),
+        ([{"foo": "bar", "bar": "foo"}, ["foo"]], {"bar": "foo"}),
+        ([{"foo": "bar", "bar": "foo"}, ["foo", "bar"]], {}),
+        ([{"foo": "bar", "bar": "foo"}], {"foo": "bar", "bar": "foo"}),
+        ([{"foo": "bar", "bar": "foo"}, ["doesntexist"]], {"foo": "bar", "bar": "foo"}),
+    ]
+
+    for test in tests:
+        assert util.remove_keys(*test[TEST]) == test[ANSWER]
+
+
+def test_remove_keys_from_list():
+    tests = [
+        (
+            [[{"foo": "bar", "bar": "foo"}, {"foo": "fighter"}], ["foo"]],
+            [{"bar": "foo"}, {}],
+        ),
+        (
+            [[{"foo": "bar", "bar": "foo"}, {"foo": "fighter"}], ["bar"]],
+            [{"foo": "bar"}, {"foo": "fighter"}],
+        ),
+        ([[], ["foo", "bar"]], []),
+        ([[]], []),
+    ]
+
+    for test in tests:
+        assert util.remove_keys_from_list(*test[TEST]) == test[ANSWER]
+
+
+def test_add_paths():
+    tests = [
+        (
+            [
+                {"id": "root"},
+                [
+                    {"id": "1", "name": "sub", "parents": ["root"]},
+                    {"id": "2", "name": "subsub", "parents": ["1"]},
+                    {"id": "3", "name": "sub1", "parents": ["root"]},
+                    {"id": "4", "name": "subsubsub", "parents": ["2"]},
+                ],
+            ],
+            [
+                {"id": "1", "name": "sub", "parents": ["root"], "path": "/sub"},
+                {"id": "2", "name": "subsub", "parents": ["1"], "path": "/sub/subsub"},
+                {"id": "3", "name": "sub1", "parents": ["root"], "path": "/sub1"},
+                {
+                    "id": "4",
+                    "name": "subsubsub",
+                    "parents": ["2"],
+                    "path": "/sub/subsub/subsubsub",
+                },
+            ],
+        )
+    ]
+
+    for test in tests:
+        util.add_paths(*test[TEST])
+        assert test[TEST][1] == test[ANSWER]
+
+
+def test_folders_to_create():
+    dirs = [
+        {"id": "1", "name": "sub", "parents": ["root"], "path": "/sub"},
+        {"id": "2", "name": "subsub", "parents": ["1"], "path": "/sub/subsub"},
+        {"id": "3", "name": "sub1", "parents": ["root"], "path": "/sub1"},
+        {
+            "id": "4",
+            "name": "subsubsub",
+            "parents": ["2"],
+            "path": "/sub/subsub/subsubsub",
+        },
+    ]
+
+    tests = [
+        ("/does/not/exist", ({"id": "root"}, ["does", "not", "exist"])),
+        ("/sub/does/not/exist", (dirs[0], ["does", "not", "exist"])),
+        ("/sub/subsub", (dirs[1], [])),
+    ]
+
+    for test in tests:
+        assert util.folders_to_create(test[TEST], dirs) == test[ANSWER]
