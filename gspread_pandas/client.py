@@ -5,6 +5,7 @@ from re import match
 
 import numpy as np
 import pandas as pd
+import requests
 from google.auth.credentials import Credentials
 from google.auth.transport.requests import AuthorizedSession
 from gspread.client import Client as ClientV4
@@ -74,28 +75,40 @@ class Client(ClientV4):
         (default default_scope)
     creds : google.auth.credentials.Credentials
         optional, pass credentials if you have those already (default None)
+    session : google.auth.transport.requests.AuthorizedSession
+        optional, pass a google.auth.transport.requests.AuthorizedSession or a
+        requests.Session and creds (default None)
     """
 
     _email = None
     _root = None
     _dirs = None
 
-    def __init__(self, user="default", config=None, scope=default_scope, creds=None):
+    def __init__(
+        self, user="default", config=None, scope=default_scope, creds=None, session=None
+    ):
         #: `(list)` - Feeds included for the OAuth2 scope
         self.scope = scope
 
-        if isinstance(creds, Credentials):
-            credentials = creds
-        elif creds is not None and "oauth2client" in creds.__module__:
-            credentials = convert_credentials(creds)
-        elif isinstance(user, basestring):
-            credentials = get_creds(user, config, self.scope)
+        if isinstance(session, requests.Session):
+            credentials = getattr(session, "credentials", creds)
+            if not credentials:
+                raise TypeError(
+                    "If you provide a session, you must also provide credentials"
+                )
         else:
-            raise TypeError(
-                "Need to provide user as a string or credentials as "
-                "google.auth.credentials.Credentials"
-            )
-        session = AuthorizedSession(credentials)
+            if isinstance(creds, Credentials):
+                credentials = creds
+            elif creds is not None and "oauth2client" in creds.__module__:
+                credentials = convert_credentials(creds)
+            elif isinstance(user, basestring):
+                credentials = get_creds(user, config, self.scope)
+            else:
+                raise TypeError(
+                    "Need to provide user as a string or credentials as "
+                    "google.auth.credentials.Credentials"
+                )
+            session = AuthorizedSession(credentials)
         super().__init__(credentials, session)
 
         self._root = self._drive_request(file_id="root", params={"fields": "name,id"})
