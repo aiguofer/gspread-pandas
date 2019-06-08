@@ -7,7 +7,7 @@ from betamax_serializers.pretty_json import PrettyJSONSerializer
 from Crypto.PublicKey import RSA
 from google.auth.transport.requests import AuthorizedSession
 
-from gspread_pandas import conf
+from gspread_pandas import Client, conf
 from gspread_pandas.util import decode
 
 # from betamax_json_body_serializer import JSONBodySerializer
@@ -53,8 +53,7 @@ def make_config(tmpdir_factory, config):
     return f.parent, f.name
 
 
-@pytest.fixture
-def authorizedsession_betamax_recorder(request, set_test_config):
+def _get_cassette_name(request):
     cassette_name = ""
 
     if request.module is not None:
@@ -64,11 +63,10 @@ def authorizedsession_betamax_recorder(request, set_test_config):
         cassette_name += request.cls.__name__ + "."
 
     cassette_name += request.function.__name__
-    session = AuthorizedSession(conf.get_creds())
-    if pytest.RECORD:
-        session.credentials.refresh(session._auth_request)
-    else:
-        session.credentials.token = pytest.DUMMY_TOKEN
+    return cassette_name
+
+
+def _set_up_recorder(session, request, cassette_name):
     recorder = Betamax(session)
     recorder.use_cassette(cassette_name)
     recorder.start()
@@ -78,12 +76,60 @@ def authorizedsession_betamax_recorder(request, set_test_config):
 
 
 @pytest.fixture
+def betamax_authorizedsession(request, set_test_config):
+    cassette_name = _get_cassette_name(request)
+    session = AuthorizedSession(conf.get_creds())
+    if pytest.RECORD:
+        session.credentials.refresh(session._auth_request)
+    else:
+        session.credentials.token = pytest.DUMMY_TOKEN
+    recorder = _set_up_recorder(session, request, cassette_name)
+
+    request.cls.session = session
+    request.cls.recorder = recorder
+
+    return session
+
+
+@pytest.fixture
+def betamax_client(request, betamax_authorizedsession):
+    request.cls.client = Client(session=betamax_authorizedsession)
+    return request.cls.client
+
+
+@pytest.fixture
+def betamax_client_bad_scope(request, set_test_config):
+    cassette_name = _get_cassette_name(request)
+    session = AuthorizedSession(
+        conf.get_creds(
+            scope=[
+                "https://www.googleapis.com/auth/spreadsheets",
+                "https://www.googleapis.com/auth/drive",
+            ]
+        )
+    )
+
+    if pytest.RECORD:
+        session.credentials.refresh(session._auth_request)
+    else:
+        session.credentials.token = pytest.DUMMY_TOKEN
+    recorder = _set_up_recorder(session, request, cassette_name)
+    client = Client(session=session)
+
+    request.cls.session = session
+    request.cls.recorder = recorder
+    request.cls.client = client
+
+    return client
+
+
+@pytest.fixture
 def set_test_config(set_sa_config):
     if pytest.RECORD:
         os.environ[conf.CONFIG_DIR_ENV_VAR] = str(os.getcwd())
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def sa_config_json():
     return {
         "type": "service_account",
@@ -99,7 +145,7 @@ def sa_config_json():
     }
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def oauth_config_json():
     return {
         "installed": {
@@ -114,7 +160,7 @@ def oauth_config_json():
     }
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def creds_json():
     return {
         "access_token": "",

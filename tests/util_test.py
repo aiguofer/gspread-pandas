@@ -281,9 +281,8 @@ def test_deprecate(recwarn):
         assert len(calls) == 3
 
 
-def test_monkey_patch_request(authorizedsession_betamax_recorder):
-    session = authorizedsession_betamax_recorder.session
-    c = Client(session.credentials, session)
+def test_monkey_patch_request(betamax_authorizedsession):
+    c = Client(betamax_authorizedsession.credentials, betamax_authorizedsession)
     s = c.open_by_key(DEMO_SHEET)
 
     # error gets turned into multiple lines by prettyjson serializer in betamax
