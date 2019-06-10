@@ -1,0 +1,161 @@
+{
+  "http_interactions": [
+    {
+      "recorded_at": "2019-06-11T00:40:02",
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": ""
+        },
+        "headers": {
+          "Accept": [
+            "*/*"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "User-Agent": [
+            "python-requests/2.21.0"
+          ],
+          "authorization": [
+            "Bearer <ACCESS_TOKEN>"
+          ]
+        },
+        "method": "GET",
+        "uri": "https://www.googleapis.com/drive/v3/files/root?fields=name%2Cid"
+      },
+      "response": {
+        "body": {
+          "base64_string": "H4sIAAAAAAAAAKvmUlDKTFGyUlAycPS0iAo0KdD1Nfb0D822DAhzVNIByuYl5qaC5H0rFVyKMstSlbhquQCVEs8GNgAAAA==",
+          "encoding": "UTF-8"
+        },
+        "headers": {
+          "Alt-Svc": [
+            "quic=\":443\"; ma=2592000; v=\"46,44,43,39\""
+          ],
+          "Cache-Control": [
+            "private, max-age=0, must-revalidate, no-transform"
+          ],
+          "Content-Encoding": [
+            "gzip"
+          ],
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ],
+          "Date": [
+            "Tue, 11 Jun 2019 00:40:02 GMT"
+          ],
+          "Expires": [
+            "Tue, 11 Jun 2019 00:40:02 GMT"
+          ],
+          "Server": [
+            "GSE"
+          ],
+          "Transfer-Encoding": [
+            "chunked"
+          ],
+          "Vary": [
+            "Origin",
+            "X-Origin"
+          ],
+          "X-Content-Type-Options": [
+            "nosniff"
+          ],
+          "X-Frame-Options": [
+            "SAMEORIGIN"
+          ],
+          "X-XSS-Protection": [
+            "1; mode=block"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "https://www.googleapis.com/drive/v3/files/root?fields=name%2Cid"
+      }
+    },
+    {
+      "recorded_at": "2019-06-11T00:40:02",
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": ""
+        },
+        "headers": {
+          "Accept": [
+            "*/*"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "User-Agent": [
+            "python-requests/2.21.0"
+          ],
+          "authorization": [
+            "Bearer <ACCESS_TOKEN>"
+          ]
+        },
+        "method": "GET",
+        "uri": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27&pageSize=1000&fields=files%28name%2Cid%2Cparents%29"
+      },
+      "response": {
+        "body": {
+          "base64_string": "H4sIAAAAAAAAAKXSyW6bUBgF4L2fArEOEqMJ2YEJNpjBzENVITBgoFwPgI1ClHevXSULuwKUdgGIq//c+wnO+wyCs6JKG/gF+jGDoPfrBcFFcn2FMV2ka6XRc5p8Q5gYN5Ud6CoMP1KokVR+pcNPf6b3EUhv80lRf64cozrdt197XhcwtX5FWVPWbXovlAdEdAVWKFzaWDr6PDTVGL7N/bzePp4eFZPRe8U+7QYVQVsl65gTkyZTwakH5whfb/xQaPsLelhywYhiMnqviAYNVO/6mtMSud3K1NkxUNS3KGdORm1XadXaHzFMRu8NRTOIeOM1JV1ISimsnMZKesUtQWDYiNCpmrAjtBHEZPQe0ebDDJQVnwOdPCIKIWr2L2bjsCMH4/42jylugR89LPNLp8WUHFiMapEhj6LP7MPBVtq0+OAH8OStyHQriao3Ks4hYrdVMCfUAJeiAR8p5VgTJA30gUe/riKJ8EtBMMWFy1L8yesXJ9lyHxzmOb5RhvvAF55ZHxDARtxhblCMoYTLBnHZi8gWuUGO9WEq+j2JJNg7kOcmkSGad5HN0lvxTk01TJYjRoWAEclk9HuS//g7k9G/W/JP9ZxdHx+z35x+n1c/BQAA",
+          "encoding": "UTF-8"
+        },
+        "headers": {
+          "Alt-Svc": [
+            "quic=\":443\"; ma=2592000; v=\"46,44,43,39\""
+          ],
+          "Cache-Control": [
+            "private, max-age=0, must-revalidate, no-transform"
+          ],
+          "Content-Encoding": [
+            "gzip"
+          ],
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ],
+          "Date": [
+            "Tue, 11 Jun 2019 00:40:02 GMT"
+          ],
+          "Expires": [
+            "Tue, 11 Jun 2019 00:40:02 GMT"
+          ],
+          "Server": [
+            "GSE"
+          ],
+          "Transfer-Encoding": [
+            "chunked"
+          ],
+          "Vary": [
+            "Origin",
+            "X-Origin"
+          ],
+          "X-Content-Type-Options": [
+            "nosniff"
+          ],
+          "X-Frame-Options": [
+            "SAMEORIGIN"
+          ],
+          "X-XSS-Protection": [
+            "1; mode=block"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27&pageSize=1000&fields=files%28name%2Cid%2Cparents%29"
+      }
+    }
+  ],
+  "recorded_with": "betamax/0.8.1"
+}
