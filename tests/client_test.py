@@ -1,4 +1,6 @@
+import pandas as pd
 import pytest
+from gspread.models import Worksheet
 from past.builtins import basestring
 
 from gspread_pandas import Client, Spread
@@ -8,7 +10,7 @@ from gspread_pandas import Client, Spread
 class TestClient:
     # just here just for autocompletion during development, during
     # test run this will be overridden by the above fixture
-    client = Client()
+    client = Client
 
     def test_root(self):
         root = self.client.root
@@ -94,6 +96,44 @@ class TestClient:
         ]
 
 
-@pytest.mark.usefixtures("betamax_client")
+@pytest.mark.usefixtures("betamax_spread")
 class TestSpread:
     spread = Spread
+
+    def test_spread(self):
+        assert isinstance(self.spread, Spread)
+        assert self.spread.email
+        assert self.spread.url
+        assert isinstance(self.spread.sheets, list)
+        assert isinstance(self.spread.sheet, Worksheet)
+        assert self.spread.sheets[0].id == self.spread.sheet.id
+
+    def test_df(self):
+        df = self.spread.sheet_to_df(header_rows=2, start_row=2)
+
+        assert isinstance(df.columns, pd.MultiIndex)
+        assert df.shape == (3, 9)
+
+        self.spread.df_to_sheet(
+            df,
+            start="A2",
+            replace=True,
+            sheet="Test df_to_sheet",
+            freeze_index=True,
+            freeze_headers=True,
+            add_filter=True,
+            merge_headers=True,
+        )
+
+        assert (
+            self.spread.sheet.get_all_values() == self.spread.sheets[1].get_all_values()
+        )
+
+        # find a different way to make sure merge ranges, frozen cells, etc match
+        # assert (
+        #     self.spread._spread_metadata["sheets"][1]
+        #     == self.spread._spread_metadata["sheets"][2]
+        # )
+
+        self.spread.unmerge_cells()
+        self.spread.delete_sheet("Test df_to_sheet")

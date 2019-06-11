@@ -7,7 +7,7 @@ from betamax_serializers.pretty_json import PrettyJSONSerializer
 from Crypto.PublicKey import RSA
 from google.auth.transport.requests import AuthorizedSession
 
-from gspread_pandas import Client, conf
+from gspread_pandas import Client, Spread, conf
 from gspread_pandas.util import decode
 
 # from betamax_json_body_serializer import JSONBodySerializer
@@ -95,6 +95,15 @@ def betamax_authorizedsession(request, set_test_config):
 def betamax_client(request, betamax_authorizedsession):
     request.cls.client = Client(session=betamax_authorizedsession)
     return request.cls.client
+
+
+@pytest.fixture
+def betamax_spread(request, betamax_client):
+    request.cls.spread = Spread(
+        "1u626GkYm1RAJSmHcGyd5_VsHNr_c_IfUcE_W-fQGxIM", sheet=0, client=betamax_client
+    )
+
+    return request.cls.spread
 
 
 @pytest.fixture
