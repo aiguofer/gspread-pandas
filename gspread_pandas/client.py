@@ -783,7 +783,7 @@ class Spread:
             for val, cell in zip(val_chunks, cells):
                 cell.value = val
 
-            self.self.sheet.update_cells(cells, "USER_ENTERED")
+            self.sheet.update_cells(cells, "USER_ENTERED")
 
     def _find_sheet(self, sheet):
         """Find a worksheet and return with index
