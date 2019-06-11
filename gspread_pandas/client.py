@@ -663,11 +663,7 @@ class Spread:
             DataFrame with the data from the Worksheet
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         vals = self.sheet.get_all_values()
         vals = self._fix_merge_values(vals)[start_row - 1 :]
@@ -711,9 +707,7 @@ class Spread:
             a tuple containing (num_rows,num_cols)
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet)
-
+        self._ensure_sheet(sheet)
         return (self.sheet.row_count, self.sheet.col_count) if self.sheet else None
 
     def _get_update_chunks(self, start, end, vals):
@@ -762,11 +756,7 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         for start_cell, end_cell, val_chunks in self._get_update_chunks(
             start, end, vals
@@ -784,6 +774,13 @@ class Spread:
                 cell.value = val
 
             self.sheet.update_cells(cells, "USER_ENTERED")
+
+    def _ensure_sheet(self, sheet):
+        if sheet is not None:
+            self.open_sheet(sheet, create=True)
+
+        if not self.sheet:
+            raise NoWorksheetException("No open worksheet")
 
     def _find_sheet(self, sheet):
         """Find a worksheet and return with index
@@ -846,11 +843,7 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         # TODO: if my merge request goes through, use sheet.frozen_*_count
         frozen_rows = self._sheet_metadata["properties"]["gridProperties"].get(
@@ -962,11 +955,7 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet, create=True)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         header = df.columns
         index_size = df.index.nlevels
@@ -1070,11 +1059,7 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet, create=True)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         if rows is None and cols is None:
             return
@@ -1106,11 +1091,7 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet, create=True)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         dims = self.get_sheet_dims()
 
@@ -1145,11 +1126,7 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet, create=True)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         self.spread.batch_update(
             {"requests": create_merge_cells_request(self.sheet.id, start, end)}
@@ -1176,11 +1153,7 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet, create=True)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         if end is None:
             end = self.get_sheet_dims()
