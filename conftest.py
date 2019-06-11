@@ -85,8 +85,9 @@ def betamax_authorizedsession(request, set_test_config):
         session.credentials.token = pytest.DUMMY_TOKEN
     recorder = _set_up_recorder(session, request, cassette_name)
 
-    request.cls.session = session
-    request.cls.recorder = recorder
+    if request.cls:
+        request.cls.session = session
+        request.cls.recorder = recorder
 
     return session
 
