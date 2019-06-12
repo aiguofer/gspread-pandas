@@ -90,11 +90,13 @@ the tool and generate credentials. Please use your web browser and go to
    the use of multiple accounts) or **Service account key** (if you prefer
    to have a service account interacting with spreadsheets).
 -  If you select **OAuth client ID**:
+
    -  Select **Application type** item as **Other** and give it a name.
    -  Click on **Create** button.
-   -  Click on **Download JSON** icon on the right side of created **OAuth
-      client IDs** and store the downloaded file on your file system.
+   -  Click on **Download JSON** icon on the right side of created 
+      **OAuth client IDs** and store the downloaded file on your file system.      
 -  If you select **Service account key**
+
    -  Click on **Service account** dropdown and select **New service account**
    -  Give it a **Service account name** and ignore the **Role** dropdown
       (unless you know you need this for something else, it's not necessary for
@@ -102,7 +104,7 @@ the tool and generate credentials. Please use your web browser and go to
    -  Note the **Service account ID** as you might need to give that user
       permission to interact with your spreadsheets
    -  Leave **Key type** as **JSON**
-   -  Click **Create** and store the downloaded file on your file system.
+   -  Click **Create** and store the downloaded file on your file system.   
 -  Please be aware, the file contains your private credentials, so take
    care of the file in the same way you care of your private SSH key;
    Move the downloaded JSON to ``~/.config/gspread_pandas/google_secret.json``
@@ -114,7 +116,8 @@ Thanks to similar project
 `df2gspread <https://github.com/maybelinot/df2gspread>`__ for this great
 description of how to get the client credentials.
 
-You can read more about it in the `configuration docs <https://gspread-pandas.readthedocs.io/en/latest/>`__
+You can read more about it in the `configuration docs 
+<https://gspread-pandas.readthedocs.io/en/latest/configuration.html>`__
 including how to change the default behavior.
 
 Example
