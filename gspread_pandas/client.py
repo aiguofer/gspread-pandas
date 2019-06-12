@@ -562,9 +562,7 @@ class Spread:
             )
             yield start_cell, end_cell, val_chunks
 
-    def update_cells(
-        self, start, end, vals, sheet=None, raw_columns=[], input_option="USER_ENTERED"
-    ):
+    def update_cells(self, start, end, vals, sheet=None, raw_columns=[]):
         """Update the values in a given range. The values should be listed in order
         from left to right across rows.
 
@@ -615,6 +613,8 @@ class Spread:
                 ), "raw_columns must be a list of ints"
                 raw_cells = [i for i in cells if i.col in raw_columns]
                 self.sheet.update_cells(raw_cells, "RAW")
+            else:
+                raw_cells = []
 
             user_cells = [i for i in cells if i not in raw_cells]
             self.sheet.update_cells(user_cells, "USER_ENTERED")
