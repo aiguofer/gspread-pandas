@@ -5,6 +5,7 @@ from re import match
 
 import numpy as np
 import pandas as pd
+import requests
 from google.auth.credentials import Credentials
 from google.auth.transport.requests import AuthorizedSession
 from gspread.client import Client as ClientV4
@@ -14,7 +15,8 @@ from gspread.exceptions import (
     SpreadsheetNotFound,
     WorksheetNotFound,
 )
-from gspread.models import Worksheet
+from gspread.models import Spreadsheet, Worksheet
+from gspread.utils import finditem
 from past.builtins import basestring
 
 from gspread_pandas.conf import default_scope, get_creds
@@ -26,6 +28,7 @@ from gspread_pandas.exceptions import (
 from gspread_pandas.util import (
     COL,
     ROW,
+    add_paths,
     chunks,
     convert_credentials,
     create_filter_request,
@@ -34,13 +37,16 @@ from gspread_pandas.util import (
     create_merge_headers_request,
     create_unmerge_cells_request,
     fillna,
+    folders_to_create,
     get_cell_as_tuple,
     get_range,
     map_cols_to_spread,
     monkey_patch_request,
     parse_df_col_names,
+    parse_permission,
     parse_sheet_headers,
     parse_sheet_index,
+    remove_keys_from_list,
 )
 
 __all__ = ["Spread", "Client"]
@@ -70,40 +76,59 @@ class Client(ClientV4):
         (default default_scope)
     creds : google.auth.credentials.Credentials
         optional, pass credentials if you have those already (default None)
+    session : google.auth.transport.requests.AuthorizedSession
+        optional, pass a google.auth.transport.requests.AuthorizedSession or a
+        requests.Session and creds (default None)
     """
 
     _email = None
+    _root = None
+    _dirs = None
 
-    def __init__(self, user="default", config=None, scope=default_scope, creds=None):
+    def __init__(
+        self, user="default", config=None, scope=default_scope, creds=None, session=None
+    ):
         #: `(list)` - Feeds included for the OAuth2 scope
         self.scope = scope
 
-        if isinstance(creds, Credentials):
-            credentials = creds
-        elif creds is not None and "oauth2client" in creds.__module__:
-            credentials = convert_credentials(creds)
-        elif isinstance(user, basestring):
-            credentials = get_creds(user, config, self.scope)
+        if isinstance(session, requests.Session):
+            credentials = getattr(session, "credentials", creds)
+            if not credentials:
+                raise TypeError(
+                    "If you provide a session, you must also provide credentials"
+                )
         else:
-            raise TypeError(
-                "Need to provide user as a string or credentials as "
-                "google.auth.credentials.Credentials"
-            )
-        session = AuthorizedSession(credentials)
+            if isinstance(creds, Credentials):
+                credentials = creds
+            elif creds is not None and "oauth2client" in creds.__module__:
+                credentials = convert_credentials(creds)
+            elif isinstance(user, basestring):
+                credentials = get_creds(user, config, self.scope)
+            else:
+                raise TypeError(
+                    "Need to provide user as a string or credentials as "
+                    "google.auth.credentials.Credentials"
+                )
+            session = AuthorizedSession(credentials)
         super().__init__(credentials, session)
 
-    def login(self):
-        pass
+        self._root = self._drive_request(file_id="root", params={"fields": "name,id"})
+        self.refresh_directories()
 
-    def get_email(self):
-        """Return the email address of the user
+    @property
+    def root(self):
+        """`(dict)` - the info for the top level Drive directory for current user"""
+        return self._root
 
-        Returns
-        -------
-        str
-            Email of the authorized user
-
+    @property
+    def directories(self):
+        """`(list)` - list of dicts for all avaliable directories for the current user
         """
+        return remove_keys_from_list(self._dirs, ["parents"])
+
+    @property
+    def email(self):
+        """`(str)` - E-mail for the currently authenticated user"""
         if not self._email:
             try:
                 self._email = self.request(
@@ -112,30 +137,87 @@ class Client(ClientV4):
             except Exception:
                 print(
                     """
-                Couldn't retrieve email. Delete credentials and authenticate again
-                """
+                    Couldn't retrieve email. Delete credentials and authenticate again
+                    """
                 )
 
         return self._email
 
-    def _make_drive_request(self, q):
+    def refresh_directories(self):
+        """Refresh list of directories for the current user"""
+        q = "mimeType='application/vnd.google-apps.folder'"
+        self._dirs = self._query_drive(q)
+        add_paths(self._root, self._dirs)
+
+    def login(self):
+        """Override login since AuthorizedSession now takes care of automatically
+        refreshing tokens when needed
+        """
+        pass
+
+    def _query_drive(self, q):
         files = []
         page_token = ""
-        url = "https://www.googleapis.com/drive/v3/files"
-        params = {"q": q, "pageSize": 1000}
+        params = {"q": q, "pageSize": 1000, "fields": "files(name,id,parents)"}
 
         while page_token is not None:
             if page_token:
                 params["pageToken"] = page_token
 
-            res = self.request("get", url, params=params).json()
+            res = self._drive_request("get", params=params)
             files.extend(res["files"])
             page_token = res.get("nextPageToken", None)
 
         return files
 
-    def list_spreadsheet_files(self):
+    def _drive_request(
+        self, method="get", file_id=None, params=None, data=None, headers=None
+    ):
+        url = "https://www.googleapis.com/drive/v3/files"
+        if file_id:
+            url += "/{}".format(file_id)
+        res = self.request(method, url, params=params, json=data)
+        if res.text:
+            return res.json()
+
+    def open(self, title):
+        """Opens a spreadsheet.
+
+        :param title: A title of a spreadsheet.
+        :type title: str
+
+        :returns: a :class:`~gspread.models.Spreadsheet` instance.
+
+        If there's more than one spreadsheet with same title the first one
+        will be opened.
+
+        :raises gspread.SpreadsheetNotFound: if no spreadsheet with
+                                             specified `title` is found.
+
+        >>> c = gspread.authorize(credentials)
+        >>> c.open('My fancy spreadsheet')
+
+        """
+        try:
+            properties = finditem(
+                lambda x: x["name"] == title, self.list_spreadsheet_files(title)
+            )
+
+            # Drive uses different terminology
+            properties["title"] = properties["name"]
+
+            return Spreadsheet(self, properties)
+        except StopIteration:
+            raise SpreadsheetNotFound
+
+    def list_spreadsheet_files(self, title=None):
         """Return all spreadsheets that the user has access to
+
+        Parameters
+        ----------
+        title : str
+            name of the spreadsheet, if none is passed it'll return every file
+            (default None)
 
         Returns
         -------
@@ -145,7 +227,9 @@ class Client(ClientV4):
 
         """
         q = "mimeType='application/vnd.google-apps.spreadsheet'"
-        return self._make_drive_request(q)
+        if title:
+            q += ' and name = "{}"'.format(title)
+        return self._list_spreadsheet_files(q)
 
     def list_spreadsheet_files_in_folder(self, folder_id):
         """Return all spreadsheets that the user has access to in a sepcific folder.
@@ -164,19 +248,31 @@ class Client(ClientV4):
         """
         q = (
             "mimeType='application/vnd.google-apps.spreadsheet'"
-            " and '{0}' in parents".format(folder_id)
+            " and '{}' in parents".format(folder_id)
         )
 
-        return self._make_drive_request(q)
+        return self._list_spreadsheet_files(q)
 
-    def find_folders(self, folder_name_query):
+    def _list_spreadsheet_files(self, q):
+        files = self._query_drive(q)
+
+        for f in files:
+            parent = next(
+                d for d in self._dirs + [self._root] if d["id"] in f["parents"]
+            )
+            f["path"] = parent.get("path", "/")
+
+        return remove_keys_from_list(files, ["parents"])
+
+    def find_folders(self, folder_name_query=""):
         """Return all folders that the user has access to containing
         ``folder_name_query`` in the name
 
         Parameters
         ----------
         folder_name_query : str
-            Case insensitive string to search in folder name
+            Case insensitive string to search in folder name. If empty,
+            it will return all folders.
 
         Returns
         -------
@@ -185,12 +281,11 @@ class Client(ClientV4):
             id, kind, mimeType, and name.
 
         """
-        q = (
-            "mimeType='application/vnd.google-apps.folder'"
-            " and name contains '{0}'".format(folder_name_query)
-        )
-
-        return self._make_drive_request(q)
+        return [
+            folder
+            for folder in self.directories
+            if folder_name_query.lower() in folder["name"].lower()
+        ]
 
     def find_spreadsheet_files_in_folders(self, folder_name_query):
         """Return all spreadsheets that the user has access to in all the folders that
@@ -210,10 +305,82 @@ class Client(ClientV4):
             with the following keys: id, kind, mimeType, and name.
 
         """
-        results = {}
-        for res in self.find_folders(folder_name_query):
-            results[res["name"]] = self.list_spreadsheet_files_in_folder(res["id"])
-        return results
+
+        return {
+            res["name"]: self.list_spreadsheet_files_in_folder(res["id"])
+            for res in self.find_folders(folder_name_query)
+        }
+
+    def create_folder(self, path, parents=True):
+        """Create a new folder in your Google drive.
+
+        Parameters
+        ----------
+        path : str
+            folder path
+        parents : bool
+            if True, create parent folders as needed (Default value = True)
+
+        Returns
+        -------
+        dict
+            information for the created directory
+        """
+        parent, to_create = folders_to_create(path, self._dirs)
+
+        if len(to_create) > 1 and parents is not True:
+            raise Exception(
+                "If you want to create nested directories pass parents=True"
+            )
+
+        for dr in to_create:
+            parent = self._drive_request(
+                "post",
+                params={"fields": "name,id,parents"},
+                data={
+                    "mimeType": "application/vnd.google-apps.folder",
+                    "name": dr,
+                    "parents": [parent["id"]],
+                },
+                headers={"Content-Type": "application/json"},
+            )
+
+        self.refresh_directories()
+        return parent
+
+    def move_file(self, file_id, path, create=False):
+        """Move a file to the given path.
+
+        Parameters
+        ----------
+        file_id : str
+            file id
+        path : str
+            folder path
+        create : bool
+            whether to create any missing folders (Default value = False)
+
+        Returns
+        -------
+
+        """
+        if path == "/":
+            folder_id = "root"
+        else:
+            parent, missing = folders_to_create(path, self._dirs)
+            if missing:
+                if not create:
+                    raise Exception("Folder does not exist")
+
+                parent = self.create_folder(path)
+            folder_id = parent["id"]
+
+        old_parents = self._drive_request(
+            "get", file_id, params={"fields": "parents"}
+        ).get("parents", [])
+
+        params = {"addParents": folder_id, "removeParents": ",".join(old_parents)}
+        self._drive_request("patch", file_id, params)
 
 
 class Spread:
@@ -257,6 +424,10 @@ class Spread:
     client : Client
         optionall, if you've already instanciated a Client, you can just pass
         that and it'll be used instead (default None)
+    permissions : list
+        a list of strings. See
+        :meth:`add_permissions <gspread_pandas.client.Spread.add_permissions>`
+        for the expected format
     """
 
     #: `(gspread.models.Spreadsheet)` - Currently open Spreadsheet
@@ -286,6 +457,7 @@ class Spread:
         user="default",
         creds=None,
         client=None,
+        permissions=None,
     ):
         if isinstance(client, Client):
             self.client = client
@@ -296,26 +468,33 @@ class Spread:
 
         self.open(spread, sheet, create_sheet, create_spread)
 
+        if permissions:
+            self.add_permissions(permissions)
+
     def __repr__(self):
-        base = "<gspread_pandas.client.Spread - '{0}'>"
+        base = "<gspread_pandas.client.Spread - '{}'>"
         meta = []
         if self.email:
-            meta.append("User: '{0}'".format(self.email))
+            meta.append("User: '{}'".format(self.email))
         if self.spread:
-            meta.append("Spread: '{0}'".format(self.spread.title))
+            meta.append("Spread: '{}'".format(self.spread.title))
         if self.sheet:
-            meta.append("Sheet: '{0}'".format(self.sheet.title))
+            meta.append("Sheet: '{}'".format(self.sheet.title))
         return base.format(", ".join(meta))
+
+    def __iter__(self):
+        for sheet in self.sheets:
+            yield sheet
 
     @property
     def email(self):
         """`(str)` - E-mail for the currently authenticated user"""
-        return self.client.get_email()
+        return self.client.email
 
     @property
     def url(self):
         """`(str)` - Url for this spreadsheet"""
-        return "https://docs.google.com/spreadsheets/d/{0}".format(self.spread.id)
+        return "https://docs.google.com/spreadsheets/d/{}".format(self.spread.id)
 
     @property
     def sheets(self):
@@ -429,7 +608,7 @@ class Spread:
         self.sheet = None
         if isinstance(sheet, int):
             if sheet >= len(self.sheets) or sheet < -1 * len(self.sheets):
-                raise WorksheetNotFound("Invalid sheet index {0}".format(sheet))
+                raise WorksheetNotFound("Invalid sheet index {}".format(sheet))
             self.sheet = self.sheets[sheet]
         else:
             self.sheet = self.find_sheet(sheet)
@@ -485,11 +664,7 @@ class Spread:
             DataFrame with the data from the Worksheet
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         vals = self.sheet.get_all_values()
         vals = self._fix_merge_values(vals)[start_row - 1 :]
@@ -533,9 +708,7 @@ class Spread:
             a tuple containing (num_rows,num_cols)
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet)
-
+        self._ensure_sheet(sheet)
         return (self.sheet.row_count, self.sheet.col_count) if self.sheet else None
 
     def _get_update_chunks(self, start, end, vals):
@@ -586,11 +759,7 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         for start_cell, end_cell, val_chunks in self._get_update_chunks(
             start, end, vals
@@ -607,6 +776,7 @@ class Spread:
             for val, cell in zip(val_chunks, cells):
                 cell.value = val
 
+
             if raw_columns != []:
                 assert isinstance(
                     raw_columns, list
@@ -618,6 +788,13 @@ class Spread:
 
             user_cells = [i for i in cells if i not in raw_cells]
             self.sheet.update_cells(user_cells, "USER_ENTERED")
+
+    def _ensure_sheet(self, sheet):
+        if sheet is not None:
+            self.open_sheet(sheet, create=True)
+
+        if not self.sheet:
+            raise NoWorksheetException("No open worksheet")
 
     def _find_sheet(self, sheet):
         """Find a worksheet and return with index
@@ -640,22 +817,22 @@ class Spread:
                 and sheet.lower() == worksheet.title.lower()
             ):
                 return ix, worksheet
-            if isinstance(sheet, Worksheet) and sheet == worksheet:
+            if isinstance(sheet, Worksheet) and sheet.id == worksheet.id:
                 return ix, worksheet
         return None, None
 
     def find_sheet(self, sheet):
-        """Find a given worksheet by title
+        """Find a given worksheet by title or by object comparison
 
         Parameters
         ----------
-        sheet : str
-            name of Worksheet
+        sheet : str,Worksheet
+            name of Worksheet or Worksheet object
 
         Returns
         -------
         Worksheet
-            a Worksheet by the given name or None if not found
+            the Worksheet by the given name or None if not found
 
 
         """
@@ -680,11 +857,7 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         # TODO: if my merge request goes through, use sheet.frozen_*_count
         frozen_rows = self._sheet_metadata["properties"]["gridProperties"].get(
@@ -754,6 +927,7 @@ class Spread:
         fill_value="",
         add_filter=False,
         merge_headers=False,
+        flatten_headers_sep=None,
     ):
         """Save a DataFrame into a worksheet.
 
@@ -788,17 +962,17 @@ class Spread:
         merge_headers : bool
             whether to merge cells in the header that have the same value
             (default False)
+        flatten_headers_sep : str
+            if you want to flatten your multi-headers to a single row,
+            you can pass the string that you'd like to use to concatenate
+            the levels, for example, ': ' (default None)
 
         Returns
         -------
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet, create=True)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         header = df.columns
         index_size = df.index.nlevels
@@ -811,7 +985,7 @@ class Spread:
         df_list = df.values.tolist()
 
         if headers:
-            header_rows = parse_df_col_names(df, index, index_size)
+            header_rows = parse_df_col_names(df, index, index_size, flatten_headers_sep)
             df_list = header_rows + df_list
 
         start = get_cell_as_tuple(start)
@@ -860,6 +1034,8 @@ class Spread:
                     )
                 }
             )
+
+        self.refresh_spread_metadata()
 
     def _fix_merge_values(self, vals):
         """Assign the top-left value to all cells in a merged range
@@ -911,11 +1087,7 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet, create=True)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         if rows is None and cols is None:
             return
@@ -947,11 +1119,7 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet, create=True)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         dims = self.get_sheet_dims()
 
@@ -962,6 +1130,8 @@ class Spread:
                 )
             }
         )
+
+        self.refresh_spread_metadata()
 
     def merge_cells(self, start, end, merge_type="MERGE_ALL", sheet=None):
         """Merge cells between the start and end cells. Use merge_type if you want
@@ -986,15 +1156,13 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet, create=True)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         self.spread.batch_update(
             {"requests": create_merge_cells_request(self.sheet.id, start, end)}
         )
+
+        self.refresh_spread_metadata()
 
     def unmerge_cells(self, start="A1", end=None, sheet=None):
         """Unmerge all cells between the start and end cells. Use defaults to unmerge
@@ -1017,11 +1185,7 @@ class Spread:
         None
 
         """
-        if sheet is not None:
-            self.open_sheet(sheet, create=True)
-
-        if not self.sheet:
-            raise NoWorksheetException("No open worksheet")
+        self._ensure_sheet(sheet)
 
         if end is None:
             end = self.get_sheet_dims()
@@ -1029,3 +1193,73 @@ class Spread:
         self.spread.batch_update(
             {"requests": create_unmerge_cells_request(self.sheet.id, start, end)}
         )
+
+        self.refresh_spread_metadata()
+
+    def add_permissions(self, permissions):
+        """Add permissions to the current spreadsheet.
+
+        The format of each string should be:
+        ``<id>|(<group>)|(<role>)|(<notify>)|(<require_link>)`` where:
+
+        <id> - email address of group or individual, domain, or 'anyone'
+        <group> - optional, if the id is a group e-mail, this needs to be 'group' or
+            'grp'
+        <role> - optional, one of 'owner', 'writer', or 'reader'. If ommited, 'reader'
+            will be used
+        <notify> - optional, if you don't want to notify the user, pass 'no' or 'false'
+        <require_link> - optional, if you want to require the user to have the link,
+            pass 'link'
+
+        For example, to allow anyone with a link in the group admins@example.com to
+        write when they have a link, but without sending a notification to the group:
+        ``admins@example.com|grp|owner|false|link``
+
+        Or if you want to give user@example.com reader permissions without a
+        notification:
+        ``user@example.com|no``
+
+        Or to give anyone read access:
+        ``anyone``
+
+        Parameters
+        ----------
+        permissions : list
+            A list of strings meeting the above mentioned format.
+
+
+        Returns
+        -------
+        None
+
+        """
+        for perm in map(parse_permission, permissions):
+            self.client.insert_permission(
+                self.spread.id, perm.pop("value", None), **perm
+            )
+
+    def list_permissions(self):
+        """List all permissions for this Spreadsheet
+
+        Returns
+        -------
+        list
+            a list of dicts indicating the permissions on this spreadsheet"""
+        return self.client.list_permissions(self.spread.id)
+
+    def move(self, path="/", create=True):
+        """Move the current spreadsheet to the specified path in your Google drive.
+        If the file is not currently in you drive, it will be added.
+
+        Parameters
+        ----------
+        path : str
+            folder path (Default value = "/")
+        create : bool
+            if true, create folders as needed (Default value = True)
+
+        Returns
+        -------
+
+        """
+        self.client.move_file(self.spread.id, path, create)

@@ -4,6 +4,7 @@ from time import sleep
 
 import numpy as np
 import pandas as pd
+from future.utils import iteritems
 from google.oauth2 import credentials as oauth2, service_account
 from gspread.client import Client as ClientV4
 from gspread.exceptions import APIError
@@ -14,6 +15,9 @@ ROW = START = 0
 COL = END = 1
 DEPRECATION_WARNINGS_ENABLED = True
 _WARNINGS_ALREADY_ENABLED = False
+
+# assuming no one will be 10 levels deep
+auto_generated_index_names = ["level_{}".format(i) for i in range(10)] + ["index"]
 
 
 def decode(strg):
@@ -38,22 +42,38 @@ def parse_sheet_index(df, index):
     return df
 
 
-def parse_df_col_names(df, include_index, index_size=1):
+def parse_df_col_names(df, include_index, index_size=1, flatten_sep=None):
     """Parse column names from a df into sheet headers"""
     headers = df.columns.tolist()
 
     # handle multi-index headers
     if len(headers) > 0 and type(headers[0]) == tuple:
-        headers = [list(row) for row in zip(*headers)]
 
-        # Pandas sets index name as top level col name when using reset_index
-        # move the index name to lowest header level since that reads more natural
+        if isinstance(flatten_sep, basestring):
+            headers = [
+                [
+                    # Remove blank elements and join using sep
+                    flatten_sep.join([ele for ele in header if ele != ""])
+                    for header in headers
+                ]
+            ]
+        else:
+            headers = [list(row) for row in zip(*headers)]
+
+        # Pandas sets index name as top level col name when using reset_index;
+        # move the index name to bottom level since that reads more natural
         if include_index:
             for i in range(index_size):
+                top = headers[0]
+                bottom = headers[-1]
+
                 # Pandas sets the index's column name as "index" if it doesn't have a
                 # name so we need to clean that up
-                headers[-1][i] = headers[0][i] if headers[0][i] != "index" else ""
-                headers[0][i] = ""
+                bottom[i] = top[i] if top[i] not in auto_generated_index_names else ""
+
+                if len(headers) > 1:
+                    top[i] = ""
+
     # handle regular columns
     else:
         headers = [headers]
@@ -396,3 +416,83 @@ def _convert_service_account(credentials):
     ]
 
     return service_account.Credentials.from_service_account_info(data, scopes=scopes)
+
+
+def parse_permission(perm):
+    """Convert the string permission into a dict to unpack for insert_permission"""
+    perm_dict = {}
+    perm = perm.split("|")
+    for part in perm:
+        if "@" in part:
+            perm_dict["value"] = part
+            perm_dict["perm_type"] = "user"
+        elif "." in part:
+            perm_dict["value"] = part
+            perm_dict["perm_type"] = "domain"
+        elif "anyone" == part:
+            perm_dict["perm_type"] = "anyone"
+        elif part in ["grp", "group"]:
+            perm_dict["perm_type"] = "group"
+        elif part in ["owner", "writer", "reader"]:
+            perm_dict["role"] = part
+        elif part in ["no", "false"]:
+            perm_dict["notify"] = False
+        elif part == "link":
+            perm_dict["with_link"] = True
+        perm_dict["role"] = perm_dict.get("role", "reader")
+    return perm_dict
+
+
+def remove_keys(dct, keys=[]):
+    """Remove keys from a dict"""
+    return {key: val for key, val in iteritems(dct) if key not in keys}
+
+
+def remove_keys_from_list(lst, keys=[]):
+    """Remove keys from a list of dicts"""
+    return [remove_keys(ele, keys) for ele in lst]
+
+
+def add_paths(root, dirs):
+    """Recursively build a `path` property to each dir. Pass in the root dir and a
+    list of all available dirs.
+    """
+    # TODO: handle scenario with folders having more than one parent
+    children = [dr for dr in dirs if root["id"] in dr.get("parents", [])]
+    path = root.get("path", "")
+
+    for child in children:
+        child["path"] = path + "/" + child["name"]
+        add_paths(child, dirs)
+
+
+def folders_to_create(search_path, dirs, base_path=""):
+    """Recursively traverse through folder paths looking for the longest existing
+    subpath. Return the dir info of the longest subpath and the directories that
+    need to be created.
+    """
+    # Allow user to pass in a string, but use a list in the recursion
+    if isinstance(search_path, list):
+        parts = search_path
+    else:
+        parts = search_path.strip("/").split("/")
+
+    parent = [dr for dr in dirs if dr.get("path", "") == base_path]
+    if len(parent) == 0:
+        parent = {"id": "root"}
+    else:
+        parent = parent.pop()
+
+    # Stop if we ran out of parts to create
+    if len(parts) == 0:
+        return parent, []
+
+    base_path += "/" + parts[0]
+
+    dirs = [dr for dr in dirs if dr.get("path", "").startswith(base_path)]
+
+    # If there's base_path matches, then keep looking for a longer path
+    if len(dirs) > 0:
+        return folders_to_create(parts[1:], dirs, base_path)
+    else:
+        return parent, parts

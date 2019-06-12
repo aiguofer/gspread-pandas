@@ -1,6 +1,6 @@
 import json
 import sys
-from os import environ
+from os import environ, name
 
 from future.utils import reraise
 from google.oauth2.credentials import Credentials as OAuthCredentials
@@ -18,11 +18,14 @@ except ImportError:
 
 
 __all__ = ["default_scope", "get_config", "get_creds"]
-
-_default_dir = "~/.config/gspread_pandas"
+if name == "nt":
+    _default_dir = Path(environ.get("APPDATA")) / "gspread_pandas"
+else:
+    _default_dir = Path(environ.get("HOME")) / ".config" / "gspread_pandas"
 _default_file = "google_secret.json"
 
 default_scope = [
+    "openid",
     "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/spreadsheets",
@@ -35,7 +38,7 @@ def get_config_dir():
     """Get the config directory. It will first look in the environment variable
     GSPREAD_PANDAS_CONFIG_DIR, but if it's not set it'll use ~/.config/gspread_pandas
     """
-    return Path(environ.get(CONFIG_DIR_ENV_VAR, _default_dir)).expanduser()
+    return Path(environ.get(CONFIG_DIR_ENV_VAR, _default_dir))
 
 
 def ensure_path(full_path):
@@ -89,12 +92,12 @@ def get_config(conf_dir=None, file_name=_default_file):
     with cfg_file.open() as fp:
         cfg = json.load(fp)
 
-    cfg["creds_dir"] = conf_dir / "creds"
-
     return cfg
 
 
-def get_creds(user="default", config=None, scope=default_scope, save=True):
+def get_creds(
+    user="default", config=None, scope=default_scope, creds_dir=None, save=True
+):
     """Get google google.auth.credentials.Credentials for the given user. If the user
     doesn't have previous creds, they will go through the OAuth flow to get new
     credentials which will be saved for later use. Credentials will be saved in
@@ -114,6 +117,9 @@ def get_creds(user="default", config=None, scope=default_scope, save=True):
         OAuth or "type", "client_email", "private_key", "private_key_id", and
         "client_id" for a Service Account. If None is passed, it will call
         :meth:`get_config() <get_config>` (Default value = None)
+    creds_dir : str
+        Optional, directory to load and store creds from/in. If None, it will use the
+        ``creds`` subdirectory in the default config location. (Default value = None)
     scope : list
         Optional, scope to use for Google Auth (Default value = default_scope)
 
@@ -132,12 +138,10 @@ def get_creds(user="default", config=None, scope=default_scope, save=True):
                 "Need to provide a user key as a string if not using a service account"
             )
 
-        if "creds_dir" not in config:
-            config["creds_dir"] = get_config_dir() / "creds"
+        if creds_dir is None:
+            creds_dir = get_config_dir() / "creds"
 
-        ensure_path(config["creds_dir"])
-
-        creds_file = config["creds_dir"] / user
+        creds_file = creds_dir / user
 
         if Path(creds_file).exists():
             # need to convert Path to string for python 2.7
@@ -157,6 +161,7 @@ def get_creds(user="default", config=None, scope=default_scope, save=True):
                 "scopes": creds.scopes,
             }
 
+            ensure_path(creds_dir)
             creds_file.write_text(decode(json.dumps(creds_data)))
 
         return creds

@@ -2,7 +2,13 @@
    :maxdepth: 5
 
    getting_started
+   configuration
    modules
+   contributing
+
+.. toctree::
+   :maxdepth: 1
+
    changelog
 
 

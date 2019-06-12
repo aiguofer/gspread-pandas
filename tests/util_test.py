@@ -59,6 +59,15 @@ def df_multiheader_w_multiindex():
 
 
 @pytest.fixture
+def df_multiheader_w_unnamed_multiindex():
+    data = [[1, 2], [3, 4]]
+    cols = pd.MultiIndex.from_tuples([("col1", "subcol1"), ("col1", "subcol2")])
+    ix = pd.MultiIndex.from_tuples([("row1", "subrow1"), ("row1", "subrow2")])
+    df = pd.DataFrame(data, columns=cols, index=ix)
+    return df.reset_index()
+
+
+@pytest.fixture
 def df_multiheader_blank_top():
     data = [[1], [3]]
     cols = pd.MultiIndex.from_tuples([("", "subcol1")])
@@ -141,6 +150,39 @@ class Test_parse_df_col_names:
     def test_multiheader_w_multiindex(self, df_multiheader_w_multiindex):
         expected = [["", "", "col1", "col1"], ["l1", "l2", "subcol1", "subcol2"]]
         assert util.parse_df_col_names(df_multiheader_w_multiindex, True, 2) == expected
+
+    def test_multiheader_no_index_flatten(self, df_multiheader):
+        expected = [["col1 subcol1", "col1 subcol2"]]
+        assert (
+            util.parse_df_col_names(df_multiheader, False, flatten_sep=" ") == expected
+        )
+
+    def test_multiheader_w_index_flatten(self, df_multiheader_w_index):
+        expected = [["test_index", "col1 subcol1", "col1 subcol2"]]
+        assert (
+            util.parse_df_col_names(df_multiheader_w_index, True, flatten_sep=" ")
+            == expected
+        )
+
+    def test_multiheader_w_multiindex_flatten(self, df_multiheader_w_multiindex):
+        expected = [["l1", "l2", "col1 subcol1", "col1 subcol2"]]
+        assert (
+            util.parse_df_col_names(
+                df_multiheader_w_multiindex, True, 2, flatten_sep=" "
+            )
+            == expected
+        )
+
+    def test_multiheader_w_unnamed_multiindex_flatten(
+        self, df_multiheader_w_unnamed_multiindex
+    ):
+        expected = [["", "", "col1 subcol1", "col1 subcol2"]]
+        assert (
+            util.parse_df_col_names(
+                df_multiheader_w_unnamed_multiindex, True, 2, flatten_sep=" "
+            )
+            == expected
+        )
 
 
 class Test_parse_sheet_headers:
@@ -239,9 +281,8 @@ def test_deprecate(recwarn):
         assert len(calls) == 3
 
 
-def test_monkey_patch_request(authorizedsession_betamax_recorder):
-    session = authorizedsession_betamax_recorder.session
-    c = Client(session.credentials, session)
+def test_monkey_patch_request(betamax_authorizedsession):
+    c = Client(betamax_authorizedsession.credentials, betamax_authorizedsession)
     s = c.open_by_key(DEMO_SHEET)
 
     # error gets turned into multiple lines by prettyjson serializer in betamax
@@ -313,3 +354,120 @@ def test_convert(creds_json, sa_config_json):
 
     assert isinstance(util.convert_credentials(oauth), credentials.Credentials)
     assert isinstance(util.convert_credentials(sa), service_account.Credentials)
+
+
+def test_parse_permissions():
+    tests = [
+        (
+            "aiguo.fernandez@gmail.com",
+            {
+                "value": "aiguo.fernandez@gmail.com",
+                "perm_type": "user",
+                "role": "reader",
+            },
+        ),
+        (
+            "aiguofer.com|owner",
+            {"value": "aiguofer.com", "perm_type": "domain", "role": "owner"},
+        ),
+        ("anyone|writer", {"perm_type": "anyone", "role": "writer"}),
+        (
+            "difernan@redhat.com|no",
+            {
+                "value": "difernan@redhat.com",
+                "perm_type": "user",
+                "role": "reader",
+                "notify": False,
+            },
+        ),
+        ("anyone|link", {"perm_type": "anyone", "role": "reader", "with_link": True}),
+    ]
+
+    for test in tests:
+        assert util.parse_permission(test[TEST]) == test[ANSWER]
+
+
+def test_remove_keys():
+    tests = [
+        ([{}], {}),
+        ([{}, ["stuff"]], {}),
+        ([{"foo": "bar", "bar": "foo"}, ["foo"]], {"bar": "foo"}),
+        ([{"foo": "bar", "bar": "foo"}, ["foo", "bar"]], {}),
+        ([{"foo": "bar", "bar": "foo"}], {"foo": "bar", "bar": "foo"}),
+        ([{"foo": "bar", "bar": "foo"}, ["doesntexist"]], {"foo": "bar", "bar": "foo"}),
+    ]
+
+    for test in tests:
+        assert util.remove_keys(*test[TEST]) == test[ANSWER]
+
+
+def test_remove_keys_from_list():
+    tests = [
+        (
+            [[{"foo": "bar", "bar": "foo"}, {"foo": "fighter"}], ["foo"]],
+            [{"bar": "foo"}, {}],
+        ),
+        (
+            [[{"foo": "bar", "bar": "foo"}, {"foo": "fighter"}], ["bar"]],
+            [{"foo": "bar"}, {"foo": "fighter"}],
+        ),
+        ([[], ["foo", "bar"]], []),
+        ([[]], []),
+    ]
+
+    for test in tests:
+        assert util.remove_keys_from_list(*test[TEST]) == test[ANSWER]
+
+
+def test_add_paths():
+    tests = [
+        (
+            [
+                {"id": "root"},
+                [
+                    {"id": "1", "name": "sub", "parents": ["root"]},
+                    {"id": "2", "name": "subsub", "parents": ["1"]},
+                    {"id": "3", "name": "sub1", "parents": ["root"]},
+                    {"id": "4", "name": "subsubsub", "parents": ["2"]},
+                ],
+            ],
+            [
+                {"id": "1", "name": "sub", "parents": ["root"], "path": "/sub"},
+                {"id": "2", "name": "subsub", "parents": ["1"], "path": "/sub/subsub"},
+                {"id": "3", "name": "sub1", "parents": ["root"], "path": "/sub1"},
+                {
+                    "id": "4",
+                    "name": "subsubsub",
+                    "parents": ["2"],
+                    "path": "/sub/subsub/subsubsub",
+                },
+            ],
+        )
+    ]
+
+    for test in tests:
+        util.add_paths(*test[TEST])
+        assert test[TEST][1] == test[ANSWER]
+
+
+def test_folders_to_create():
+    dirs = [
+        {"id": "1", "name": "sub", "parents": ["root"], "path": "/sub"},
+        {"id": "2", "name": "subsub", "parents": ["1"], "path": "/sub/subsub"},
+        {"id": "3", "name": "sub1", "parents": ["root"], "path": "/sub1"},
+        {
+            "id": "4",
+            "name": "subsubsub",
+            "parents": ["2"],
+            "path": "/sub/subsub/subsubsub",
+        },
+    ]
+
+    tests = [
+        ("/does/not/exist", ({"id": "root"}, ["does", "not", "exist"])),
+        ("/sub/does/not/exist", (dirs[0], ["does", "not", "exist"])),
+        ("/sub/subsub", (dirs[1], [])),
+    ]
+
+    for test in tests:
+        assert util.folders_to_create(test[TEST], dirs) == test[ANSWER]
