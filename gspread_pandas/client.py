@@ -748,7 +748,7 @@ class Spread:
         start=(1, 1),
         replace=False,
         sheet=None,
-        raw_columns=[],
+        raw_column_names=[],
         freeze_index=False,
         freeze_headers=False,
         fill_value="",
@@ -775,7 +775,7 @@ class Spread:
             before saving,
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
             (default None)
-        raw_columns : list, str
+        raw_column_names : list, str
             optional, list of columns from your dataframe that you want interpreted as RAW input in google sheets
         freeze_index : bool
             whether to freeze the index columns (default False)
@@ -829,9 +829,11 @@ class Spread:
             # make sure sheet is large enough
             self.sheet.resize(max(sheet_rows, req_rows), max(sheet_cols, req_cols))
 
-        if raw_columns != []:
+        if raw_column_names != []:
             mapped = map_cols_to_spread(start, end, df.columns.tolist())
-            raw_columns = [i[0] for i in mapped if i[1] in raw_columns]
+            raw_columns = [i[0] for i in mapped if i[1] in raw_column_names]
+        else:
+            raw_columns = []
 
         self.update_cells(
             start=start,
