@@ -3,7 +3,7 @@ import pytest
 from gspread.models import Worksheet
 from past.builtins import basestring
 
-from gspread_pandas import Client, Spread
+from gspread_pandas import Client, Spread, util
 
 
 @pytest.mark.usefixtures("betamax_client")
@@ -125,15 +125,38 @@ class TestSpread:
             merge_headers=True,
         )
 
+        # ensre values are the same
         assert (
-            self.spread.sheet.get_all_values() == self.spread.sheets[1].get_all_values()
+            self.spread.sheets[1].get_all_values()
+            == self.spread.sheets[2].get_all_values()
         )
 
-        # find a different way to make sure merge ranges, frozen cells, etc match
-        # assert (
-        #     self.spread._spread_metadata["sheets"][1]
-        #     == self.spread._spread_metadata["sheets"][2]
-        # )
+        sheets_metadata = self.spread._spread_metadata["sheets"]
+
+        # ensure merged cells match
+        assert util.remove_keys_from_list(
+            sheets_metadata[1]["merges"], ["sheetId"]
+        ) == util.remove_keys_from_list(sheets_metadata[2]["merges"], ["sheetId"])
+
+        # ensure basic filter matches
+        assert util.remove_keys(
+            sheets_metadata[1]["basicFilter"]["range"], ["sheetId"]
+        ) == util.remove_keys(sheets_metadata[2]["basicFilter"]["range"], ["sheetId"])
+
+        # ensure frozen cols/rows and dims match
+        assert (
+            sheets_metadata[1]["properties"]["gridProperties"]
+            == sheets_metadata[2]["properties"]["gridProperties"]
+        )
 
         self.spread.unmerge_cells()
+        sheets_metadata = self.spread._spread_metadata["sheets"]
+
+        # ensure merged cells don't match
+        assert util.remove_keys_from_list(
+            sheets_metadata[1]["merges"], ["sheetId"]
+        ) != util.remove_keys_from_list(
+            sheets_metadata[2].get("merges", {}), ["sheetId"]
+        )
+
         self.spread.delete_sheet("Test df_to_sheet")

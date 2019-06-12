@@ -1009,6 +1009,8 @@ class Spread:
                 }
             )
 
+        self.refresh_spread_metadata()
+
     def _fix_merge_values(self, vals):
         """Assign the top-left value to all cells in a merged range
 
@@ -1103,6 +1105,8 @@ class Spread:
             }
         )
 
+        self.refresh_spread_metadata()
+
     def merge_cells(self, start, end, merge_type="MERGE_ALL", sheet=None):
         """Merge cells between the start and end cells. Use merge_type if you want
         to change the behavior of the merge.
@@ -1131,6 +1135,8 @@ class Spread:
         self.spread.batch_update(
             {"requests": create_merge_cells_request(self.sheet.id, start, end)}
         )
+
+        self.refresh_spread_metadata()
 
     def unmerge_cells(self, start="A1", end=None, sheet=None):
         """Unmerge all cells between the start and end cells. Use defaults to unmerge
@@ -1161,6 +1167,8 @@ class Spread:
         self.spread.batch_update(
             {"requests": create_unmerge_cells_request(self.sheet.id, start, end)}
         )
+
+        self.refresh_spread_metadata()
 
     def add_permissions(self, permissions):
         """Add permissions to the current spreadsheet.
