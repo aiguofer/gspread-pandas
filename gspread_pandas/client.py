@@ -40,6 +40,7 @@ from gspread_pandas.util import (
     folders_to_create,
     get_cell_as_tuple,
     get_range,
+    map_cols_to_spread,
     monkey_patch_request,
     parse_df_col_names,
     parse_permission,
@@ -734,7 +735,7 @@ class Spread:
             )
             yield start_cell, end_cell, val_chunks
 
-    def update_cells(self, start, end, vals, sheet=None):
+    def update_cells(self, start, end, vals, sheet=None, raw_columns=[]):
         """Update the values in a given range. The values should be listed in order
         from left to right across rows.
 
@@ -750,6 +751,8 @@ class Spread:
             optional, if you want to open a different sheet first,
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
             (default None)
+        raw_columns : list, int
+            optional, list of column indexes in the google sheet that should be interpreted as "RAW" input
 
         Returns
         -------
@@ -773,7 +776,18 @@ class Spread:
             for val, cell in zip(val_chunks, cells):
                 cell.value = val
 
-            self.sheet.update_cells(cells, "USER_ENTERED")
+
+            if raw_columns != []:
+                assert isinstance(
+                    raw_columns, list
+                ), "raw_columns must be a list of ints"
+                raw_cells = [i for i in cells if i.col in raw_columns]
+                self.sheet.update_cells(raw_cells, "RAW")
+            else:
+                raw_cells = []
+
+            user_cells = [i for i in cells if i not in raw_cells]
+            self.sheet.update_cells(user_cells, "USER_ENTERED")
 
     def _ensure_sheet(self, sheet):
         if sheet is not None:
@@ -907,6 +921,7 @@ class Spread:
         start=(1, 1),
         replace=False,
         sheet=None,
+        raw_column_names=[],
         freeze_index=False,
         freeze_headers=False,
         fill_value="",
@@ -934,6 +949,8 @@ class Spread:
             before saving,
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
             (default None)
+        raw_column_names : list, str
+            optional, list of columns from your dataframe that you want interpreted as RAW input in google sheets
         freeze_index : bool
             whether to freeze the index columns (default False)
         freeze_headers : bool
@@ -977,6 +994,8 @@ class Spread:
         req_rows = len(df_list) + (start[ROW] - 1)
         req_cols = len(df_list[0]) + (start[COL] - 1) or 1
 
+        end = (req_rows, req_cols)
+
         if replace:
             # this takes care of resizing
             self.clear_sheet(req_rows, req_cols)
@@ -984,10 +1003,17 @@ class Spread:
             # make sure sheet is large enough
             self.sheet.resize(max(sheet_rows, req_rows), max(sheet_cols, req_cols))
 
+        if raw_column_names != []:
+            mapped = map_cols_to_spread(start, end, df.columns.tolist())
+            raw_columns = [i[0] for i in mapped if i[1] in raw_column_names]
+        else:
+            raw_columns = []
+
         self.update_cells(
             start=start,
-            end=(req_rows, req_cols),
+            end=end,
             vals=[str(val) for row in df_list for val in row],
+            raw_columns=raw_columns,
         )
 
         self.freeze(

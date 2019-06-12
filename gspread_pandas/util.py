@@ -233,6 +233,15 @@ def get_range(start, end):
     return "{0}:{1}".format(rowcol_to_a1(*start_int), rowcol_to_a1(*end_int))
 
 
+def map_cols_to_spread(start, end, cols):
+    """map df columns to spreadsheet columns"""
+    start_col = get_cell_as_tuple(start)[COL]
+    end_col = get_cell_as_tuple(end)[COL]
+    col_range = range(start_col, end_col + 1)
+    assert len(cols) == len(col_range), "df columns do not match spread columns"
+    return list(zip(col_range, cols))
+
+
 def create_merge_cells_request(sheet_id, start, end, merge_type="MERGE_ALL"):
     """
     Create v4 API request to merge rows and/or columns for a
