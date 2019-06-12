@@ -25,6 +25,7 @@ else:
 _default_file = "google_secret.json"
 
 default_scope = [
+    "openid",
     "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/spreadsheets",
