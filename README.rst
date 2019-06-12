@@ -114,57 +114,8 @@ Thanks to similar project
 `df2gspread <https://github.com/maybelinot/df2gspread>`__ for this great
 description of how to get the client credentials.
 
-User Credentials
-----------------
-
-Once you have your client credentials, you can have multiple user
-credentials stored in the same machine. This can be useful when you have
-a shared server (for example with a Jupyter notebook server) with
-multiple people that may want to use the library. The ``user`` parameter to
-``Spread`` must be the key identifying a user's credentials, by default it
-will store the creds using ``default`` as the key. The first
-time this is called for a specific key, you will have to authenticate
-through a text based OAuth prompt; this makes it possible to run on a headless
-server through ssh or through a Jupyter notebook. After this, the
-credentials for that user will be stored (by default in
-``~/.config/gspread_pandas/creds`` or you can manually set it in
-``GSPREAD_PANDAS_CONFIG_DIR`` env var) and the tokens will berefreshed
-automatically any time the tool is used.
-
-Users will only be able to interact with Spreadsheets that they have
-access to.
-
-Handling Authentication
------------------------
-
-In the backend, the library is leveraging
-`Google's google-auth <https://google-auth.readthedocs.io/en/latest/>`__ to
-handle authentication. It conveniently stores everything as described
-above so that you don't have to worry about boiler plate code to handle auth.
-However, if you need to customize how you handle authentication you can do so
-in a few different ways. You can change the directory where everything is stored
-using the ``GSPREAD_PANDAS_CONFIG_DIR`` env var. You can also generate your own
-``google.auth.credentials.Credentials`` and pass them in when instanciating a
-``Client`` or ``Spread`` object. For other ways to customize authentication, see
-``gspread_pandas.conf.get_config`` and ``gspread_pandas.conf.get_creds``
-
-Contributing
-============
-
-Code should be run through black, isort, and flake8 before being merged. Pre-commit
-takes care of it for you, but you need to have Python 3 installed to be able to run
-black. To contribute, please fork the repo, create a feature branch, push it to your
-repo, then create a pull request.
-
-To install and set up the environment after you fork it (replace `aiguofer` with your
-username):
-
-.. code-block:: console
-
-    $ git clone https://github.com/aiguofer/gspread-pandas.git && cd gspread-pandas
-    $ pip install -e ".[dev]"
-    $ pre-commit install
-
+You can read more about it in the `configuration docs <https://gspread-pandas.readthedocs.io/en/latest/>`__
+including how to change the default behavior.
 
 Example
 =======
