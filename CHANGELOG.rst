@@ -8,6 +8,42 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Added
+-----
+
+-  Test python 3.7, Windows, and MacOS
+-  You can now iterate over worksheets like: ``for sheet in spread``
+-  ``Spread.df_to_sheet`` can now flatten multi-level headers using the
+   ``flatten_headers_sep`` param
+-  Add ability to set permissions on spreadsheets
+-  Add ability to create and move folders and spreadsheets
+-  A session can now be passed directly to a ``Client``
+
+Removed
+-------
+
+-  BREAKING: Removed ``start/end_row/col`` params from add_filter
+-  BREAKING: Removed ``user_creds_or_client`` param from Spread
+-  BREAKING: Removed ``user_or_creds`` param from Client
+
+Changed
+-------
+
+-  The ``credentials`` param is now called ``creds`` everywhere
+-  Test suite is now a lot more robust
+-  Use google-auth instead of the now deprecated oauth2client library.
+   This moves the retry code into that library.
+-  Default config will now be in ``C:\Users\<user>\AppData\gspread_pandas``
+   on Windows
+
+
+Fixed
+-----
+
+-  Things should now work when passing a ``Worksheet`` object to ``Spread.open``
+
+
 [1.3.1] - 2019-05-17
 -----------------------------
 
