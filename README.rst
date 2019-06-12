@@ -41,11 +41,12 @@ Some key goals/features:
 -  Allow storing different user credentials or using Service Accounts
 -  Automatically handle token refreshes
 -  Enable handling of frozen rows and columns
--  Enable handling of merged cells
--  Nicely handle large data sets and retries
+-  Enable handling of merged cells when pulling data
+-  Nicely handle large data sets and auto-retries
 -  Enable creation of filters
 -  Handle retries when exceeding 100s quota
--  Handle cell merges with option to merge multi-level header cells
+-  When pushing DataFrames with MultiIndex columns, allow merging or flattening headers
+-  Ability to nicely handle Spreadsheet permissions
 
 Installation / Usage
 ====================
@@ -137,13 +138,13 @@ Handling Authentication
 -----------------------
 
 In the backend, the library is leveraging
-`Google's oauth2client <http://oauth2client.readthedocs.io/en/latest/>`__ to
+`Google's google-auth <https://google-auth.readthedocs.io/en/latest/>`__ to
 handle authentication. It conveniently stores everything as described
 above so that you don't have to worry about boiler plate code to handle auth.
 However, if you need to customize how you handle authentication you can do so
 in a few different ways. You can change the directory where everything is stored
 using the ``GSPREAD_PANDAS_CONFIG_DIR`` env var. You can also generate your own
-``oauth2client.client.OAuth2Credentials`` and pass them in when instanciating a
+``google.auth.credentials.Credentials`` and pass them in when instanciating a
 ``Client`` or ``Spread`` object. For other ways to customize authentication, see
 ``gspread_pandas.conf.get_config`` and ``gspread_pandas.conf.get_creds``
 
