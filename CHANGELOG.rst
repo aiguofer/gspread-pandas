@@ -19,6 +19,9 @@ Added
 -  Add ability to set permissions on spreadsheets
 -  Add ability to create and move folders and spreadsheets
 -  A session can now be passed directly to a ``Client``
+-  A ``raw_column_names`` param to ``Spread.df_to_sheet`` to force specific
+   columns to be sent to the Google Sheets API as RAW input so it doesn't
+   get interpreted as a number, date, etc.
 
 Removed
 -------
