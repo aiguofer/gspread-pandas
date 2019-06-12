@@ -2,6 +2,7 @@
    :maxdepth: 5
 
    getting_started
+   configuration
    modules
    changelog
 
