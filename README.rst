@@ -22,6 +22,17 @@ Links:
 -  `Source code <https://github.com/aiguofer/gspread-pandas>`_
 -  `Short video tutorial <https://youtu.be/2yIcNYzfzPw>`_
 
+.. attention:: Upgrading from < 2.0
+
+    If you are upgrading, the ``user`` is now an optional param that 
+    uses ``default`` as the default. If you're a single user, you might
+    want to re-name your credentials to ``default`` so you can stop 
+    specifying it:
+    
+    .. code-block:: console
+        
+        mv ~/.config/gspread_pandas/creds{<old_name>,default}
+
 Overview
 ========
 
