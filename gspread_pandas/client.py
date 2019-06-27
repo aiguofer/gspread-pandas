@@ -257,10 +257,13 @@ class Client(ClientV4):
         files = self._query_drive(q)
 
         for f in files:
-            parent = next(
-                d for d in self._dirs + [self._root] if d["id"] in f["parents"]
-            )
-            f["path"] = parent.get("path", "/")
+            try:
+                parent = next(
+                    d for d in self._dirs + [self._root] if d["id"] in f.get("parents", {})
+                )
+                f["path"] = parent.get("path", "/")
+            except StopIteration:
+                f["path"] = "/"
 
         return remove_keys_from_list(files, ["parents"])
 
