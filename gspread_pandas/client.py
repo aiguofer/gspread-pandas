@@ -256,14 +256,21 @@ class Client(ClientV4):
     def _list_spreadsheet_files(self, q):
         files = self._query_drive(q)
 
-        for f in files:
+        for fil3 in files:
             try:
+                # if a file is in multiple directories then it'll
+                # have multiple parents. However, this adds complexity
+                # so we'll just choose the first one to build the path
                 parent = next(
-                    d for d in self._dirs + [self._root] if d["id"] in f.get("parents", {})
+                    directory
+                    for directory in self._dirs + [self._root]
+                    if directory["id"] in fil3.get("parents", {})
                 )
-                f["path"] = parent.get("path", "/")
+                fil3["path"] = parent.get("path", "/")
             except StopIteration:
-                f["path"] = "/"
+                # Files that are visible to a ServiceAccount but not
+                # in the root will not have the 'parents' property
+                fil3["path"] = None
 
         return remove_keys_from_list(files, ["parents"])
 
