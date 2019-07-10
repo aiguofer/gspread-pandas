@@ -755,7 +755,8 @@ class Spread:
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
             (default None)
         raw_columns : list, int
-            optional, list of column indexes in the google sheet that should be interpreted as "RAW" input
+            optional, list of column indexes in the google sheet that should be
+            interpreted as "RAW" input
 
         Returns
         -------
@@ -778,7 +779,6 @@ class Spread:
 
             for val, cell in zip(val_chunks, cells):
                 cell.value = val
-
 
             if raw_columns != []:
                 assert isinstance(
@@ -953,7 +953,8 @@ class Spread:
             see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
             (default None)
         raw_column_names : list, str
-            optional, list of columns from your dataframe that you want interpreted as RAW input in google sheets
+            optional, list of columns from your dataframe that you want
+            interpreted as RAW input in google sheets
         freeze_index : bool
             whether to freeze the index columns (default False)
         freeze_headers : bool
