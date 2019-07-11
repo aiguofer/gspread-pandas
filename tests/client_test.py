@@ -111,6 +111,17 @@ class TestSpread:
         assert isinstance(self.spread.sheet, Worksheet)
         assert self.spread.sheets[0].id == self.spread.sheet.id
 
+    def test_open_sheet(self):
+        sheet = self.spread.sheets[0]
+        self.spread.open_sheet(0)
+        by_index = self.spread.sheet
+        self.spread.open_sheet(sheet)
+        by_sheet = self.spread.sheet
+        self.spread.open_sheet(sheet.title)
+        by_name = self.spread.sheet
+
+        assert by_index.id == by_sheet.id == by_name.id
+
     def test_df(self):
         df = self.spread.sheet_to_df(header_rows=2, start_row=2)
 
