@@ -61,7 +61,6 @@ class Client(ClientV4):
     _root = None
     _dirs = None
     _load_dirs = False
-    directories = None
 
     def __init__(
         self,
@@ -97,13 +96,6 @@ class Client(ClientV4):
         super().__init__(credentials, session)
 
         self._root = self._drive_request(file_id="root", params={"fields": "name,id"})
-        self.directories = property(
-            self._get_dirs,
-            doc=(
-                "`(list)` - list of dicts for all avaliable "
-                "directories for the current user"
-            ),
-        )
 
         if load_dirs:
             self.refresh_directories()
@@ -125,6 +117,14 @@ class Client(ClientV4):
             return remove_keys_from_list(self._dirs, ["parents"])
         else:
             return self._dirs
+
+    directories = property(
+        _get_dirs,
+        doc=(
+            "`(list)` - list of dicts for all avaliable "
+            "directories for the current user"
+        ),
+    )
 
     @property
     def email(self):
