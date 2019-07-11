@@ -1,3 +1,3 @@
 #!/bin/sh
 
-git push origin master --tags
+tox && git push origin master --tags
