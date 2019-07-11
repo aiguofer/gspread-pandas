@@ -8,6 +8,23 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Added
+-----
+
+-  Added test for open_sheet
+
+Fixed
+-----
+
+-  Client directories property now works as expected
+-  Various fixes for tests
+
+Changed
+-------
+
+-  Tox must run correctly before being able to push a new tag
+
 [2.1.1] - 2019-07-10
 -----------------------------
 
