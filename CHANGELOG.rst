@@ -8,6 +8,31 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Added
+-----
+
+-  Client now has an optional ``load_dirs`` param which default to ``False``
+
+Changed
+-------
+
+-  BREAKING: Refactored ``Spread`` into its own file. If you were importing
+   like ``from gspread_pandas.client import Spread`` you will need to change
+   to ``from gspread_pandas.spread import Spread``.
+-  Directories and paths are no longer loaded by default. However, if you try
+   to use any functionality that requires it, it'll load it at that point.
+
+Fixed
+-----
+
+-  If a file doesn't have ``parents`` it'll no longer break (thanks @shredding)
+   (`#29 <https://github.com/aiguofer/gspread-pandas/issues/29>`_)
+-  $XDG_CONFIG_HOME should now be respected
+-  If you don't have Drive API access in the scope, it should now still work and
+   print a message instead
+
+
 [2.0.0] - 2019-06-12
 -----------------------------
 
