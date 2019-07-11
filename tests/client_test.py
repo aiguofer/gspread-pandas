@@ -32,6 +32,7 @@ class TestClient:
         assert "Couldn't retrieve" in str(captured)
 
     def test_list_spreadsheet_files(self):
+        self.client.refresh_directories()
         files = self.client.list_spreadsheet_files()
         assert isinstance(files, list)
 
