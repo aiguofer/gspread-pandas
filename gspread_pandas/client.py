@@ -79,14 +79,27 @@ class Client(ClientV4):
     session : google.auth.transport.requests.AuthorizedSession
         optional, pass a google.auth.transport.requests.AuthorizedSession or a
         requests.Session and creds (default None)
+    load_dirs : bool
+        optional, whether you want to load directories and paths on instanciation.
+        if you refresh directories later or perform an action that requires them,
+        they will be loaded at that time. For speed, this is disabled by default
+        (default False)
     """
 
     _email = None
     _root = None
     _dirs = None
+    _load_dirs = False
+    directories = None
 
     def __init__(
-        self, user="default", config=None, scope=default_scope, creds=None, session=None
+        self,
+        user="default",
+        config=None,
+        scope=default_scope,
+        creds=None,
+        session=None,
+        load_dirs=False,
     ):
         #: `(list)` - Feeds included for the OAuth2 scope
         self.scope = scope
@@ -113,18 +126,34 @@ class Client(ClientV4):
         super().__init__(credentials, session)
 
         self._root = self._drive_request(file_id="root", params={"fields": "name,id"})
-        self.refresh_directories()
+        self.directories = property(
+            self._get_dirs,
+            doc=(
+                "`(list)` - list of dicts for all avaliable "
+                "directories for the current user"
+            ),
+        )
+
+        if load_dirs:
+            self.refresh_directories()
 
     @property
     def root(self):
         """`(dict)` - the info for the top level Drive directory for current user"""
         return self._root
 
-    @property
-    def directories(self):
-        """`(list)` - list of dicts for all avaliable directories for the current user
-        """
-        return remove_keys_from_list(self._dirs, ["parents"])
+    def _get_dirs(self, strip_parents=True):
+        """Helper function to fetch directories if they haven't been yet. It will strip
+        the parents by default for the `directories` property"""
+        if not self._load_dirs:
+            self.refresh_directories()
+
+        if strip_parents:
+            # this will make a copy, if we intend to modify the values
+            # internally, pass strip_parents = False
+            return remove_keys_from_list(self._dirs, ["parents"])
+        else:
+            return self._dirs
 
     @property
     def email(self):
@@ -145,6 +174,7 @@ class Client(ClientV4):
 
     def refresh_directories(self):
         """Refresh list of directories for the current user"""
+        self._load_dirs = True
         q = "mimeType='application/vnd.google-apps.folder'"
         self._dirs = self._query_drive(q)
         add_paths(self._root, self._dirs)
@@ -254,8 +284,17 @@ class Client(ClientV4):
         return self._list_spreadsheet_files(q)
 
     def _list_spreadsheet_files(self, q):
+        """Helper function to actually run a query, add paths if needed, and
+        remove unwanted keys from results"""
         files = self._query_drive(q)
 
+        if self._load_dirs:
+            self._add_path_to_files(files)
+
+        return remove_keys_from_list(files, ["parents"])
+
+    def _add_path_to_files(self, files):
+        """Add path to files by looking up the parent dir and its path"""
         for fil3 in files:
             try:
                 # if a file is in multiple directories then it'll
@@ -263,7 +302,7 @@ class Client(ClientV4):
                 # so we'll just choose the first one to build the path
                 parent = next(
                     directory
-                    for directory in self._dirs + [self._root]
+                    for directory in self._get_dirs(False) + [self._root]
                     if directory["id"] in fil3.get("parents", {})
                 )
                 fil3["path"] = parent.get("path", "/")
@@ -271,8 +310,6 @@ class Client(ClientV4):
                 # Files that are visible to a ServiceAccount but not
                 # in the root will not have the 'parents' property
                 fil3["path"] = None
-
-        return remove_keys_from_list(files, ["parents"])
 
     def find_folders(self, folder_name_query=""):
         """Return all folders that the user has access to containing
@@ -336,20 +373,20 @@ class Client(ClientV4):
         dict
             information for the created directory
         """
-        parent, to_create = folders_to_create(path, self._dirs)
+        parent, to_create = folders_to_create(path, self._get_dirs(False))
 
         if len(to_create) > 1 and parents is not True:
             raise Exception(
                 "If you want to create nested directories pass parents=True"
             )
 
-        for dr in to_create:
+        for directory in to_create:
             parent = self._drive_request(
                 "post",
                 params={"fields": "name,id,parents"},
                 data={
                     "mimeType": "application/vnd.google-apps.folder",
-                    "name": dr,
+                    "name": directory,
                     "parents": [parent["id"]],
                 },
                 headers={"Content-Type": "application/json"},
@@ -377,7 +414,7 @@ class Client(ClientV4):
         if path == "/":
             folder_id = "root"
         else:
-            parent, missing = folders_to_create(path, self._dirs)
+            parent, missing = folders_to_create(path, self._get_dirs(False))
             if missing:
                 if not create:
                     raise Exception("Folder does not exist")
