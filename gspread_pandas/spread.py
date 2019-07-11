@@ -5,7 +5,6 @@ from re import match
 
 import numpy as np
 import pandas as pd
-from gspread.client import Client
 from gspread.exceptions import (
     APIError,
     NoValidUrlKeyFound,
@@ -15,6 +14,7 @@ from gspread.exceptions import (
 from gspread.models import Worksheet
 from past.builtins import basestring
 
+from gspread_pandas.client import Client
 from gspread_pandas.conf import default_scope
 from gspread_pandas.exceptions import (
     GspreadPandasException,
