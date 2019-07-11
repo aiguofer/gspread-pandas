@@ -1,3 +1,5 @@
+from time import sleep
+
 import pandas as pd
 import pytest
 from gspread.models import Worksheet
@@ -151,6 +153,10 @@ class TestSpread:
         )
 
         self.spread.unmerge_cells()
+        # sometimes it fetches the data too quickly and it hasn't
+        # updated
+        sleep(1)
+        self.spread.refresh_spread_metadata()
         sheets_metadata = self.spread._spread_metadata["sheets"]
 
         # ensure merged cells don't match
