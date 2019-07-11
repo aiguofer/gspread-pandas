@@ -1,21 +1,21 @@
 language: python
 python:
-  - 3.6
-  - 3.5
-  - 2.7
+- 3.6
+- 3.5
+- 2.7
 matrix:
   include:
-    - name: "Python 3.7  on Xenial Linux"
-      dist: xenial          # required for Python >= 3.7
-    - name: "Python 3.7 on macOS"
-      os: osx
-      osx_image: xcode10.2  # Python 3.7.2 running on macOS 10.14.3
-      language: shell       # 'language: python' is an error on Travis CI macOS
-    - name: "Python 3.7 on Windows"
-      os: windows           # Windows 10.0.17134 N/A Build 17134
-      language: shell       # 'language: python' is an error on Travis CI Windows
-      before_install: choco install python
-      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+  - name: Python 3.7  on Xenial Linux
+    dist: xenial
+  - name: Python 3.7 on macOS
+    os: osx
+    osx_image: xcode10.2
+    language: shell
+  - name: Python 3.7 on Windows
+    os: windows
+    language: shell
+    before_install: choco install python
+    env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 install: pip install -U tox-travis
 script: tox
 deploy:
@@ -23,7 +23,7 @@ deploy:
   distributions: sdist bdist_wheel
   user: aiguofer
   password:
-    secure: M5mDyJ89gXd55CVRuTIkPCen7yc20kXaoJEFRdZ66WqSmgeNJveE86NkCHabgATZ/VuoEC7PBPU8Qp0/adiS6hNRZVDxnjK6GU2pDo+g9IlADhxPcqUgxuOhNJrnaggmPSyrd1FE6CKsNU9DbambYGx38b/R6dTP+nCsuxTerU1DD3nAPKx2Xhft+VAIqc7wxwBMITizJmIRw7bWJgKOiI2wsEy7dKThCQMUOQZucll21LsnoT/CM7RIkgHE152Aa3RcU1tpS80yjViwWKyD5jF/afXIwpPk3+bSvLVdeP+uDGVHpuz3EdAVivyoA7u4OvreTNPWkWLCPp1ithcyj1Eyvn4ce5hOmRII5p0K6J1jitRRhRsBfked1os5VsmHx2lPp8aTsYTgeE/y4qdvNNNLnaHhPUMErdJnr+HSnFcIAeeJN1dMiD5s2Onc6MIoC3QbiJf7JoRrA0PyYQbTv4YfSWwp0jJ+lfZj47UgWTAl5zTfuW5hEOuoAFKJqj8kd2Uui2yWIOpQvUj3XgprOVNSWEF578Pk1BRdhlyi6sCjwYtkC70hbHMvrJQZhlAu9/ngjiyqOI9Al5VjZSe0pRDIk3JGin9ORgQJifcI4oGXjmKYqnv0eTxa0NWfc+IL93zmssZVQWz4mE1mexktdjB3kDex4gDq+HDyLOc/ldQ=
+    secure: hAyppEoL6R57np2Me36Mua966Ju/15D3Xu/g3FLy24kK+2nD9x7pWLblhuEyX9lYwNwYoRwYJpi8/epXIVu/JwbfTksl6L0M84FECtiwnQyOCHjSJCLWJcZyE6aqJD8bvFU2HIee1+JMK97DFg1HZa/yi2Lv61xvxzFq/QxXdUh7clLemZsb/uc7QENIRDKwwqUraj0AlUAFbhtG4HDGiyStRmI+V4f0nmCdG98aSbwiveQAFMClIIW1JdvGmKOoVtRG84dwHYb8ExwmazQlgcHLJiB7IXPd+zIu/67EufPS5424MdhY07D83uayLidU1cT9vJHHd+1Os2VjeyzQwSUmLF1Whc2xFCp4eu3Sw619x4kheI5AH5F1xEzi9S0XVDhTuH2D39A5Lpg06YIbRd2B61z3unZVYJqGYV4UQV3hHcNBPKN8Ka6VsDOSl7qSbDOWwwfLBszbC24yoABOrg3pBO0FMVHMtx1CA15D36ZAVxIV45TP2TyXCezkjvUmUgop4oQJ7qA7Kkd9LSr13gBwvH2PLvXUzMU3RUGF/Dgqbyz9GBiKVS7OgJYNQH1lnuOPLMj6I5jBD+2uTlxXedgOgxzUBU926YiZ5pqiwuQvpkLguBLvZseCl4kKTWmeNQSZoNCWhy8afrcfdFpg+hiN5fyTe4BUGFW4Kivcb7E=
   on:
     tags: true
     repo: aiguofer/gspread-pandas
