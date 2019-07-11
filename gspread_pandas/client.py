@@ -3,10 +3,11 @@ from __future__ import print_function
 from builtins import super
 
 import requests
+from future.utils import reraise
 from google.auth.credentials import Credentials
 from google.auth.transport.requests import AuthorizedSession
 from gspread.client import Client as ClientV4
-from gspread.exceptions import SpreadsheetNotFound
+from gspread.exceptions import APIError, SpreadsheetNotFound
 from gspread.models import Spreadsheet
 from gspread.utils import finditem
 from past.builtins import basestring
@@ -165,7 +166,7 @@ class Client(ClientV4):
                 params["pageToken"] = page_token
 
             res = self._drive_request("get", params=params)
-            files.extend(res["files"])
+            files.extend(res.get("files", []))
             page_token = res.get("nextPageToken", None)
 
         return files
@@ -176,9 +177,20 @@ class Client(ClientV4):
         url = "https://www.googleapis.com/drive/v3/files"
         if file_id:
             url += "/{}".format(file_id)
-        res = self.request(method, url, params=params, json=data)
-        if res.text:
-            return res.json()
+        try:
+            res = self.request(method, url, params=params, json=data)
+            if res.text:
+                return res.json()
+        except APIError as e:
+            if "scopes" in e.response.text:
+                print(
+                    "Your credentials don't have Drive API access, ignoring "
+                    "drive specific functionality (Note this includes searching "
+                    "spreadsheets by name)"
+                )
+                return {}
+            else:
+                reraise(e)
 
     def open(self, title):
         """Opens a spreadsheet.

@@ -458,7 +458,7 @@ def add_paths(root, dirs):
     list of all available dirs.
     """
     # TODO: handle scenario with folders having more than one parent
-    children = [dr for dr in dirs if root["id"] in dr.get("parents", [])]
+    children = [dr for dr in dirs if root.get("id", None) in dr.get("parents", [])]
     path = root.get("path", "")
 
     for child in children:
