@@ -28,11 +28,13 @@ with open(path.join(here, "requirements_dev.txt"), encoding="utf-8") as f:
 setup(
     name="gspread-pandas",
     version=__version__,
-    description="A package to easily open an instance of a Google spreadsheet and interact with worksheets through Pandas DataFrames.",
+    description=(
+        "A package to easily open an instance of a Google spreadsheet and "
+        "interact with worksheets through Pandas DataFrames."
+    ),
     long_description=long_description,
     url="https://github.com/aiguofer/gspread-pandas",
-    download_url="https://github.com/aiguofer/gspread-pandas/tarball/v"
-    + __version__,
+    download_url="https://github.com/aiguofer/gspread-pandas/tarball/v" + __version__,
     license="BSD",
     classifiers=[
         "Development Status :: 4 - Beta",
