@@ -52,6 +52,6 @@ output/
 *#
 
 # Pyenv
-.python-version
+.python-version*
 
 google_secret.json
