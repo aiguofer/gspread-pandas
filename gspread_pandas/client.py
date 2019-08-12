@@ -24,7 +24,8 @@ __all__ = ["Client"]
 
 
 class Client(ClientV4):
-    """The gspread_pandas :class:`Client` extends :class:`Client <gspread.client.Client>`
+    """
+    The gspread_pandas :class:`Client` extends :class:`Client <gspread.client.Client>`
     and authenticates using credentials stored in ``gspread_pandas`` config.
 
     This class also adds a few convenience methods to explore the user's google drive
@@ -106,8 +107,12 @@ class Client(ClientV4):
         return self._root
 
     def _get_dirs(self, strip_parents=True):
-        """Helper function to fetch directories if they haven't been yet. It will strip
-        the parents by default for the `directories` property"""
+        """
+        Helper function to fetch directories if they haven't been yet.
+
+        It will strip the parents by default for the `directories`
+        property
+        """
         if not self._load_dirs:
             self.refresh_directories()
 
@@ -144,7 +149,7 @@ class Client(ClientV4):
         return self._email
 
     def refresh_directories(self):
-        """Refresh list of directories for the current user"""
+        """Refresh list of directories for the current user."""
         self._load_dirs = True
         q = "mimeType='application/vnd.google-apps.folder'"
         self._dirs = self._query_drive(q)
@@ -152,9 +157,7 @@ class Client(ClientV4):
 
     def login(self):
         """Override login since AuthorizedSession now takes care of automatically
-        refreshing tokens when needed
-        """
-        pass
+        refreshing tokens when needed."""
 
     def _query_drive(self, q):
         files = []
@@ -193,7 +196,8 @@ class Client(ClientV4):
                 reraise(e)
 
     def open(self, title):
-        """Opens a spreadsheet.
+        """
+        Opens a spreadsheet.
 
         :param title: A title of a spreadsheet.
         :type title: str
@@ -208,7 +212,6 @@ class Client(ClientV4):
 
         >>> c = gspread.authorize(credentials)
         >>> c.open('My fancy spreadsheet')
-
         """
         try:
             properties = finditem(
@@ -223,7 +226,8 @@ class Client(ClientV4):
             raise SpreadsheetNotFound
 
     def list_spreadsheet_files(self, title=None):
-        """Return all spreadsheets that the user has access to
+        """
+        Return all spreadsheets that the user has access to.
 
         Parameters
         ----------
@@ -236,7 +240,6 @@ class Client(ClientV4):
         list
             List of spreadsheets. Each spreadsheet is a dict with the following keys:
             id, kind, mimeType, and name.
-
         """
         q = "mimeType='application/vnd.google-apps.spreadsheet'"
         if title:
@@ -244,7 +247,8 @@ class Client(ClientV4):
         return self._list_spreadsheet_files(q)
 
     def list_spreadsheet_files_in_folder(self, folder_id):
-        """Return all spreadsheets that the user has access to in a sepcific folder.
+        """
+        Return all spreadsheets that the user has access to in a sepcific folder.
 
         Parameters
         ----------
@@ -256,7 +260,6 @@ class Client(ClientV4):
         list
             List of spreadsheets. Each spreadsheet is a dict with the following keys:
             id, kind, mimeType, and name.
-
         """
         q = (
             "mimeType='application/vnd.google-apps.spreadsheet'"
@@ -266,8 +269,8 @@ class Client(ClientV4):
         return self._list_spreadsheet_files(q)
 
     def _list_spreadsheet_files(self, q):
-        """Helper function to actually run a query, add paths if needed, and
-        remove unwanted keys from results"""
+        """Helper function to actually run a query, add paths if needed, and remove
+        unwanted keys from results."""
         files = self._query_drive(q)
 
         if self._load_dirs:
@@ -276,7 +279,7 @@ class Client(ClientV4):
         return remove_keys_from_list(files, ["parents"])
 
     def _add_path_to_files(self, files):
-        """Add path to files by looking up the parent dir and its path"""
+        """Add path to files by looking up the parent dir and its path."""
         for fil3 in files:
             try:
                 # if a file is in multiple directories then it'll
@@ -294,8 +297,9 @@ class Client(ClientV4):
                 fil3["path"] = None
 
     def find_folders(self, folder_name_query=""):
-        """Return all folders that the user has access to containing
-        ``folder_name_query`` in the name
+        """
+        Return all folders that the user has access to containing ``folder_name_query``
+        in the name.
 
         Parameters
         ----------
@@ -308,7 +312,6 @@ class Client(ClientV4):
         list
             List of folders. Each folder is a dict with the following keys:
             id, kind, mimeType, and name.
-
         """
         return [
             folder
@@ -317,9 +320,10 @@ class Client(ClientV4):
         ]
 
     def find_spreadsheet_files_in_folders(self, folder_name_query):
-        """Return all spreadsheets that the user has access to in all the folders that
+        """
+        Return all spreadsheets that the user has access to in all the folders that
         contain ``folder_name_query`` in the name. Returns as a dict with each key being
-        the folder name and the value being a list of spreadsheet files
+        the folder name and the value being a list of spreadsheet files.
 
         Parameters
         ----------
@@ -332,7 +336,6 @@ class Client(ClientV4):
             Spreadsheets in each folder. Each entry is a dict with the folder name as
             the key and a list of spreadsheets as the value. Each spreadsheet is a dict
             with the following keys: id, kind, mimeType, and name.
-
         """
 
         return {
@@ -341,7 +344,8 @@ class Client(ClientV4):
         }
 
     def create_folder(self, path, parents=True):
-        """Create a new folder in your Google drive.
+        """
+        Create a new folder in your Google drive.
 
         Parameters
         ----------
@@ -378,7 +382,8 @@ class Client(ClientV4):
         return parent
 
     def move_file(self, file_id, path, create=False):
-        """Move a file to the given path.
+        """
+        Move a file to the given path.
 
         Parameters
         ----------
@@ -391,7 +396,6 @@ class Client(ClientV4):
 
         Returns
         -------
-
         """
         if path == "/":
             folder_id = "root"
