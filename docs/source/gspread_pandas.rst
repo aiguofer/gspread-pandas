@@ -5,6 +5,14 @@ gspread_pandas
 Submodules
 ==========
 
+gspread_pandas.spread module
+----------------------------
+
+.. automodule:: gspread_pandas.spread
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 gspread_pandas.client module
 ----------------------------
 

@@ -45,8 +45,9 @@ __all__ = ["Spread"]
 
 
 class Spread:
-    """Simple wrapper for gspread to interact with Pandas. It holds an instance of
-    an 'open' spreadsheet, an 'open' worksheet, and a list of available worksheets.
+    """
+    Simple wrapper for gspread to interact with Pandas. It holds an instance of an
+    'open' spreadsheet, an 'open' worksheet, and a list of available worksheets.
 
     Each user will be associated with specific OAuth credentials. The authenticated user
     will need the appropriate permissions to the Spreadsheet in order to interact with
@@ -57,10 +58,10 @@ class Spread:
     spread : str
         name, url, or id of the spreadsheet; must have read access by
         the authenticated user,
-        see :meth:`open_spread <gspread_pandas.client.Spread.open_spread>`
+        see :meth:`open_spread <gspread_pandas.spread.Spread.open_spread>`
     sheet : str,int
         optional, name or index of Worksheet,
-        see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+        see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
         (default None)
     config : dict
         optional, if you want to provide an alternate configuration,
@@ -87,7 +88,7 @@ class Spread:
         that and it'll be used instead (default None)
     permissions : list
         a list of strings. See
-        :meth:`add_permissions <gspread_pandas.client.Spread.add_permissions>`
+        :meth:`add_permissions <gspread_pandas.spread.Spread.add_permissions>`
         for the expected format
     """
 
@@ -133,7 +134,7 @@ class Spread:
             self.add_permissions(permissions)
 
     def __repr__(self):
-        base = "<gspread_pandas.client.Spread - '{}'>"
+        base = "<gspread_pandas.spread.Spread - '{}'>"
         meta = []
         if self.email:
             meta.append("User: '{}'".format(self.email))
@@ -163,7 +164,7 @@ class Spread:
         return self.spread.worksheets()
 
     def refresh_spread_metadata(self):
-        """Refresh spreadsheet metadata"""
+        """Refresh spreadsheet metadata."""
         self._spread_metadata = self.spread.fetch_sheet_metadata()
 
     @property
@@ -174,7 +175,9 @@ class Spread:
             return self._spread_metadata["sheets"][ix]
 
     def open(self, spread, sheet=None, create_sheet=False, create_spread=False):
-        """Open a spreadsheet, and optionally a worksheet. See
+        """
+        Open a spreadsheet, and optionally a worksheet. See.
+
         :meth:`open_spread <gspread_pandas.Spread.open_spread>` and
         :meth:`open_sheet <gspread_pandas.Spread.open_sheet>`.
 
@@ -194,7 +197,6 @@ class Spread:
         Returns
         -------
         None
-
         """
         self.open_spread(spread, create_spread)
 
@@ -202,7 +204,8 @@ class Spread:
             self.open_sheet(sheet, create_sheet)
 
     def open_spread(self, spread, create=False):
-        """Open a spreadsheet. Authorized user must already have read access.
+        """
+        Open a spreadsheet. Authorized user must already have read access.
 
         Parameters
         ----------
@@ -215,7 +218,6 @@ class Spread:
         Returns
         -------
         None
-
         """
         id_regex = "[a-zA-Z0-9-_]{44}"
         url_path = "docs.google.com/spreadsheet"
@@ -249,7 +251,8 @@ class Spread:
             raise new_error
 
     def open_sheet(self, sheet, create=False):
-        """Open a worksheet. Optionally, if the sheet doesn't exist then create it first
+        """
+        Open a worksheet. Optionally, if the sheet doesn't exist then create it first
         (only when ``sheet`` is a str).
 
         Parameters
@@ -264,7 +267,6 @@ class Spread:
         Returns
         -------
         None
-
         """
         self.sheet = None
         if isinstance(sheet, int):
@@ -281,7 +283,8 @@ class Spread:
                 raise WorksheetNotFound("Worksheet not found")
 
     def create_sheet(self, name, rows=1, cols=1):
-        """Create a new worksheet with the given number of rows and cols.
+        """
+        Create a new worksheet with the given number of rows and cols.
 
         Automatically opens that sheet after it's created.
 
@@ -297,14 +300,14 @@ class Spread:
         Returns
         -------
         None
-
         """
         self.spread.add_worksheet(name, rows, cols)
         self.refresh_spread_metadata()
         self.open_sheet(name)
 
     def sheet_to_df(self, index=1, header_rows=1, start_row=1, sheet=None):
-        """Pull a worksheet into a DataFrame.
+        """
+        Pull a worksheet into a DataFrame.
 
         Parameters
         ----------
@@ -316,14 +319,13 @@ class Spread:
             row number for first row of headers or data (default 1)
         sheet : str,int
             optional, if you want to open a different sheet first,
-            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
             (default None)
 
         Returns
         -------
         DataFrame
             DataFrame with the data from the Worksheet
-
         """
         self._ensure_sheet(sheet)
 
@@ -354,20 +356,20 @@ class Spread:
         return parse_sheet_index(df, index)
 
     def get_sheet_dims(self, sheet=None):
-        """Get the dimensions of the currently open Worksheet.
+        """
+        Get the dimensions of the currently open Worksheet.
 
         Parameters
         ----------
         sheet : str,int,Worksheet
             optional, if you want to open a different sheet first,
-            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
             (default None)
 
         Returns
         -------
         tuple
             a tuple containing (num_rows,num_cols)
-
         """
         self._ensure_sheet(sheet)
         return (self.sheet.row_count, self.sheet.col_count) if self.sheet else None
@@ -397,8 +399,9 @@ class Spread:
             yield start_cell, end_cell, val_chunks
 
     def update_cells(self, start, end, vals, sheet=None, raw_columns=[]):
-        """Update the values in a given range. The values should be listed in order
-        from left to right across rows.
+        """
+        Update the values in a given range. The values should be listed in order from
+        left to right across rows.
 
         Parameters
         ----------
@@ -410,7 +413,7 @@ class Spread:
             array of values to populate
         sheet : str,int,Worksheet
             optional, if you want to open a different sheet first,
-            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
             (default None)
         raw_columns : list, int
             optional, list of column indexes in the google sheet that should be
@@ -419,7 +422,6 @@ class Spread:
         Returns
         -------
         None
-
         """
         self._ensure_sheet(sheet)
 
@@ -458,7 +460,8 @@ class Spread:
             raise NoWorksheetException("No open worksheet")
 
     def _find_sheet(self, sheet):
-        """Find a worksheet and return with index
+        """
+        Find a worksheet and return with index.
 
         Parameters
         ----------
@@ -470,7 +473,6 @@ class Spread:
         -------
         tuple
             Tuple like (index, worksheet)
-
         """
         for ix, worksheet in enumerate(self.sheets):
             if (
@@ -483,7 +485,8 @@ class Spread:
         return None, None
 
     def find_sheet(self, sheet):
-        """Find a given worksheet by title or by object comparison
+        """
+        Find a given worksheet by title or by object comparison.
 
         Parameters
         ----------
@@ -494,13 +497,12 @@ class Spread:
         -------
         Worksheet
             the Worksheet by the given name or None if not found
-
-
         """
         return self._find_sheet(sheet)[1]
 
     def clear_sheet(self, rows=1, cols=1, sheet=None):
-        """Reset open worksheet to a blank sheet with given dimensions.
+        """
+        Reset open worksheet to a blank sheet with given dimensions.
 
         Parameters
         ----------
@@ -510,13 +512,12 @@ class Spread:
             number of columns (default 1)
         sheet : str,int,Worksheet
             optional; name, index, or Worksheet,
-            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
             (default None)
 
         Returns
         -------
         None
-
         """
         self._ensure_sheet(sheet)
 
@@ -540,7 +541,8 @@ class Spread:
         )
 
     def delete_sheet(self, sheet):
-        """Delete a worksheet by title. Returns whether the sheet was deleted or not. If
+        """
+        Delete a worksheet by title. Returns whether the sheet was deleted or not. If
         current sheet is deleted, the ``sheet`` property will be set to None.
 
         Parameters
@@ -552,7 +554,6 @@ class Spread:
         -------
         bool
             True if deleted successfully, else False
-
         """
         is_current = False
 
@@ -590,7 +591,8 @@ class Spread:
         merge_headers=False,
         flatten_headers_sep=None,
     ):
-        """Save a DataFrame into a worksheet.
+        """
+        Save a DataFrame into a worksheet.
 
         Parameters
         ----------
@@ -608,7 +610,7 @@ class Spread:
         sheet : str,int,Worksheet
             optional, if you want to open or create a different sheet
             before saving,
-            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
             (default None)
         raw_column_names : list, str
             optional, list of columns from your dataframe that you want
@@ -632,7 +634,6 @@ class Spread:
         Returns
         -------
         None
-
         """
         self._ensure_sheet(sheet)
 
@@ -700,7 +701,8 @@ class Spread:
         self.refresh_spread_metadata()
 
     def _fix_merge_values(self, vals):
-        """Assign the top-left value to all cells in a merged range
+        """
+        Assign the top-left value to all cells in a merged range.
 
         Parameters
         ----------
@@ -713,7 +715,6 @@ class Spread:
         -------
         list
             Fixed values
-
         """
         for merge in self._sheet_metadata.get("merges", []):
             start_row, end_row = merge["startRowIndex"], merge["endRowIndex"]
@@ -730,7 +731,8 @@ class Spread:
         return vals
 
     def freeze(self, rows=None, cols=None, sheet=None):
-        """Freeze rows and/or columns for the open worksheet.
+        """
+        Freeze rows and/or columns for the open worksheet.
 
         Parameters
         ----------
@@ -741,13 +743,12 @@ class Spread:
         sheet : str,int,Worksheet
             optional, if you want to open or create a
             different sheet before freezing,
-            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
             (default None)
 
         Returns
         -------
         None
-
         """
         self._ensure_sheet(sheet)
 
@@ -761,7 +762,8 @@ class Spread:
         self.refresh_spread_metadata()
 
     def add_filter(self, start=None, end=None, sheet=None):
-        """Add filters to data in the open worksheet.
+        """
+        Add filters to data in the open worksheet.
 
         Parameters
         ----------
@@ -773,13 +775,12 @@ class Spread:
         sheet : str,int,Worksheet
             optional, if you want to open or create a
             different sheet before adding the filter,
-            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
             (default None)
 
         Returns
         -------
         None
-
         """
         self._ensure_sheet(sheet)
 
@@ -796,8 +797,9 @@ class Spread:
         self.refresh_spread_metadata()
 
     def merge_cells(self, start, end, merge_type="MERGE_ALL", sheet=None):
-        """Merge cells between the start and end cells. Use merge_type if you want
-        to change the behavior of the merge.
+        """
+        Merge cells between the start and end cells. Use merge_type if you want to
+        change the behavior of the merge.
 
         Parameters
         ----------
@@ -810,13 +812,12 @@ class Spread:
         sheet : str,int,Worksheet
             optional, if you want to open or create a
             different sheet before adding the filter,
-            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
             (default None)
 
         Returns
         -------
         None
-
         """
         self._ensure_sheet(sheet)
 
@@ -827,8 +828,9 @@ class Spread:
         self.refresh_spread_metadata()
 
     def unmerge_cells(self, start="A1", end=None, sheet=None):
-        """Unmerge all cells between the start and end cells. Use defaults to unmerge
-        all cells in the sheet.
+        """
+        Unmerge all cells between the start and end cells. Use defaults to unmerge all
+        cells in the sheet.
 
         Parameters
         ----------
@@ -839,13 +841,12 @@ class Spread:
         sheet : str,int,Worksheet
             optional, if you want to open or create a
             different sheet before adding the filter,
-            see :meth:`open_sheet <gspread_pandas.client.Spread.open_sheet>`
+            see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
             (default None)
 
         Returns
         -------
         None
-
         """
         self._ensure_sheet(sheet)
 
@@ -919,17 +920,20 @@ class Spread:
             self.add_permission(perm)
 
     def list_permissions(self):
-        """List all permissions for this Spreadsheet
+        """
+        List all permissions for this Spreadsheet.
 
         Returns
         -------
         list
-            a list of dicts indicating the permissions on this spreadsheet"""
+            a list of dicts indicating the permissions on this spreadsheet
+        """
         return self.client.list_permissions(self.spread.id)
 
     def move(self, path="/", create=True):
-        """Move the current spreadsheet to the specified path in your Google drive.
-        If the file is not currently in you drive, it will be added.
+        """
+        Move the current spreadsheet to the specified path in your Google drive. If the
+        file is not currently in you drive, it will be added.
 
         Parameters
         ----------
@@ -940,6 +944,5 @@ class Spread:
 
         Returns
         -------
-
         """
         self.client.move_file(self.spread.id, path, create)
