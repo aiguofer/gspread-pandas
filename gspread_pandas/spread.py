@@ -858,10 +858,11 @@ class Spread:
 
         self.refresh_spread_metadata()
 
-    def add_permissions(self, permissions):
-        """Add permissions to the current spreadsheet.
+    def add_permission(self, permission):
+        """
+        Add a permission to the current spreadsheet.
 
-        The format of each string should be:
+        The format should be:
         ``<id>|(<group>)|(<role>)|(<notify>)|(<require_link>)`` where:
 
         <id> - email address of group or individual, domain, or 'anyone'
@@ -886,6 +887,26 @@ class Spread:
 
         Parameters
         ----------
+        permissions : string
+            A strings meeting the above mentioned format.
+
+
+        Returns
+        -------
+        None
+        """
+        perm = parse_permission(permission)
+        self.client.insert_permission(self.spread.id, perm.pop("value", None), **perm)
+
+    def add_permissions(self, permissions):
+        """
+        Add permissions to the current spreadsheet. See.
+
+        :meth:`add_permission <gspread_pandas.spread.Spread.add_permission>` for format.
+
+
+        Parameters
+        ----------
         permissions : list
             A list of strings meeting the above mentioned format.
 
@@ -893,12 +914,9 @@ class Spread:
         Returns
         -------
         None
-
         """
-        for perm in map(parse_permission, permissions):
-            self.client.insert_permission(
-                self.spread.id, perm.pop("value", None), **perm
-            )
+        for perm in permissions:
+            self.add_permission(perm)
 
     def list_permissions(self):
         """List all permissions for this Spreadsheet
