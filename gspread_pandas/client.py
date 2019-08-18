@@ -162,7 +162,14 @@ class Client(ClientV4):
     def _query_drive(self, q):
         files = []
         page_token = ""
-        params = {"q": q, "pageSize": 1000, "fields": "files(name,id,parents)"}
+        params = {
+            "q": q,
+            "pageSize": 100,
+            "useDomainAdminAccess": True,
+            "includeItemsFromAllDrives": True,
+            "supportsAllDrives": True,
+            "fields": "files(name,id,parents,mimeType,kind,driveId)",
+        }
 
         while page_token is not None:
             if page_token:
