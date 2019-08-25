@@ -9,6 +9,9 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+[2.1.3] - 2019-08-25
+-----------------------------
+
 Added
 -----
 
