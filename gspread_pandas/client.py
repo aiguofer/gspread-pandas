@@ -71,9 +71,11 @@ class Client(ClientV4):
         creds=None,
         session=None,
         load_dirs=False,
+        drive_id=None,
     ):
         #: `(list)` - Feeds included for the OAuth2 scope
         self.scope = scope
+        self.drive_id = drive_id
 
         if isinstance(session, requests.Session):
             credentials = getattr(session, "credentials", creds)
@@ -96,7 +98,9 @@ class Client(ClientV4):
             session = AuthorizedSession(credentials)
         super().__init__(credentials, session)
 
-        self._root = self._drive_request(file_id="root", params={"fields": "name,id"})
+        root_id = self.drive_id or "root"
+
+        self._root = self._drive_request(file_id=root_id, params={"fields": "name,id"})
 
         if load_dirs:
             self.refresh_directories()
@@ -183,6 +187,10 @@ class Client(ClientV4):
         headers=None,
         endpoint="files",
     ):
+        if self.drive_id:
+            params["driveId"] = self.drive_id
+            params["corpora"] = "drive"
+
         # enable all shared drive functionality if available
         params["includeItemsFromAllDrives"] = True
         params["supportsAllDrives"] = True
