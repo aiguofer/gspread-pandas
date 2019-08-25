@@ -8,6 +8,19 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Added
+-----
+
+-  Added ``Spread.add_permission`` to differentiate adding a single
+   permission vs adding multiple permissions.
+
+Changed
+-------
+
+-  Ensure license is packaged with sdist
+-  Unified and simplified project and test configuration settings
+
 [2.1.2] - 2019-07-10
 -----------------------------
 
