@@ -159,32 +159,58 @@ class Client(ClientV4):
         """Override login since AuthorizedSession now takes care of automatically
         refreshing tokens when needed."""
 
+    def list_shared_drives(self):
+        params = {"pageSize": 100, "fields": "id,name"}
+
+        return self._fetch_all_results(params=params, endpoint="drives")
+
     def _query_drive(self, q):
-        files = []
-        page_token = ""
         params = {
             "q": q,
-            "pageSize": 100,
-            "useDomainAdminAccess": True,
-            "includeItemsFromAllDrives": True,
-            "supportsAllDrives": True,
+            "pageSize": 1000,
             "fields": "files(name,id,parents,mimeType,kind,driveId)",
+            "useDomainAdminAccess": True,
         }
+
+        return self._fetch_all_results(params=params, endpoint="files")
+
+    def _fetch_all_results(
+        self,
+        method="get",
+        file_id=None,
+        params=None,
+        data=None,
+        headers=None,
+        endpoint="files",
+    ):
+        # enable all shared drive functionality if available
+        params["includeItemsFromAllDrives"] = True
+        params["supportsAllDrives"] = True
+
+        items = []
+        page_token = ""
+        value_key = endpoint.split("/")[-1]
 
         while page_token is not None:
             if page_token:
                 params["pageToken"] = page_token
 
-            res = self._drive_request("get", params=params)
-            files.extend(res.get("files", []))
+            res = self._drive_request(method, file_id, params, data, headers, endpoint)
+            items.extend(res.get(value_key, []))
             page_token = res.get("nextPageToken", None)
 
-        return files
+        return items
 
     def _drive_request(
-        self, method="get", file_id=None, params=None, data=None, headers=None
+        self,
+        method="get",
+        file_id=None,
+        params=None,
+        data=None,
+        headers=None,
+        endpoint="files",
     ):
-        url = "https://www.googleapis.com/drive/v3/files"
+        url = "https://www.googleapis.com/drive/v3/{}".format(endpoint)
         if file_id:
             url += "/{}".format(file_id)
         try:
