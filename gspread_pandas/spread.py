@@ -67,10 +67,10 @@ class Spread:
         optional, if you want to provide an alternate configuration,
         see :meth:`get_config <gspread_pandas.conf.get_config>` (default None)
     create_sheet : bool
-        whether to create the spreadsheet if it doesn't exist,
+        whether to create the worksheet if it doesn't exist,
         it wil use the ``spread`` value as the sheet title (default False)
     create_spread : bool
-        whether to create the sheet if it doesn't exist,
+        whether to create the spreadsheet if it doesn't exist,
         it wil use the ``spread`` value as the sheet title (default False)
     scope : list
         optional, if you'd like to provide your own scope
@@ -188,10 +188,10 @@ class Spread:
         sheet : str,int
             name or index of Worksheet (default None)
         create_sheet : bool
-            whether to create the spreadsheet if it doesn't exist,
+            whether to create the worksheet if it doesn't exist,
             it wil use the ``spread`` value as the sheet title (default False)
         create_spread : bool
-            whether to create the sheet if it doesn't exist,
+            whether to create the spreadsheet if it doesn't exist,
             it wil use the ``spread`` value as the sheet title (default False)
 
         Returns
