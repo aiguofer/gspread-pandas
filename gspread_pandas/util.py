@@ -496,3 +496,18 @@ def folders_to_create(search_path, dirs, base_path=""):
         return folders_to_create(parts[1:], dirs, base_path)
     else:
         return parent, parts
+
+
+def get_ranges(sheet_name, cols):
+    """Get a list of ranges for the given worksheet and columns."""
+    ranges = []
+    for col in cols:
+        start_label = rowcol_to_a1(1, col)
+        range_label = "%s!%s:%s" % (sheet_name, start_label, start_label[:-1])
+        ranges.append(range_label)
+    return ranges
+
+
+def transpose(lst):
+    """Transpose a list of lists."""
+    return list(map(list, zip(*lst)))

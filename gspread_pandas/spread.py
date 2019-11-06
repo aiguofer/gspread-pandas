@@ -12,6 +12,7 @@ from gspread.exceptions import (
     WorksheetNotFound,
 )
 from gspread.models import Worksheet
+from gspread.utils import fill_gaps
 from past.builtins import basestring
 
 from gspread_pandas.client import Client
@@ -33,12 +34,14 @@ from gspread_pandas.util import (
     fillna,
     get_cell_as_tuple,
     get_range,
+    get_ranges,
     map_cols_to_spread,
     monkey_patch_request,
     parse_df_col_names,
     parse_permission,
     parse_sheet_headers,
     parse_sheet_index,
+    transpose,
 )
 
 __all__ = ["Spread"]
@@ -305,7 +308,66 @@ class Spread:
         self.refresh_spread_metadata()
         self.open_sheet(name)
 
-    def sheet_to_df(self, index=1, header_rows=1, start_row=1, sheet=None):
+    def get_columns(self, cols, value_render_option="FORMATTED_VALUE"):
+        """
+        Returns a list of all values in column `col`.
+
+        Empty cells in this list will be rendered as :const:`None`.
+
+        Parameters
+        ----------
+        cols : list of ints
+            Column numbers.
+        value_render_option : str
+            Determines how values should be rendered in the the output. Possible
+            values are "FORMATTED_VALUEF", "FORMULA", and "UNFORMATTED_VALUE"(
+            Default value = "FORMATTED_VALUE")
+
+        Returns
+        -------
+        """
+        ranges = get_ranges(self.sheet.title, cols)
+        data = self.spread.values_get_batch(
+            ranges,
+            params={
+                "valueRenderOption": value_render_option,
+                "majorDimension": "COLUMNS",
+            },
+        )
+
+        try:
+            return fill_gaps(
+                [col.get("values", [[]])[0] for col in data["valueRanges"]]
+            )
+        except KeyError:
+            return []
+
+    def _fix_value_render(self, vals, cols, value_render_option):
+        """Replace values for columns that need a different value render option."""
+        for ix, col in enumerate(self.get_columns(cols, value_render_option)):
+            vals[cols[ix] - 1] = col
+
+    def _get_vals(self, start_row, unformatted_columns, formula_columns):
+        """Get values and clean them up as needed."""
+        data = self.spread.values_get(self.sheet.title, {"major_dimension": "COLUMNS"})
+        vals = data.get("values", [])
+        if unformatted_columns:
+            self._fix_value_render(unformatted_columns, "UNFORMATTED_VALUE")
+        if formula_columns:
+            self._fix_value_render(formula_columns, "FORMULA")
+        vals = transpose(fill_gaps(vals))
+        vals = self._fix_merge_values(vals)[start_row - 1 :]
+        return vals
+
+    def sheet_to_df(
+        self,
+        index=1,
+        header_rows=1,
+        start_row=1,
+        unformatted_columns=[],
+        formula_columns=[],
+        sheet=None,
+    ):
         """
         Pull a worksheet into a DataFrame.
 
@@ -317,6 +379,12 @@ class Spread:
             number of rows that represent headers (default 1)
         start_row : int
             row number for first row of headers or data (default 1)
+        unformatted_columns : list of ints
+            column numbers for columns you'd like to pull in as
+            unformatted values (defaul [])
+        formula_columns : list of ints
+            column numbers for columns you'd like to pull in as
+            actual formulas (defaul [])
         sheet : str,int
             optional, if you want to open a different sheet first,
             see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
@@ -329,8 +397,7 @@ class Spread:
         """
         self._ensure_sheet(sheet)
 
-        vals = self.sheet.get_all_values()
-        vals = self._fix_merge_values(vals)[start_row - 1 :]
+        vals = self._get_vals(start_row, unformatted_columns, formula_columns)
 
         col_names = parse_sheet_headers(vals, header_rows)
 
