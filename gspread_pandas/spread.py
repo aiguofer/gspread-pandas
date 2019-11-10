@@ -327,7 +327,7 @@ class Spread:
         -------
         """
         ranges = get_ranges(self.sheet.title, cols)
-        data = self.spread.values_get_batch(
+        data = self.spread.values_batch_get(
             ranges,
             params={
                 "valueRenderOption": value_render_option,

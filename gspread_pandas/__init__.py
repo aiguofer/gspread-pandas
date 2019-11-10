@@ -9,7 +9,7 @@ __all__ = ["Spread", "Client", "__version__", "__version_info__"]
 SPREADSHEET_VALUES_BATCH_URL = SPREADSHEETS_API_V4_BASE_URL + "/%s/values:batchGet"
 
 
-def values_get_batch(self, ranges, params=None):
+def values_batch_get(self, ranges, params=None):
     """
     Lower-level method that directly calls `spreadsheets.values.batchGet.
 
@@ -38,4 +38,4 @@ def values_get_batch(self, ranges, params=None):
     return r.json()
 
 
-Spreadsheet.values_get_batch = values_get_batch
+Spreadsheet.values_batch_get = values_batch_get
