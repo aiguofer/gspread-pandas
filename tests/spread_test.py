@@ -1,5 +1,3 @@
-from time import sleep
-
 import pandas as pd
 import pytest
 from gspread.models import Worksheet
@@ -31,20 +29,26 @@ class TestSpread:
         assert by_index.id == by_sheet.id == by_name.id
 
     def test_df(self):
-        df = self.spread.sheet_to_df(header_rows=2, start_row=2)
+        df = self.spread.sheet_to_df(
+            header_rows=2, start_row=2, formula_columns=["Total"]
+        )
+
+        df_to_sheet_name = "Test df_to_sheet"
 
         assert isinstance(df.columns, pd.MultiIndex)
         assert df.shape == (3, 9)
+        assert df["Total"][0].startswith("=")
 
         self.spread.df_to_sheet(
             df,
             start="A2",
             replace=True,
-            sheet="Test df_to_sheet",
+            sheet=df_to_sheet_name,
             freeze_index=True,
             freeze_headers=True,
             add_filter=True,
             merge_headers=True,
+            raw_column_names=["Total"],
         )
 
         # ensre values are the same
@@ -71,11 +75,11 @@ class TestSpread:
             == sheets_metadata[2]["properties"]["gridProperties"]
         )
 
+        self.spread.open_sheet(df_to_sheet_name)
+
         self.spread.unmerge_cells()
         # sometimes it fetches the data too quickly and it hasn't
         # updated
-        sleep(1)
-        self.spread.refresh_spread_metadata()
         sheets_metadata = self.spread._spread_metadata["sheets"]
 
         # ensure merged cells don't match
@@ -85,4 +89,4 @@ class TestSpread:
             sheets_metadata[2].get("merges", {}), ["sheetId"]
         )
 
-        self.spread.delete_sheet("Test df_to_sheet")
+        self.spread.delete_sheet(df_to_sheet_name)
