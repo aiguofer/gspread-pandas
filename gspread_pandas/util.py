@@ -11,6 +11,8 @@ from gspread.exceptions import APIError
 from gspread.utils import a1_to_rowcol, rowcol_to_a1
 from past.builtins import basestring
 
+from gspread_pandas.exceptions import MissMatchException
+
 ROW = START = 0
 COL = END = 1
 DEPRECATION_WARNINGS_ENABLED = True
@@ -125,6 +127,22 @@ def _shift_header_up(
         if row_index + shift_val >= rows:
             header_names[row_index][col_index] = ""
     return shift_val
+
+
+def set_col_names(df, col_names):
+    """Set the column names on the DataFrame and ensure the set even if there's no
+    data."""
+    if col_names is not None:
+        if len(df.columns) == len(col_names):
+            df.columns = col_names
+        elif len(df) == 0:
+            # if we have headers but no data, set column headers on empty DF
+            df = df.reindex(columns=col_names)
+        else:
+            raise MissMatchException(
+                "Column headers don't match number of data columns"
+            )
+    return df
 
 
 def chunks(lst, chunk_size):
@@ -508,6 +526,27 @@ def get_ranges(sheet_name, cols):
     return ranges
 
 
-def transpose(lst):
-    """Transpose a list of lists."""
-    return list(map(list, zip(*lst)))
+def is_int(val):
+    return isinstance(val, (int, np.integer))
+
+
+def is_indexes(lst):
+    """Is this a list of indexes (all ints)"""
+    return all([is_int(val) for val in lst])
+
+
+def find_col_indexes(cols, col_names):
+    """Given a column name Index, find the numeric indeces of the columns in the
+    spreadsheet."""
+    col_locs = []
+
+    for col in cols:
+        loc = col_names.get_loc(col)
+        if is_int(loc):
+            col_locs.append(loc)
+        elif isinstance(loc, slice):
+            col_locs += list(range(len(col_names))[loc])
+        elif isinstance(loc, np.ndarray):
+            col_locs += [ix for ix in range(len(loc)) if loc[ix]]
+    # add 1 because we want the index based on spreadsheet, not python
+    return [ele + 1 for ele in set(col_locs)]
