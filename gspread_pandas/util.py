@@ -31,7 +31,7 @@ def decode(strg):
 
 
 def parse_sheet_index(df, index):
-    """Parse sheet index into df index"""
+    """Parse sheet index into df index."""
     if index and len(df.columns) >= index:
         df = df.set_index(df.columns[index - 1])
         # if column was MultiIndex, the name is a tuple;
@@ -45,7 +45,7 @@ def parse_sheet_index(df, index):
 
 
 def parse_df_col_names(df, include_index, index_size=1, flatten_sep=None):
-    """Parse column names from a df into sheet headers"""
+    """Parse column names from a df into sheet headers."""
     headers = df.columns.tolist()
 
     # handle multi-index headers
@@ -84,7 +84,7 @@ def parse_df_col_names(df, include_index, index_size=1, flatten_sep=None):
 
 
 def parse_sheet_headers(vals, header_rows):
-    """Parse headers from a sheet into df columns"""
+    """Parse headers from a sheet into df columns."""
     col_names = None
     if header_rows:
         headers = vals[:header_rows]
@@ -108,7 +108,7 @@ def _fix_sheet_header_level(header_names):
 def _shift_header_up(
     header_names, col_index, row_index=0, shift_val=0, found_first=False
 ):
-    """Recursively shift headers up so that top level is not empty"""
+    """Recursively shift headers up so that top level is not empty."""
     rows = len(header_names)
     if row_index < rows:
         current_value = header_names[row_index][col_index]
@@ -146,13 +146,13 @@ def set_col_names(df, col_names):
 
 
 def chunks(lst, chunk_size):
-    """Chunk a list into specified chunk sizes"""
+    """Chunk a list into specified chunk sizes."""
     for i in range(0, len(lst), chunk_size):
         yield lst[i : i + chunk_size]
 
 
 def deprecate(message):
-    """Display message about deprecation"""
+    """Display message about deprecation."""
     global DEPRECATION_WARNINGS_ENABLED, _WARNINGS_ALREADY_ENABLED
     # force enable DeprecationWarnings since most interactive shells have
     # them disabled
@@ -171,9 +171,7 @@ def deprecate(message):
 
 
 def create_filter_request(sheet_id, start, end):
-    """
-    Create v4 API request to create a filter for a given worksheet.
-    """
+    """Create v4 API request to create a filter for a given worksheet."""
     start = get_cell_as_tuple(start)
     end = get_cell_as_tuple(end)
 
@@ -193,10 +191,7 @@ def create_filter_request(sheet_id, start, end):
 
 
 def create_frozen_request(sheet_id, rows=None, cols=None):
-    """
-    Create v4 API request to freeze rows and/or columns for a
-    given worksheet.
-    """
+    """Create v4 API request to freeze rows and/or columns for a given worksheet."""
     grid_properties = {}
 
     if rows is not None and rows >= 0:
@@ -217,7 +212,9 @@ def create_frozen_request(sheet_id, rows=None, cols=None):
 
 def fillna(df, fill_value=""):
     """
-    Replace null values with `fill_value`. Also replaces in categorical columns.
+    Replace null values with `fill_value`.
+
+    Also replaces in categorical columns.
     """
     for col in df.dtypes[df.dtypes == "category"].index:
         if fill_value not in df[col].cat.categories:
@@ -226,7 +223,7 @@ def fillna(df, fill_value=""):
 
 
 def get_cell_as_tuple(cell):
-    """Take cell in either format, validate, and return as tuple"""
+    """Take cell in either format, validate, and return as tuple."""
     if type(cell) == tuple:
         if (
             len(cell) != 2
@@ -244,7 +241,7 @@ def get_cell_as_tuple(cell):
 
 
 def get_range(start, end):
-    """Transform start and end to cell range like A1:B5"""
+    """Transform start and end to cell range like A1:B5."""
     start_int = get_cell_as_tuple(start)
     end_int = get_cell_as_tuple(end)
 
@@ -252,7 +249,7 @@ def get_range(start, end):
 
 
 def map_cols_to_spread(start, end, cols):
-    """map df columns to spreadsheet columns"""
+    """map df columns to spreadsheet columns."""
     start_col = get_cell_as_tuple(start)[COL]
     end_col = get_cell_as_tuple(end)[COL]
     col_range = range(start_col, end_col + 1)
@@ -261,10 +258,7 @@ def map_cols_to_spread(start, end, cols):
 
 
 def create_merge_cells_request(sheet_id, start, end, merge_type="MERGE_ALL"):
-    """
-    Create v4 API request to merge rows and/or columns for a
-    given worksheet.
-    """
+    """Create v4 API request to merge rows and/or columns for a given worksheet."""
     start = get_cell_as_tuple(start)
     end = get_cell_as_tuple(end)
 
@@ -283,10 +277,7 @@ def create_merge_cells_request(sheet_id, start, end, merge_type="MERGE_ALL"):
 
 
 def create_unmerge_cells_request(sheet_id, start, end):
-    """
-    Create v4 API request to unmerge rows and/or columns for a
-    given worksheet.
-    """
+    """Create v4 API request to unmerge rows and/or columns for a given worksheet."""
     start = get_cell_as_tuple(start)
     end = get_cell_as_tuple(end)
 
@@ -305,8 +296,7 @@ def create_unmerge_cells_request(sheet_id, start, end):
 
 def monkey_patch_request(client, retry_delay=10):
     """Monkey patch gspread's Client.request to auto-retry with a delay when you get a
-    100s RESOURCE_EXCHAUSTED error.
-    """
+    100s RESOURCE_EXCHAUSTED error."""
 
     def request(*args, **kwargs):
         try:
@@ -327,9 +317,7 @@ def monkey_patch_request(client, retry_delay=10):
 
 
 def create_merge_headers_request(sheet_id, headers, start, index_size):
-    """
-    Create v4 API request to merge labels for a given worksheet.
-    """
+    """Create v4 API request to merge labels for a given worksheet."""
     request = []
     start = get_cell_as_tuple(start)
 
@@ -351,8 +339,11 @@ def create_merge_headers_request(sheet_id, headers, start, index_size):
 
 
 def get_col_merge_ranges(index):
-    """Get list of ranges to be merged for each level of columns. For each level,
-    same values will only be merged if they share the same label for the level above.
+    """
+    Get list of ranges to be merged for each level of columns.
+
+    For each level, same values will only be merged if they share the
+    same label for the level above.
     """
     labels = index.codes if hasattr(index, "codes") else index.labels
     # Dummy range indicating the full size, this is removed at the end
@@ -371,7 +362,8 @@ def get_col_merge_ranges(index):
 
 
 def get_contiguous_ranges(lst, lst_start, lst_end):
-    """Get list of tuples, each indicating the range of contiguous equal values in the lst
+    """
+    Get list of tuples, each indicating the range of contiguous equal values in the lst
     between lst_start and lst_end. Everything is 0 indexed.
 
     For example, get_contiguous_ranges([0, 0, 0, 1, 1], 1, 4) = [(1, 2), (3, 4)]
@@ -437,7 +429,7 @@ def _convert_service_account(credentials):
 
 
 def parse_permission(perm):
-    """Convert the string permission into a dict to unpack for insert_permission"""
+    """Convert the string permission into a dict to unpack for insert_permission."""
     perm_dict = {}
     perm = perm.split("|")
     for part in perm:
@@ -462,18 +454,20 @@ def parse_permission(perm):
 
 
 def remove_keys(dct, keys=[]):
-    """Remove keys from a dict"""
+    """Remove keys from a dict."""
     return {key: val for key, val in iteritems(dct) if key not in keys}
 
 
 def remove_keys_from_list(lst, keys=[]):
-    """Remove keys from a list of dicts"""
+    """Remove keys from a list of dicts."""
     return [remove_keys(ele, keys) for ele in lst]
 
 
 def add_paths(root, dirs):
-    """Recursively build a `path` property to each dir. Pass in the root dir and a
-    list of all available dirs.
+    """
+    Recursively build a `path` property to each dir.
+
+    Pass in the root dir and a list of all available dirs.
     """
     # TODO: handle scenario with folders having more than one parent
     children = [dr for dr in dirs if root.get("id", None) in dr.get("parents", [])]
@@ -485,8 +479,10 @@ def add_paths(root, dirs):
 
 
 def folders_to_create(search_path, dirs, base_path=""):
-    """Recursively traverse through folder paths looking for the longest existing
-    subpath. Return the dir info of the longest subpath and the directories that
+    """
+    Recursively traverse through folder paths looking for the longest existing subpath.
+
+    Return the dir info of the longest subpath and the directories that
     need to be created.
     """
     # Allow user to pass in a string, but use a list in the recursion
