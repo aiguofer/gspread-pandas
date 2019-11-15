@@ -5,17 +5,18 @@ python:
 - 2.7
 matrix:
   include:
-  - name: Python 3.7  on Xenial Linux
+  - name: Python on Xenial Linux
     dist: xenial
-  - name: Python 3.7 on macOS
+  - name: Python on macOS
     os: osx
     osx_image: xcode10.2
     language: shell
-  - name: Python 3.7 on Windows
+  - name: Python on Windows
     os: windows
     language: shell
-    before_install: choco install python
-    env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+    env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
+    before_install:
+      - choco install python
 install: pip install -U tox-travis
 script: tox
 deploy:
