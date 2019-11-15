@@ -344,13 +344,15 @@ class Spread:
         except KeyError:
             return []
 
-    def _fix_value_render(self, df, header_rows, col_names, cols, value_render_option):
+    def _fix_value_render(
+        self, df, first_data_row, col_names, cols, value_render_option
+    ):
         """Replace values for columns that need a different value render option."""
         if not is_indexes(cols):
             cols = find_col_indexes(cols, col_names)
 
         for ix, col in enumerate(self._get_columns(cols, value_render_option)):
-            df.iloc[:, cols[ix] - 1] = rightpad(col[header_rows:], len(df))
+            df.iloc[:, cols[ix] - 1] = rightpad(col[first_data_row:], len(df))
 
     def sheet_to_df(
         self,
@@ -391,6 +393,7 @@ class Spread:
         self._ensure_sheet(sheet)
 
         vals = self.sheet.get_all_values()
+        vals = self._fix_merge_values(vals)[start_row - 1 :]
 
         col_names = parse_sheet_headers(vals, header_rows)
 
@@ -406,12 +409,16 @@ class Spread:
         # index in set_col_names
         if unformatted_columns:
             self._fix_value_render(
-                df, header_rows, col_names, unformatted_columns, "UNFORMATTED_VALUE"
+                df,
+                header_rows + start_row - 1,
+                col_names,
+                unformatted_columns,
+                "UNFORMATTED_VALUE",
             )
 
         if formula_columns:
             self._fix_value_render(
-                df, header_rows, col_names, formula_columns, "FORMULA"
+                df, header_rows + start_row - 1, col_names, formula_columns, "FORMULA"
             )
 
         df = set_col_names(df, col_names)
