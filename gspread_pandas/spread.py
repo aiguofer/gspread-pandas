@@ -12,6 +12,7 @@ from gspread.exceptions import (
     WorksheetNotFound,
 )
 from gspread.models import Worksheet
+from gspread.utils import fill_gaps, rightpad
 from past.builtins import basestring
 
 from gspread_pandas.client import Client
@@ -31,14 +32,18 @@ from gspread_pandas.util import (
     create_merge_headers_request,
     create_unmerge_cells_request,
     fillna,
+    find_col_indexes,
     get_cell_as_tuple,
     get_range,
+    get_ranges,
+    is_indexes,
     map_cols_to_spread,
     monkey_patch_request,
     parse_df_col_names,
     parse_permission,
     parse_sheet_headers,
     parse_sheet_index,
+    set_col_names,
 )
 
 __all__ = ["Spread"]
@@ -305,7 +310,59 @@ class Spread:
         self.refresh_spread_metadata()
         self.open_sheet(name)
 
-    def sheet_to_df(self, index=1, header_rows=1, start_row=1, sheet=None):
+    def _get_columns(self, cols, value_render_option="FORMATTED_VALUE"):
+        """
+        Returns a list of all values in `cols`.
+
+        Empty cells in this list will be rendered as :const:`None`.
+
+        Parameters
+        ----------
+        cols : list of ints
+            Column numbers.
+        value_render_option : str
+            Determines how values should be rendered in the the output. Possible
+            values are "FORMATTED_VALUEF", "FORMULA", and "UNFORMATTED_VALUE"(
+            Default value = "FORMATTED_VALUE")
+
+        Returns
+        -------
+        """
+        ranges = get_ranges(self.sheet.title, cols)
+        data = self.spread.values_batch_get(
+            ranges,
+            params={
+                "valueRenderOption": value_render_option,
+                "majorDimension": "COLUMNS",
+            },
+        )
+
+        try:
+            return fill_gaps(
+                [col.get("values", [[]])[0] for col in data["valueRanges"]]
+            )
+        except KeyError:
+            return []
+
+    def _fix_value_render(
+        self, df, first_data_row, col_names, cols, value_render_option
+    ):
+        """Replace values for columns that need a different value render option."""
+        if not is_indexes(cols):
+            cols = find_col_indexes(cols, col_names)
+
+        for ix, col in enumerate(self._get_columns(cols, value_render_option)):
+            df.iloc[:, cols[ix] - 1] = rightpad(col[first_data_row:], len(df))
+
+    def sheet_to_df(
+        self,
+        index=1,
+        header_rows=1,
+        start_row=1,
+        unformatted_columns=[],
+        formula_columns=[],
+        sheet=None,
+    ):
         """
         Pull a worksheet into a DataFrame.
 
@@ -317,6 +374,12 @@ class Spread:
             number of rows that represent headers (default 1)
         start_row : int
             row number for first row of headers or data (default 1)
+        unformatted_columns : list
+            column numbers or names for columns you'd like to pull in as
+            unformatted values (defaul [])
+        formula_columns : list
+            column numbers or names for columns you'd like to pull in as
+            actual formulas (defaul [])
         sheet : str,int
             optional, if you want to open a different sheet first,
             see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
@@ -342,16 +405,23 @@ class Spread:
             .fillna("")
         )
 
-        if col_names is not None:
-            if len(df.columns) == len(col_names):
-                df.columns = col_names
-            elif len(df) == 0:
-                # if we have headers but no data, set column headers on empty DF
-                df = df.reindex(columns=col_names)
-            else:
-                raise MissMatchException(
-                    "Column headers don't match number of data columns"
-                )
+        # replace values with a different value render option before we set the
+        # index in set_col_names
+        if unformatted_columns:
+            self._fix_value_render(
+                df,
+                header_rows + start_row - 1,
+                col_names,
+                unformatted_columns,
+                "UNFORMATTED_VALUE",
+            )
+
+        if formula_columns:
+            self._fix_value_render(
+                df, header_rows + start_row - 1, col_names, formula_columns, "FORMULA"
+            )
+
+        df = set_col_names(df, col_names)
 
         return parse_sheet_index(df, index)
 
