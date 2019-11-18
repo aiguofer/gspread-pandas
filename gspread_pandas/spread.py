@@ -520,7 +520,8 @@ class Spread:
                 raw_cells = []
 
             user_cells = [i for i in cells if i not in raw_cells]
-            self.sheet.update_cells(user_cells, "USER_ENTERED")
+            if user_cells:
+                self.sheet.update_cells(user_cells, "USER_ENTERED")
 
     def _ensure_sheet(self, sheet):
         if sheet is not None:
