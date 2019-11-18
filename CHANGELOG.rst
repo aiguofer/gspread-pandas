@@ -9,6 +9,34 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ------------
 
+Added
+-----
+
+-  Added ``formula_columns`` and ``unformatted_columns`` as options to
+   ``Spread.sheet_to_df`` to allow usage of ValueRenderOption for specific
+   columns.
+-  Added test for python 3.7 and 3.8 in travis
+
+Fixed
+-----
+
+-  Bug with certain functions when index=False
+-  Bug when all columns are ``raw_columns``
+-  Fixed travis tests
+
+Deprecated
+----------
+
+-  ``raw_column_names`` is deprecated in favor of ``raw_columns``. It will
+   be removed in v3.
+
+Changed
+-------
+
+-  bumpversion config now in setup.cfg
+-  Docstrings now use docformatter format
+
+
 [2.1.3] - 2019-08-25
 -----------------------------
 

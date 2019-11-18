@@ -24,13 +24,13 @@ Links:
 
 .. attention:: Upgrading from < 2.0
 
-    If you are upgrading, the ``user`` is now an optional param that 
+    If you are upgrading, the ``user`` is now an optional param that
     uses ``default`` as the default. If you're a single user, you might
-    want to re-name your credentials to ``default`` so you can stop 
+    want to re-name your credentials to ``default`` so you can stop
     specifying it:
-    
+
     .. code-block:: console
-        
+
         mv ~/.config/gspread_pandas/creds{<old_name>,default}
 
 Overview
@@ -58,6 +58,7 @@ Some key goals/features:
 -  Handle retries when exceeding 100s quota
 -  When pushing DataFrames with MultiIndex columns, allow merging or flattening headers
 -  Ability to nicely handle Spreadsheet permissions
+-  Ability to specify ``ValueInputOption`` and ``ValueRenderOption`` for specific columns
 
 Installation / Usage
 ====================
@@ -104,8 +105,8 @@ the tool and generate credentials. Please use your web browser and go to
 
    -  Select **Application type** item as **Other** and give it a name.
    -  Click on **Create** button.
-   -  Click on **Download JSON** icon on the right side of created 
-      **OAuth client IDs** and store the downloaded file on your file system.      
+   -  Click on **Download JSON** icon on the right side of created
+      **OAuth client IDs** and store the downloaded file on your file system.
 -  If you select **Service account key**
 
    -  Click on **Service account** dropdown and select **New service account**
@@ -115,7 +116,7 @@ the tool and generate credentials. Please use your web browser and go to
    -  Note the **Service account ID** as you might need to give that user
       permission to interact with your spreadsheets
    -  Leave **Key type** as **JSON**
-   -  Click **Create** and store the downloaded file on your file system.   
+   -  Click **Create** and store the downloaded file on your file system.
 -  Please be aware, the file contains your private credentials, so take
    care of the file in the same way you care of your private SSH key;
    Move the downloaded JSON to ``~/.config/gspread_pandas/google_secret.json``
@@ -127,7 +128,7 @@ Thanks to similar project
 `df2gspread <https://github.com/maybelinot/df2gspread>`__ for this great
 description of how to get the client credentials.
 
-You can read more about it in the `configuration docs 
+You can read more about it in the `configuration docs
 <https://gspread-pandas.readthedocs.io/en/latest/configuration.html>`__
 including how to change the default behavior.
 
