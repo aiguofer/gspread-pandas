@@ -48,7 +48,6 @@ class TestSpread:
             freeze_headers=True,
             add_filter=True,
             merge_headers=True,
-            raw_column_names=["Total"],
         )
 
         # ensre values are the same
@@ -89,4 +88,12 @@ class TestSpread:
             sheets_metadata[2].get("merges", {}), ["sheetId"]
         )
 
+        raw_sheet = "Raw"
+        self.spread.df_to_sheet(
+            df[["Total"]], index=False, sheet=raw_sheet, raw_columns=["Total"]
+        )
+
+        assert any(row[0].startswith("=") for row in self.spread.sheet.get_all_values())
+
         self.spread.delete_sheet(df_to_sheet_name)
+        self.spread.delete_sheet(raw_sheet)
