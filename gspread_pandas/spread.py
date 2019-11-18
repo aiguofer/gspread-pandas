@@ -715,7 +715,7 @@ class Spread:
         self._ensure_sheet(sheet)
 
         header = df.columns
-        index_size = df.index.nlevels
+        index_size = df.index.nlevels if index else 0
         header_size = df.columns.nlevels
 
         if index:
