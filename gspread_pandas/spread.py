@@ -31,13 +31,13 @@ from gspread_pandas.util import (
     create_merge_cells_request,
     create_merge_headers_request,
     create_unmerge_cells_request,
+    deprecate,
     fillna,
     find_col_indexes,
     get_cell_as_tuple,
     get_range,
     get_ranges,
     is_indexes,
-    map_cols_to_spread,
     monkey_patch_request,
     parse_df_col_names,
     parse_permission,
@@ -322,8 +322,8 @@ class Spread:
             Column numbers.
         value_render_option : str
             Determines how values should be rendered in the the output. Possible
-            values are "FORMATTED_VALUEF", "FORMULA", and "UNFORMATTED_VALUE"(
-            Default value = "FORMATTED_VALUE")
+            values are "FORMATTED_VALUE", "FORMULA", and "UNFORMATTED_VALUE"
+            (Default value = "FORMATTED_VALUE")
 
         Returns
         -------
@@ -359,8 +359,8 @@ class Spread:
         index=1,
         header_rows=1,
         start_row=1,
-        unformatted_columns=[],
-        formula_columns=[],
+        unformatted_columns=None,
+        formula_columns=None,
         sheet=None,
     ):
         """
@@ -468,7 +468,7 @@ class Spread:
             )
             yield start_cell, end_cell, val_chunks
 
-    def update_cells(self, start, end, vals, sheet=None, raw_columns=[]):
+    def update_cells(self, start, end, vals, sheet=None, raw_columns=None):
         """
         Update the values in a given range. The values should be listed in order from
         left to right across rows.
@@ -486,7 +486,7 @@ class Spread:
             see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
             (default None)
         raw_columns : list, int
-            optional, list of column indexes in the google sheet that should be
+            optional, list of column numbers in the google sheet that should be
             interpreted as "RAW" input
 
         Returns
@@ -510,7 +510,7 @@ class Spread:
             for val, cell in zip(val_chunks, cells):
                 cell.value = val
 
-            if raw_columns != []:
+            if raw_columns:
                 assert isinstance(
                     raw_columns, list
                 ), "raw_columns must be a list of ints"
@@ -654,7 +654,8 @@ class Spread:
         start=(1, 1),
         replace=False,
         sheet=None,
-        raw_column_names=[],
+        raw_column_names=None,
+        raw_columns=None,
         freeze_index=False,
         freeze_headers=False,
         fill_value="",
@@ -684,8 +685,13 @@ class Spread:
             see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
             (default None)
         raw_column_names : list, str
+            (DEPRECATED use raw_collumns instead) optional, list of columns
+            from your dataframe that you want interpreted as RAW input in
+            google sheets.
+        raw_columns : list, str
             optional, list of columns from your dataframe that you want
-            interpreted as RAW input in google sheets
+            interpreted as RAW input in google sheets. This can be column
+            names or column numbers.
         freeze_index : bool
             whether to freeze the index columns (default False)
         freeze_headers : bool
@@ -737,11 +743,19 @@ class Spread:
             # make sure sheet is large enough
             self.sheet.resize(max(sheet_rows, req_rows), max(sheet_cols, req_cols))
 
-        if raw_column_names != []:
-            mapped = map_cols_to_spread(start, end, df.columns.tolist())
-            raw_columns = [i[0] for i in mapped if i[1] in raw_column_names]
-        else:
-            raw_columns = []
+        if raw_column_names:
+            deprecate("raw_column_names is deprecated, please use raw_columns instead.")
+            raw_columns = find_col_indexes(
+                raw_column_names, header, start[COL] + index_size
+            )
+        elif raw_columns:
+            if is_indexes(raw_columns):
+                offset = index_size + start[COL] - 1
+                raw_columns = [ix + offset for ix in raw_columns]
+            else:
+                raw_columns = find_col_indexes(
+                    raw_columns, header, start[COL] + index_size
+                )
 
         self.update_cells(
             start=start,

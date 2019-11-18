@@ -248,15 +248,6 @@ def get_range(start, end):
     return "{0}:{1}".format(rowcol_to_a1(*start_int), rowcol_to_a1(*end_int))
 
 
-def map_cols_to_spread(start, end, cols):
-    """map df columns to spreadsheet columns."""
-    start_col = get_cell_as_tuple(start)[COL]
-    end_col = get_cell_as_tuple(end)[COL]
-    col_range = range(start_col, end_col + 1)
-    assert len(cols) == len(col_range), "df columns do not match spread columns"
-    return list(zip(col_range, cols))
-
-
 def create_merge_cells_request(sheet_id, start, end, merge_type="MERGE_ALL"):
     """Create v4 API request to merge rows and/or columns for a given worksheet."""
     start = get_cell_as_tuple(start)
@@ -531,7 +522,7 @@ def is_indexes(lst):
     return all([is_int(val) for val in lst])
 
 
-def find_col_indexes(cols, col_names):
+def find_col_indexes(cols, col_names, col_offset=1):
     """Given a column name Index, find the numeric indeces of the columns in the
     spreadsheet."""
     col_locs = []
@@ -545,4 +536,4 @@ def find_col_indexes(cols, col_names):
         elif isinstance(loc, np.ndarray):
             col_locs += [ix for ix in range(len(loc)) if loc[ix]]
     # add 1 because we want the index based on spreadsheet, not python
-    return [ele + 1 for ele in set(col_locs)]
+    return [ele + col_offset for ele in set(col_locs)]
