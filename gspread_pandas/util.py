@@ -287,14 +287,14 @@ def create_unmerge_cells_request(sheet_id, start, end):
 
 def monkey_patch_request(client, retry_delay=10):
     """Monkey patch gspread's Client.request to auto-retry with a delay when you get a
-    100s RESOURCE_EXCHAUSTED error."""
+    100 seconds RESOURCE_EXCHAUSTED error."""
 
     def request(*args, **kwargs):
         try:
             return ClientV4.request(client, *args, **kwargs)
         except APIError as e:
             error = str(e)
-            # Only retry on 100s quota breaches
+            # Only retry on 100 seconds quota breaches
             if "RESOURCE_EXHAUSTED" in error and "100" in error:
                 sleep(retry_delay)
                 return request(*args, **kwargs)
