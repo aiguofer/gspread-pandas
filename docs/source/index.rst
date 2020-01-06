@@ -3,6 +3,7 @@
 
    getting_started
    configuration
+   using
    modules
    contributing
 
