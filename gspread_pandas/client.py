@@ -17,6 +17,7 @@ from gspread_pandas.util import (
     add_paths,
     convert_credentials,
     folders_to_create,
+    monkey_patch_request,
     remove_keys_from_list,
 )
 
@@ -95,6 +96,8 @@ class Client(ClientV4):
                 )
             session = AuthorizedSession(credentials)
         super().__init__(credentials, session)
+
+        monkey_patch_request(self)
 
         self._root = self._drive_request(file_id="root", params={"fields": "name,id"})
 

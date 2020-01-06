@@ -38,7 +38,6 @@ from gspread_pandas.util import (
     get_range,
     get_ranges,
     is_indexes,
-    monkey_patch_request,
     parse_df_col_names,
     parse_permission,
     parse_sheet_headers,
@@ -130,8 +129,6 @@ class Spread:
             self.client = client
         else:
             self.client = Client(user, config, scope, creds)
-
-        monkey_patch_request(self.client)
 
         self.open(spread, sheet, create_sheet, create_spread)
 
