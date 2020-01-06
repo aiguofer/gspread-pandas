@@ -45,19 +45,24 @@ most of the heavylifting, but it has a lot of added functionality
 to handle things specific to working with DataFrames as well as
 some extra nice to have features.
 
+The target audience are Data Analysts and Data Scientists, but it can also
+be used by Data Engineers or anyone trying to automate workflows with Google
+Sheets and Pandas.
+
 Some key goals/features:
 
--  Nicely handle headers and indexes
+-  Be easy to use interactively, with good docstrings and auto-completion
+-  Nicely handle headers and indexes (including multi-level headers and merged cells)
 -  Run on Jupyter, headless server, and/or scripts
 -  Allow storing different user credentials or using Service Accounts
 -  Automatically handle token refreshes
 -  Enable handling of frozen rows and columns
--  Enable handling of merged cells when pulling data
+-  Enable filling in all merged cells when pulling data
 -  Nicely handle large data sets and auto-retries
 -  Enable creation of filters
--  Handle retries when exceeding 100s quota
+-  Handle retries when exceeding 100 second user quota
 -  When pushing DataFrames with MultiIndex columns, allow merging or flattening headers
--  Ability to nicely handle Spreadsheet permissions
+-  Ability to handle Spreadsheet permissions
 -  Ability to specify ``ValueInputOption`` and ``ValueRenderOption`` for specific columns
 
 Installation / Usage
