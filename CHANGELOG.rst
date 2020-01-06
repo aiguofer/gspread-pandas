@@ -8,6 +8,25 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Added
+-----
+
+-  Added a section explaining the main concepts of ``Gspread-Pandas``
+   to the docs.
+
+Fixed
+-----
+
+-  Fixed the auto-retry when encountering the 100 second quota limit (thanks @rodelrod).
+-  All ``Client`` objects should now be monkeypatched to retry on 100 s quota error.
+   Before it was only those within a ``Spread`` instance.
+
+Changed
+-------
+
+-  When a ``Spread`` is opened, it will now open the first worksheet by default.
+
 [2.2.0] - 2019-11-17
 -----------------------------
 
