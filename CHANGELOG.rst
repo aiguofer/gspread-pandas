@@ -8,6 +8,8 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+[2.2.1] - 2020-01-05
+-----------------------------
 
 Added
 -----
