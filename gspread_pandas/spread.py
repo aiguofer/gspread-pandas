@@ -116,7 +116,7 @@ class Spread:
     def __init__(
         self,
         spread,
-        sheet=None,
+        sheet=0,
         config=None,
         create_spread=False,
         create_sheet=False,
