@@ -56,7 +56,8 @@ def ensure_path(full_path):
     -------
     None
     """
-    if not Path(full_path).exists():
+    full_path = Path(full_path)
+    if not full_path.exists():
         full_path.mkdir(parents=True, exist_ok=True)
 
 
@@ -120,7 +121,7 @@ def get_creds(
         OAuth or "type", "client_email", "private_key", "private_key_id", and
         "client_id" for a Service Account. If None is passed, it will call
         :meth:`get_config() <get_config>` (Default value = None)
-    creds_dir : str
+    creds_dir : str, Path
         Optional, directory to load and store creds from/in. If None, it will use the
         ``creds`` subdirectory in the default config location. (Default value = None)
     scope : list
@@ -144,9 +145,9 @@ def get_creds(
         if creds_dir is None:
             creds_dir = get_config_dir() / "creds"
 
-        creds_file = creds_dir / user
+        creds_file = Path(creds_dir) / user
 
-        if Path(creds_file).exists():
+        if creds_file.exists():
             # need to convert Path to string for python 2.7
             return OAuthCredentials.from_authorized_user_file(str(creds_file))
 
