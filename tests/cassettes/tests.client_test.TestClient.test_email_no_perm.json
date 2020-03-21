@@ -1,7 +1,7 @@
 {
   "http_interactions": [
     {
-      "recorded_at": "2019-07-11T02:10:35",
+      "recorded_at": "2020-03-21T17:59:23",
       "request": {
         "body": {
           "encoding": "utf-8",
@@ -34,7 +34,7 @@
         },
         "headers": {
           "Alt-Svc": [
-            "quic=\":443\"; ma=2592000; v=\"46,43,39\""
+            "quic=\":443\"; ma=2592000; v=\"46,43\",h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,h3-T050=\":443\"; ma=2592000"
           ],
           "Cache-Control": [
             "private, max-age=0, must-revalidate, no-transform"
@@ -42,14 +42,17 @@
           "Content-Encoding": [
             "gzip"
           ],
+          "Content-Security-Policy": [
+            "frame-ancestors 'self'"
+          ],
           "Content-Type": [
             "application/json; charset=UTF-8"
           ],
           "Date": [
-            "Thu, 11 Jul 2019 02:10:34 GMT"
+            "Sat, 21 Mar 2020 17:59:23 GMT"
           ],
           "Expires": [
-            "Thu, 11 Jul 2019 02:10:34 GMT"
+            "Sat, 21 Mar 2020 17:59:23 GMT"
           ],
           "Server": [
             "GSE"

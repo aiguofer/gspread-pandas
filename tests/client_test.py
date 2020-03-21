@@ -39,6 +39,7 @@ class TestClient:
             assert {"name", "id", "path"} == set(f.keys())
 
     def test_find_spreadsheet_files_in_folder(self):
+        self.client.refresh_directories()
         files = self.client.list_spreadsheet_files_in_folder("root")
 
         assert isinstance(files, list)

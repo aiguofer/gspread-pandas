@@ -1,7 +1,7 @@
 {
   "http_interactions": [
     {
-      "recorded_at": "2019-07-11T02:10:36",
+      "recorded_at": "2020-03-21T17:59:25",
       "request": {
         "body": {
           "encoding": "utf-8",
@@ -34,7 +34,7 @@
         },
         "headers": {
           "Alt-Svc": [
-            "quic=\":443\"; ma=2592000; v=\"46,43,39\""
+            "quic=\":443\"; ma=2592000; v=\"46,43\",h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,h3-T050=\":443\"; ma=2592000"
           ],
           "Cache-Control": [
             "private, max-age=0, must-revalidate, no-transform"
@@ -42,14 +42,17 @@
           "Content-Encoding": [
             "gzip"
           ],
+          "Content-Security-Policy": [
+            "frame-ancestors 'self'"
+          ],
           "Content-Type": [
             "application/json; charset=UTF-8"
           ],
           "Date": [
-            "Thu, 11 Jul 2019 02:10:36 GMT"
+            "Sat, 21 Mar 2020 17:59:25 GMT"
           ],
           "Expires": [
-            "Thu, 11 Jul 2019 02:10:36 GMT"
+            "Sat, 21 Mar 2020 17:59:25 GMT"
           ],
           "Server": [
             "GSE"
@@ -79,7 +82,7 @@
       }
     },
     {
-      "recorded_at": "2019-07-11T02:10:37",
+      "recorded_at": "2020-03-21T17:59:25",
       "request": {
         "body": {
           "encoding": "utf-8",
@@ -103,16 +106,16 @@
           ]
         },
         "method": "GET",
-        "uri": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.spreadsheet%27+and+%27root%27+in+parents&fields=files%28name%2Cid%2Cparents%29&pageSize=1000"
+        "uri": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27&pageSize=1000&fields=files%28name%2Cid%2Cparents%29"
       },
       "response": {
         "body": {
-          "base64_string": "H4sIAAAAAAAAAKvmUlBKy8xJLVayUoiO5arlAgAFrPVGEQAAAA==",
+          "base64_string": "H4sIAAAAAAAAAKXSyW6bUBgF4L2fArEOEqMJ2YEJNpjBzENVITBgoFwPgI1ClHevXSULuwKUdgGIq//c+wnO+wyCs6JKG/gF+jGDoPfrBcFFcn2FMV2ka6XRc5p8Q5gYN5Ud6CoMP1KokVR+pcNPf6b3EUhv80lRf64cozrdt197XhcwtX5FWVPWbXovlAdEdAVWKFzaWDr6PDTVGL7N/bzePp4eFZPRe8U+7QYVQVsl65gTkyZTwakH5whfb/xQaPsLelhywYhiMnqviAYNVO/6mtMSud3K1NkxUNS3KGdORm1XadXaHzFMRu8NRTOIeOM1JV1ISimsnMZKesUtQWDYiNCpmrAjtBHEZPQe0ebDDJQVnwOdPCIKIWr2L2bjsCMH4/42jylugR89LPNLp8WUHFiMapEhj6LP7MPBVtq0+OAH8OStyHQriao3Ks4hYrdVMCfUAJeiAR8p5VgTJA30gUe/riKJ8EtBMMWFy1L8yesXJ9lyHxzmOb5RhvvAF55ZHxDARtxhblCMoYTLBnHZi8gWuUGO9WEq+j2JJNg7kOcmkSGad5HN0lvxTk01TJYjRoWAEclk9HuS//g7k9G/W/JP9ZxdHx+z35x+n1c/BQAA",
           "encoding": "UTF-8"
         },
         "headers": {
           "Alt-Svc": [
-            "quic=\":443\"; ma=2592000; v=\"46,43,39\""
+            "quic=\":443\"; ma=2592000; v=\"46,43\",h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,h3-T050=\":443\"; ma=2592000"
           ],
           "Cache-Control": [
             "private, max-age=0, must-revalidate, no-transform"
@@ -120,14 +123,17 @@
           "Content-Encoding": [
             "gzip"
           ],
+          "Content-Security-Policy": [
+            "frame-ancestors 'self'"
+          ],
           "Content-Type": [
             "application/json; charset=UTF-8"
           ],
           "Date": [
-            "Thu, 11 Jul 2019 02:10:37 GMT"
+            "Sat, 21 Mar 2020 17:59:25 GMT"
           ],
           "Expires": [
-            "Thu, 11 Jul 2019 02:10:37 GMT"
+            "Sat, 21 Mar 2020 17:59:25 GMT"
           ],
           "Server": [
             "GSE"
@@ -153,7 +159,88 @@
           "code": 200,
           "message": "OK"
         },
-        "url": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.spreadsheet%27+and+%27root%27+in+parents&fields=files%28name%2Cid%2Cparents%29&pageSize=1000"
+        "url": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27&pageSize=1000&fields=files%28name%2Cid%2Cparents%29"
+      }
+    },
+    {
+      "recorded_at": "2020-03-21T17:59:25",
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": ""
+        },
+        "headers": {
+          "Accept": [
+            "*/*"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "User-Agent": [
+            "python-requests/2.21.0"
+          ],
+          "authorization": [
+            "Bearer <ACCESS_TOKEN>"
+          ]
+        },
+        "method": "GET",
+        "uri": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.spreadsheet%27+and+%27root%27+in+parents&pageSize=1000&fields=files%28name%2Cid%2Cparents%29"
+      },
+      "response": {
+        "body": {
+          "base64_string": "H4sIAAAAAAAAAL2TSa+iWhCA9/dXGNdNgjIIvWMSEBAQkKHTMUdmOAKCINDp/97eznsb31t6XZypKpXzpb7Ur4/FMslh3C2/L358LBa/HmuxzKPHc7nqtI139TzzKB0wJ2u1VTqgoh3k7gxGQ9kVg+mUHc97gU0tv/0trMAl/iy14+624GAeV7fP6z/ZBrSPwL9fPQIoI1OBiTeIhsm6U9LGkVl+Zn4+tt/fnnFmt/Cl0xDMnHec8vuoAmof2M22mac17tEjoqFQvc0FYqH/h2M1bQyiLovjF/EYiVZb3dXkGEUh1u2NMlqe0Cyk1k4riK2RUHU5l7M4fa898XB1My3qZKG3eZpXAL6GR2AcOWwkGfWNzB/ZrRJdox7MiuAQ9yzkuzo+4AHotln93J/XcmxUeV/xlNiXO5MkC4G0gNo36WHY6FiyLsiCDUWvXU96EL7FU6BG+dW3uiljKTjDYF+1CEFCQq7MWK4KE54nyOmwiPL7WzyluNk74cWhlBF4tCuGvTHh1BZR3d7OSlMibUUsThWVuM6XemLIM2l0ZN/B3UrGrbgH/PVMlye9mlJTsYBVpj5jQERUnjm+xlNVtnMVdAmU5ButNFrSpz5bINNcKSMW5e5ZzWQ+39wvIvMWT0c5XivEfk4dlKMswRLcDUPmXIsEMLHSAbf8OyfdT/X0H57XcqgaJ4yF6w/wUnqFl11152rK/gVV2qMxmvVNcyrkxqbouX7PPK02jSaG4p3cAnCguRKfw6u3teBqm63yHWgte3B5mZE28pvmKTdCNrmoXWNlUuTtB5ZWjNWYVDGl57shAFHmu8w6OKRf6mkP7WpK2hRFNBny8XDpuXR/5pBdyQMbFLOjmwyL1Tkq+G/xNAdUQJi5w3aGQTm4LZ16ba1SUY1WlNfQkTRHFF4NXdE/9+VrPM2YtzUm8WJH7FERKHHArl5ASFLolsw4NIxBB7HeYYRbC6/09PE4fn/8AfMLDgrpCAAA",
+          "encoding": "UTF-8"
+        },
+        "headers": {
+          "Alt-Svc": [
+            "quic=\":443\"; ma=2592000; v=\"46,43\",h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,h3-T050=\":443\"; ma=2592000"
+          ],
+          "Cache-Control": [
+            "private, max-age=0, must-revalidate, no-transform"
+          ],
+          "Content-Encoding": [
+            "gzip"
+          ],
+          "Content-Security-Policy": [
+            "frame-ancestors 'self'"
+          ],
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ],
+          "Date": [
+            "Sat, 21 Mar 2020 17:59:25 GMT"
+          ],
+          "Expires": [
+            "Sat, 21 Mar 2020 17:59:25 GMT"
+          ],
+          "Server": [
+            "GSE"
+          ],
+          "Transfer-Encoding": [
+            "chunked"
+          ],
+          "Vary": [
+            "Origin",
+            "X-Origin"
+          ],
+          "X-Content-Type-Options": [
+            "nosniff"
+          ],
+          "X-Frame-Options": [
+            "SAMEORIGIN"
+          ],
+          "X-XSS-Protection": [
+            "1; mode=block"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.spreadsheet%27+and+%27root%27+in+parents&pageSize=1000&fields=files%28name%2Cid%2Cparents%29"
       }
     }
   ],

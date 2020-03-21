@@ -287,7 +287,7 @@ def test_monkey_patch_request(betamax_authorizedsession):
 
     # error gets turned into multiple lines by prettyjson serializer in betamax
     # need to a regex class that includes newlines
-    with pytest.raises(APIError, match=r"100s[\s\S]+RESOURCE_EXHAUSTED"):
+    with pytest.raises(APIError, match=r"100[\s\S]+RESOURCE_EXHAUSTED"):
         for i in range(200):
             s.fetch_sheet_metadata()
 
