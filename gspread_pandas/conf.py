@@ -22,7 +22,7 @@ if name == "nt":
     _default_dir = Path(environ.get("APPDATA")) / "gspread_pandas"
 else:
     _default_dir = (
-        Path(environ.get("XDG_CONFIG_HOME", Path(environ.get("HOME")) / ".config"))
+        Path(environ.get("XDG_CONFIG_HOME", Path(environ.get("HOME", "")) / ".config"))
         / "gspread_pandas"
     )
 _default_file = "google_secret.json"
