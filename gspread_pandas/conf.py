@@ -22,7 +22,7 @@ if name == "nt":
     _default_dir = Path(environ.get("APPDATA")) / "gspread_pandas"
 else:
     _default_dir = (
-        Path(environ.get("$XDG_CONFIG_HOME", Path(environ.get("HOME")) / ".config"))
+        Path(environ.get("XDG_CONFIG_HOME", Path(environ.get("HOME")) / ".config"))
         / "gspread_pandas"
     )
 _default_file = "google_secret.json"
@@ -38,14 +38,19 @@ CONFIG_DIR_ENV_VAR = "GSPREAD_PANDAS_CONFIG_DIR"
 
 
 def get_config_dir():
-    """Get the config directory. It will first look in the environment variable
-    GSPREAD_PANDAS_CONFIG_DIR, but if it's not set it'll use ~/.config/gspread_pandas
+    """
+    Get the config directory.
+
+    It will first look in the environment variable
+    GSPREAD_PANDAS_CONFIG_DIR, but if it's not set it'll use
+    ~/.config/gspread_pandas
     """
     return Path(environ.get(CONFIG_DIR_ENV_VAR, _default_dir))
 
 
 def ensure_path(full_path):
-    """Create path if it doesn't exist
+    """
+    Create path if it doesn't exist.
 
     Parameters
     ----------
@@ -62,11 +67,12 @@ def ensure_path(full_path):
 
 
 def get_config(conf_dir=None, file_name=_default_file):
-    """Get config for Google client. Looks in ~/.config/gspread_pandas/google_secret.json
-    by default but you can override it with conf_dir and file_name. The creds_dir
-    value will be set to conf_dir/creds and the directory will be created if it doesn't
-    exist; if you'd like to override that you can do so by changing the 'creds_dir'
-    value in the dict returned by this function.
+    """
+    Get config for Google client. Looks in ~/.config/gspread_pandas/google_secret.json
+    by default but you can override it with conf_dir and file_name. The creds_dir value
+    will be set to conf_dir/creds and the directory will be created if it doesn't exist;
+    if you'd like to override that you can do so by changing the 'creds_dir' value in
+    the dict returned by this function.
 
     Download json from https://console.developers.google.com/apis/credentials
 
@@ -102,11 +108,13 @@ def get_config(conf_dir=None, file_name=_default_file):
 def get_creds(
     user="default", config=None, scope=default_scope, creds_dir=None, save=True
 ):
-    """Get google google.auth.credentials.Credentials for the given user. If the user
+    """
+    Get google google.auth.credentials.Credentials for the given user. If the user
     doesn't have previous creds, they will go through the OAuth flow to get new
     credentials which will be saved for later use. Credentials will be saved in
     config['creds_dir'], if this value is not set, then they will be stored in a folder
-    named ``creds`` in the default config dir (either ~/.config/gspread_pandas or
+    named ``creds`` in the default config dir (either ~/.config/gspread_pandas or.
+
     $GSPREAD_PANDAS_CONFIG_DIR)
 
     Alternatively, it will get credentials from a service account.
