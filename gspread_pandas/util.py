@@ -388,7 +388,7 @@ def convert_credentials(credentials):
 
     if cls == "ServiceAccountCredentials":
         return _convert_service_account(credentials)
-    elif cls == "OAuth2Credentials":
+    elif cls == "OAuth2Credentials" or cls == "GoogleCredentials":
         return _convert_oauth(credentials)
 
     raise TypeError(
