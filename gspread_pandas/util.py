@@ -1,4 +1,5 @@
 import warnings
+from distutils.version import StrictVersion
 from re import match
 from time import sleep
 
@@ -10,7 +11,7 @@ from gspread.client import Client as ClientV4
 from gspread.exceptions import APIError
 from gspread.utils import a1_to_rowcol, rowcol_to_a1
 from past.builtins import basestring
-from distutils.version import StrictVersion
+
 from gspread_pandas.exceptions import MissMatchException
 
 ROW = START = 0
@@ -105,7 +106,9 @@ def _fix_sheet_header_level(header_names):
     return header_names
 
 
-def _shift_header_up(header_names, col_index, row_index=0, shift_val=0, found_first=False):
+def _shift_header_up(
+    header_names, col_index, row_index=0, shift_val=0, found_first=False
+):
     """Recursively shift headers up so that top level is not empty."""
     rows = len(header_names)
     if row_index < rows:
@@ -116,7 +119,9 @@ def _shift_header_up(header_names, col_index, row_index=0, shift_val=0, found_fi
         else:
             found_first = True
 
-        shift_val = _shift_header_up(header_names, col_index, row_index + 1, shift_val, found_first)
+        shift_val = _shift_header_up(
+            header_names, col_index, row_index + 1, shift_val, found_first
+        )
         if shift_val <= row_index:
             header_names[row_index - shift_val][col_index] = current_value
 
@@ -135,7 +140,9 @@ def set_col_names(df, col_names):
             # if we have headers but no data, set column headers on empty DF
             df = df.reindex(columns=col_names)
         else:
-            raise MissMatchException("Column headers don't match number of data columns")
+            raise MissMatchException(
+                "Column headers don't match number of data columns"
+            )
     return df
 
 
@@ -152,10 +159,14 @@ def deprecate(message):
     # them disabled
     if DEPRECATION_WARNINGS_ENABLED and not _WARNINGS_ALREADY_ENABLED:
         _WARNINGS_ALREADY_ENABLED = True
-        warnings.filterwarnings("default", ".*", category=DeprecationWarning, module="gspread_pandas")
+        warnings.filterwarnings(
+            "default", ".*", category=DeprecationWarning, module="gspread_pandas"
+        )
     # provide ability to disable them at runtime
     if _WARNINGS_ALREADY_ENABLED and not DEPRECATION_WARNINGS_ENABLED:
-        warnings.filterwarnings("ignore", ".*", category=DeprecationWarning, module="gspread_pandas")
+        warnings.filterwarnings(
+            "ignore", ".*", category=DeprecationWarning, module="gspread_pandas"
+        )
 
     warnings.warn(message, DeprecationWarning, stacklevel=2)
 
@@ -211,7 +222,9 @@ def fillna(df, fill_value=""):
             df[col].cat.add_categories([fill_value], inplace=True)
     # Known bug https://github.com/pandas-dev/pandas/issues/25472
     if StrictVersion(pd.__version__) >= StrictVersion("1.0"):
-        for col in df.dtypes[df.dtypes.apply(lambda x: x in ["float64", "Int16"])].index:
+        for col in df.dtypes[
+            df.dtypes.apply(lambda x: x in ["float64", "Int16"])
+        ].index:
             df[col] = df[col].astype("float")
     return df.fillna(fill_value)
 
@@ -337,7 +350,9 @@ def get_col_merge_ranges(index):
     for ix, index_level in enumerate(labels[:]):
         index_ranges = []
         for rng in ranges[ix]:
-            index_ranges.extend(get_contiguous_ranges(index_level, rng[START], rng[END]))
+            index_ranges.extend(
+                get_contiguous_ranges(index_level, rng[START], rng[END])
+            )
         ranges.append(index_ranges)
 
     ranges.pop(0)
@@ -383,7 +398,9 @@ def convert_credentials(credentials):
     elif cls == "OAuth2Credentials" or cls == "GoogleCredentials":
         return _convert_oauth(credentials)
 
-    raise TypeError("Credentials need to be from either oauth2client or from google-auth.")
+    raise TypeError(
+        "Credentials need to be from either oauth2client or from google-auth."
+    )
 
 
 def _convert_oauth(credentials):
