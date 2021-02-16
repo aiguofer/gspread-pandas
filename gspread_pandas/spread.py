@@ -13,7 +13,6 @@ from gspread.exceptions import (
 )
 from gspread.models import Worksheet
 from gspread.utils import fill_gaps, rightpad
-from past.builtins import basestring
 
 from gspread_pandas.client import Client
 from gspread_pandas.conf import default_scope
@@ -46,6 +45,12 @@ from gspread_pandas.util import (
 )
 
 __all__ = ["Spread"]
+
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 
 class Spread:

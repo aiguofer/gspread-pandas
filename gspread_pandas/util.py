@@ -10,8 +10,6 @@ from google.oauth2 import credentials as oauth2, service_account
 from gspread.client import Client as ClientV4
 from gspread.exceptions import APIError
 from gspread.utils import a1_to_rowcol, rowcol_to_a1
-from past.builtins import basestring
-
 from gspread_pandas.exceptions import MissMatchException
 
 ROW = START = 0
@@ -21,6 +19,12 @@ _WARNINGS_ALREADY_ENABLED = False
 
 # assuming no one will be 10 levels deep
 auto_generated_index_names = ["level_{}".format(i) for i in range(10)] + ["index"]
+
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 
 def decode(strg):

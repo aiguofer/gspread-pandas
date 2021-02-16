@@ -1,7 +1,12 @@
 import pytest
-from past.builtins import basestring
 
 from gspread_pandas import Client
+
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 
 @pytest.mark.usefixtures("betamax_client")
