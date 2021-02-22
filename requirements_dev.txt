@@ -10,7 +10,7 @@ pytest
 pre-commit
 isort
 black;python_version>="3.6"
-pycrypto
+pycryptodome
 betamax
 betamax_serializers
 pytest_mock
