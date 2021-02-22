@@ -66,7 +66,7 @@ class Spread:
     sheet : str,int
         optional, name or index of Worksheet,
         see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
-        (default None)
+        (default 0)
     config : dict
         optional, if you want to provide an alternate configuration,
         see :meth:`get_config <gspread_pandas.conf.get_config>` (default None)
