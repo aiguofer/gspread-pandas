@@ -223,7 +223,7 @@ def fillna(df, fill_value=""):
     # Known bug https://github.com/pandas-dev/pandas/issues/25472
     if StrictVersion(pd.__version__) >= StrictVersion("1.0"):
         for col in df.dtypes[
-            df.dtypes.apply(lambda x: x in ["float64", "Int16"])
+            df.dtypes.apply(lambda x: x in ["float64", "int16"])
         ].index:
             df[col] = df[col].astype("float")
     return df.fillna(fill_value)
