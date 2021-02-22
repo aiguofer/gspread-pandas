@@ -469,7 +469,7 @@ def add_paths(root, dirs):
     """
     # TODO: handle scenario with folders having more than one parent
     children = [dr for dr in dirs if root.get("id", None) in dr.get("parents", [])]
-    path = root.get("path", root["name"])
+    path = root.get("path", root.get("name", ""))
 
     for child in children:
         child["path"] = path + "/" + child["name"]
