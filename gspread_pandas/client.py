@@ -122,9 +122,9 @@ class Client(ClientV4):
         if strip_parents:
             # this will make a copy, if we intend to modify the values
             # internally, pass strip_parents = False
-            return remove_keys_from_list(self._dirs, ["parents"])
+            return remove_keys_from_list(self._dirs + [self.root], ["parents"])
         else:
-            return self._dirs
+            return self._dirs + [self.root]
 
     directories = property(
         _get_dirs,
@@ -156,7 +156,16 @@ class Client(ClientV4):
         self._load_dirs = True
         q = "mimeType='application/vnd.google-apps.folder'"
         self._dirs = self._query_drive(q)
-        add_paths(self._root, self._dirs)
+        root_dirs = []
+
+        for dir_ in self._dirs:
+            # these are top level shared drives
+            if "parents" not in dir_:
+                dir_["path"] = dir_["name"]
+                root_dirs.append(dir_)
+
+        for root_dir in root_dirs:
+            add_paths(root_dir, self._dirs)
 
     def login(self):
         """Override login since AuthorizedSession now takes care of automatically
@@ -165,7 +174,13 @@ class Client(ClientV4):
     def _query_drive(self, q):
         files = []
         page_token = ""
-        params = {"q": q, "pageSize": 1000, "fields": "files(name,id,parents)"}
+        params = {
+            "q": q,
+            "pageSize": 1000,
+            "fields": "files(name,id,parents)",
+            "supportsAllDrives": True,
+            "includeItemsFromAllDrives": True,
+        }
 
         while page_token is not None:
             if page_token:
@@ -290,10 +305,15 @@ class Client(ClientV4):
                 # so we'll just choose the first one to build the path
                 parent = next(
                     directory
-                    for directory in self._get_dirs(False) + [self._root]
-                    if directory["id"] in fil3.get("parents", {})
+                    for directory in self._get_dirs(False)
+                    if directory["id"] in fil3.get("parents", None)
                 )
-                fil3["path"] = parent.get("path", "/")
+
+                if parent is None:
+                    # This is a top level shared drive
+                    fil3["path"] = f"{fil3['name']}/"
+                else:
+                    fil3["path"] = parent.get("path", "/")
             except StopIteration:
                 # Files that are visible to a ServiceAccount but not
                 # in the root will not have the 'parents' property
@@ -393,7 +413,8 @@ class Client(ClientV4):
         file_id : str
             file id
         path : str
-            folder path
+            folder path. A path starting with `/` will use your drive, for shared drives
+            the path will start with `<Shared Drive Name>/` (no leading /)
         create : bool
             whether to create any missing folders (Default value = False)
 

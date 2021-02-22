@@ -469,7 +469,7 @@ def add_paths(root, dirs):
     """
     # TODO: handle scenario with folders having more than one parent
     children = [dr for dr in dirs if root.get("id", None) in dr.get("parents", [])]
-    path = root.get("path", "")
+    path = root.get("path", root["name"])
 
     for child in children:
         child["path"] = path + "/" + child["name"]
@@ -488,6 +488,10 @@ def folders_to_create(search_path, dirs, base_path=""):
         parts = search_path
     else:
         parts = search_path.strip("/").split("/")
+
+    # shared drives don't start with a /
+    if base_path == "" and not search_path.startswith("/"):
+        base_path = parts.pop(0)
 
     parent = [dr for dr in dirs if dr.get("path", "") == base_path]
     if len(parent) == 0:
