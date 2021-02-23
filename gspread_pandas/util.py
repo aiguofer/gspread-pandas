@@ -302,7 +302,9 @@ def monkey_patch_request(client, retry_delay=10):
         except APIError as e:
             error = str(e)
             # Only retry on 100 seconds quota breaches
-            if "RESOURCE_EXHAUSTED" in error and "100" in error:
+            if "RESOURCE_EXHAUSTED" in error and (
+                "100" in error or "Read requests" in error
+            ):
                 sleep(retry_delay)
                 return request(*args, **kwargs)
             else:

@@ -194,14 +194,14 @@ class Test_parse_sheet_headers:
         assert util.parse_sheet_headers(data_multiheader, 1).equals(expected)
 
     def test_multiheader(self, data_multiheader):
-        """Note that 'test_index' should be shifted up"""
+        """Note that 'test_index' should be shifted up."""
         expected = pd.MultiIndex.from_arrays(
             [["test_index", "col1", "col1"], ["", "subcol1", "subcol2"]]
         )
         assert util.parse_sheet_headers(data_multiheader, 2).equals(expected)
 
     def test_multiheader3(self, data_multiheader):
-        """Note that 'test_index' and 1 should be shifted up"""
+        """Note that 'test_index' and 1 should be shifted up."""
         expected = pd.MultiIndex.from_arrays(
             [["test_index", "col1", "col1"], [1, "subcol1", "subcol2"], ["", 2, 3]]
         )
@@ -287,7 +287,7 @@ def test_monkey_patch_request(betamax_authorizedsession):
 
     # error gets turned into multiple lines by prettyjson serializer in betamax
     # need to a regex class that includes newlines
-    with pytest.raises(APIError, match=r"100[\s\S]+RESOURCE_EXHAUSTED"):
+    with pytest.raises(APIError, match=r".*Read requests.*RESOURCE_EXHAUSTED.*"):
         for i in range(200):
             s.fetch_sheet_metadata()
 
