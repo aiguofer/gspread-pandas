@@ -13,7 +13,7 @@ from gspread.exceptions import (
 )
 from gspread.models import Worksheet
 from gspread.utils import fill_gaps, rightpad
-from past.builtins import basestring
+from six import string_types as basestring
 
 from gspread_pandas.client import Client
 from gspread_pandas.conf import default_scope

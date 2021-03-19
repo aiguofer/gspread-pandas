@@ -1,5 +1,5 @@
 import pytest
-from past.builtins import basestring
+from six import string_types as basestring
 
 from gspread_pandas import Client
 

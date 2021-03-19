@@ -2,11 +2,10 @@ import json
 import sys
 from os import environ, name
 
-from future.utils import reraise
 from google.oauth2.credentials import Credentials as OAuthCredentials
 from google.oauth2.service_account import Credentials as SACredentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from past.builtins import basestring
+from six import reraise, string_types as basestring
 
 from gspread_pandas.exceptions import ConfigException
 from gspread_pandas.util import decode

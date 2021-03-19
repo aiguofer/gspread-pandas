@@ -5,12 +5,11 @@ from time import sleep
 
 import numpy as np
 import pandas as pd
-from future.utils import iteritems
 from google.oauth2 import credentials as oauth2, service_account
 from gspread.client import Client as ClientV4
 from gspread.exceptions import APIError
 from gspread.utils import a1_to_rowcol, rowcol_to_a1
-from past.builtins import basestring
+from six import iteritems, string_types as basestring
 
 from gspread_pandas.exceptions import MissMatchException
 

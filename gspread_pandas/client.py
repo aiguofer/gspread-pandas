@@ -3,14 +3,13 @@ from __future__ import print_function
 from builtins import super
 
 import requests
-from future.utils import reraise
 from google.auth.credentials import Credentials
 from google.auth.transport.requests import AuthorizedSession
 from gspread.client import Client as ClientV4
 from gspread.exceptions import APIError, SpreadsheetNotFound
 from gspread.models import Spreadsheet
 from gspread.utils import finditem
-from past.builtins import basestring
+from six import string_types as basestring
 
 from gspread_pandas.conf import default_scope, get_creds
 from gspread_pandas.util import (
@@ -210,8 +209,7 @@ class Client(ClientV4):
                     "spreadsheets by name)"
                 )
                 return {}
-            else:
-                reraise(e)
+            raise
 
     def open(self, title):
         """
