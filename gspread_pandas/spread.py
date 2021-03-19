@@ -5,6 +5,7 @@ from re import match
 
 import numpy as np
 import pandas as pd
+import six
 from gspread.exceptions import (
     APIError,
     NoValidUrlKeyFound,
@@ -13,7 +14,6 @@ from gspread.exceptions import (
 )
 from gspread.models import Worksheet
 from gspread.utils import fill_gaps, rightpad
-from six import string_types as basestring
 
 from gspread_pandas.client import Client
 from gspread_pandas.conf import default_scope
@@ -544,7 +544,7 @@ class Spread:
         """
         for ix, worksheet in enumerate(self.sheets):
             if (
-                isinstance(sheet, basestring)
+                isinstance(sheet, six.string_types)
                 and sheet.lower() == worksheet.title.lower()
             ):
                 return ix, worksheet

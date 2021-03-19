@@ -5,11 +5,11 @@ from time import sleep
 
 import numpy as np
 import pandas as pd
+import six
 from google.oauth2 import credentials as oauth2, service_account
 from gspread.client import Client as ClientV4
 from gspread.exceptions import APIError
 from gspread.utils import a1_to_rowcol, rowcol_to_a1
-from six import iteritems, string_types as basestring
 
 from gspread_pandas.exceptions import MissMatchException
 
@@ -51,7 +51,7 @@ def parse_df_col_names(df, include_index, index_size=1, flatten_sep=None):
     # handle multi-index headers
     if len(headers) > 0 and type(headers[0]) == tuple:
 
-        if isinstance(flatten_sep, basestring):
+        if isinstance(flatten_sep, six.string_types):
             headers = [
                 [
                     # Remove blank elements and join using sep
@@ -238,7 +238,7 @@ def get_cell_as_tuple(cell):
         ):
             raise TypeError("{0} is not a valid cell tuple".format(cell))
         return cell
-    elif isinstance(cell, basestring):
+    elif isinstance(cell, six.string_types):
         if not match("[a-zA-Z]+[0-9]+", cell):
             raise TypeError("{0} is not a valid address".format(cell))
         return a1_to_rowcol(cell)
