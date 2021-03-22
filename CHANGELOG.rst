@@ -8,12 +8,51 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Changed
+-------
+
+- Switch to pycryptodome instead of pycrypto to fix tests
+- Switch from future to six for python 2 compat
+
+Fixed
+-----
+
+- Fix docstring about default sheet param for `open`
+- Fix numpy deprecation warning about numeric-style types
+- Fix google quota exceed retry
+
+Added
+-----
+
+- Added ability to use shared drives
+
 [2.2.4] - 2021-01-24
 -----------------------------
+
+Fixed
+-----
+
+- Fix dtype issues for numeric+null values for pandas 1.0
+- Fix auth within Colab
+
 [2.2.3] - 2020-03-26
 -----------------------------
+
+Fixed
+-----
+
+- Ensure we respect XDG_CONFIG_HOME
+- Use current dir if no $HOME env var is set (in some cloud environments and Colab)
+
 [2.2.2] - 2020-03-21
 -----------------------------
+
+Changed
+-------
+
+- Use Path for various paths in conf.py
+
 [2.2.1] - 2020-01-05
 -----------------------------
 
