@@ -1,7 +1,7 @@
 {
   "http_interactions": [
     {
-      "recorded_at": "2020-03-21T17:59:25",
+      "recorded_at": "2021-03-22T04:45:59",
       "request": {
         "body": {
           "encoding": "utf-8",
@@ -18,7 +18,7 @@
             "keep-alive"
           ],
           "User-Agent": [
-            "python-requests/2.21.0"
+            "python-requests/2.25.1"
           ],
           "authorization": [
             "Bearer <ACCESS_TOKEN>"
@@ -34,10 +34,10 @@
         },
         "headers": {
           "Alt-Svc": [
-            "quic=\":443\"; ma=2592000; v=\"46,43\",h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,h3-T050=\":443\"; ma=2592000"
+            "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
           ],
           "Cache-Control": [
-            "private, max-age=0, must-revalidate, no-transform"
+            "no-cache, no-store, max-age=0, must-revalidate"
           ],
           "Content-Encoding": [
             "gzip"
@@ -49,10 +49,13 @@
             "application/json; charset=UTF-8"
           ],
           "Date": [
-            "Sat, 21 Mar 2020 17:59:25 GMT"
+            "Mon, 22 Mar 2021 04:45:59 GMT"
           ],
           "Expires": [
-            "Sat, 21 Mar 2020 17:59:25 GMT"
+            "Mon, 01 Jan 1990 00:00:00 GMT"
+          ],
+          "Pragma": [
+            "no-cache"
           ],
           "Server": [
             "GSE"
@@ -82,7 +85,7 @@
       }
     },
     {
-      "recorded_at": "2020-03-21T17:59:25",
+      "recorded_at": "2021-03-22T04:45:59",
       "request": {
         "body": {
           "encoding": "utf-8",
@@ -99,26 +102,26 @@
             "keep-alive"
           ],
           "User-Agent": [
-            "python-requests/2.21.0"
+            "python-requests/2.25.1"
           ],
           "authorization": [
             "Bearer <ACCESS_TOKEN>"
           ]
         },
         "method": "GET",
-        "uri": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27&pageSize=1000&fields=files%28name%2Cid%2Cparents%29"
+        "uri": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27&pageSize=1000&fields=files%28name%2Cid%2Cparents%29&supportsAllDrives=True&includeItemsFromAllDrives=True"
       },
       "response": {
         "body": {
-          "base64_string": "H4sIAAAAAAAAAKXSyW6bUBgF4L2fArEOEqMJ2YEJNpjBzENVITBgoFwPgI1ClHevXSULuwKUdgGIq//c+wnO+wyCs6JKG/gF+jGDoPfrBcFFcn2FMV2ka6XRc5p8Q5gYN5Ud6CoMP1KokVR+pcNPf6b3EUhv80lRf64cozrdt197XhcwtX5FWVPWbXovlAdEdAVWKFzaWDr6PDTVGL7N/bzePp4eFZPRe8U+7QYVQVsl65gTkyZTwakH5whfb/xQaPsLelhywYhiMnqviAYNVO/6mtMSud3K1NkxUNS3KGdORm1XadXaHzFMRu8NRTOIeOM1JV1ISimsnMZKesUtQWDYiNCpmrAjtBHEZPQe0ebDDJQVnwOdPCIKIWr2L2bjsCMH4/42jylugR89LPNLp8WUHFiMapEhj6LP7MPBVtq0+OAH8OStyHQriao3Ks4hYrdVMCfUAJeiAR8p5VgTJA30gUe/riKJ8EtBMMWFy1L8yesXJ9lyHxzmOb5RhvvAF55ZHxDARtxhblCMoYTLBnHZi8gWuUGO9WEq+j2JJNg7kOcmkSGad5HN0lvxTk01TJYjRoWAEclk9HuS//g7k9G/W/JP9ZxdHx+z35x+n1c/BQAA",
+          "base64_string": "H4sIAAAAAAAAAL2VyY6jRgBA7/0VLZ8HCbDZ5gbGYMDsO1GE2GyMKWMWg81o/j3uKDl0Rw3uRJMDIEr1qCfxCn68vC72xzJrF99ff3t5ff3xOF4Xx/Rxu0CqGkvyBkvI9kBGo10YvGzaDE3g2lKkZQ8svv05+xyB7G1+emz+GrlETXbu/n7mYwBhDCuSTjJ3o2HIcs5ASQJkzeMH2m74Arqji7d5vz9OP799tJhF31ucs+FTC0HBfYgTRFNHXE6vDT3T1a7eH/FlEeiyn05YzKLvLaJPHa4yeW7rA59jYgufwsSt+D6pN3xDqsBd6v6Ewyz63uHYfiqRsHV9hFNJ0/YZK7AFpLimXd3OQSXmolb2ExKz6HuJLp/Q8HaJQA1bEWs0BWUgYUhkxAlVwGRwwEZyMaExZEMmbJGoby+UbpZDFK+JKEylAWj9mkCFL7R5HM9AheKTCbtCI6oU5nnSYW/f75VN2kBLJixm0efb3BArvuR6/WQcYlRqaC/aDVeJCvd4iEN36zZhMYs+2ybwCVdf9VYSbNQywq3icrIohVGTO8lzrK9POMyiT7e5u1y7MbpZicVHKb/dAJcz1TuwpChwHcklJiRm0f+nTdzVePckMtmwAWi5iqUrOUKpXI0jq2OPnfOFNqH8cmFjXIMHrLydrbze9kqIMVKCrNWWE/MJi1n0+Ta3YdmjS58+8X5MiVG4VZAVpKM+zZwbZX2PJyxm0WfbXEZuCZP4KrS6gg43mICIsVhW+2tV2tU1OUw4zKJPtxllXjegxcDhTlO2PXEltiRRSzoLcW4titSExCz6fJswLZCBvrpA8lJQ7ROlOfTEwrpANHKr58TqDlExasoHMJQIesFgIy398uPOnKpRaTYwbe50mzhzRQUJLkdzR5cweEfHQ1OZ6mAWfb7GoCtTKWaEtN0roB7BNUIlzQ+5buzhimeCCYtZ9NkasdH1Vadb5na3w66OAcO+hTn4KuqGUi2lqb/4LPp0jXdWlbO1KBfc1mmtdJTdAgSGDXGDonKHpTohMYv+qhpRP8ljjFmjFw/Z+4XTIXIOHn8KaxWyMEzSHxa2srZDf8U3OhBVMAYesdlG4tIvOM4U1i6NsbU3ruud5X7wMK/xm8rnPbBHz2wqCNARU+EGRhlyyLeQS/cCfcyN1VQPc+jXTETOPoA8N5d7SPX6nVl4W9ZpsJba55BRQmDCZBb9msl/eDuz6D8r+Vd5vjwuP1/+ABElPDIFDQAA",
           "encoding": "UTF-8"
         },
         "headers": {
           "Alt-Svc": [
-            "quic=\":443\"; ma=2592000; v=\"46,43\",h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,h3-T050=\":443\"; ma=2592000"
+            "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
           ],
           "Cache-Control": [
-            "private, max-age=0, must-revalidate, no-transform"
+            "no-cache, no-store, max-age=0, must-revalidate"
           ],
           "Content-Encoding": [
             "gzip"
@@ -130,10 +133,13 @@
             "application/json; charset=UTF-8"
           ],
           "Date": [
-            "Sat, 21 Mar 2020 17:59:25 GMT"
+            "Mon, 22 Mar 2021 04:45:59 GMT"
           ],
           "Expires": [
-            "Sat, 21 Mar 2020 17:59:25 GMT"
+            "Mon, 01 Jan 1990 00:00:00 GMT"
+          ],
+          "Pragma": [
+            "no-cache"
           ],
           "Server": [
             "GSE"
@@ -159,11 +165,11 @@
           "code": 200,
           "message": "OK"
         },
-        "url": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27&pageSize=1000&fields=files%28name%2Cid%2Cparents%29"
+        "url": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27&pageSize=1000&fields=files%28name%2Cid%2Cparents%29&supportsAllDrives=True&includeItemsFromAllDrives=True"
       }
     },
     {
-      "recorded_at": "2020-03-21T17:59:25",
+      "recorded_at": "2021-03-22T04:46:00",
       "request": {
         "body": {
           "encoding": "utf-8",
@@ -180,26 +186,26 @@
             "keep-alive"
           ],
           "User-Agent": [
-            "python-requests/2.21.0"
+            "python-requests/2.25.1"
           ],
           "authorization": [
             "Bearer <ACCESS_TOKEN>"
           ]
         },
         "method": "GET",
-        "uri": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.spreadsheet%27+and+%27root%27+in+parents&pageSize=1000&fields=files%28name%2Cid%2Cparents%29"
+        "uri": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27&pageSize=1000&fields=files%28name%2Cid%2Cparents%29&supportsAllDrives=True&includeItemsFromAllDrives=True"
       },
       "response": {
         "body": {
-          "base64_string": "H4sIAAAAAAAAAL2TSa+iWhCA9/dXGNdNgjIIvWMSEBAQkKHTMUdmOAKCINDp/97eznsb31t6XZypKpXzpb7Ur4/FMslh3C2/L358LBa/HmuxzKPHc7nqtI139TzzKB0wJ2u1VTqgoh3k7gxGQ9kVg+mUHc97gU0tv/0trMAl/iy14+624GAeV7fP6z/ZBrSPwL9fPQIoI1OBiTeIhsm6U9LGkVl+Zn4+tt/fnnFmt/Cl0xDMnHec8vuoAmof2M22mac17tEjoqFQvc0FYqH/h2M1bQyiLovjF/EYiVZb3dXkGEUh1u2NMlqe0Cyk1k4riK2RUHU5l7M4fa898XB1My3qZKG3eZpXAL6GR2AcOWwkGfWNzB/ZrRJdox7MiuAQ9yzkuzo+4AHotln93J/XcmxUeV/xlNiXO5MkC4G0gNo36WHY6FiyLsiCDUWvXU96EL7FU6BG+dW3uiljKTjDYF+1CEFCQq7MWK4KE54nyOmwiPL7WzyluNk74cWhlBF4tCuGvTHh1BZR3d7OSlMibUUsThWVuM6XemLIM2l0ZN/B3UrGrbgH/PVMlye9mlJTsYBVpj5jQERUnjm+xlNVtnMVdAmU5ButNFrSpz5bINNcKSMW5e5ZzWQ+39wvIvMWT0c5XivEfk4dlKMswRLcDUPmXIsEMLHSAbf8OyfdT/X0H57XcqgaJ4yF6w/wUnqFl11152rK/gVV2qMxmvVNcyrkxqbouX7PPK02jSaG4p3cAnCguRKfw6u3teBqm63yHWgte3B5mZE28pvmKTdCNrmoXWNlUuTtB5ZWjNWYVDGl57shAFHmu8w6OKRf6mkP7WpK2hRFNBny8XDpuXR/5pBdyQMbFLOjmwyL1Tkq+G/xNAdUQJi5w3aGQTm4LZ16ba1SUY1WlNfQkTRHFF4NXdE/9+VrPM2YtzUm8WJH7FERKHHArl5ASFLolsw4NIxBB7HeYYRbC6/09PE4fn/8AfMLDgrpCAAA",
+          "base64_string": "H4sIAAAAAAAAAL2VyY6jRgBA7/0VLZ8HCbDZ5gbGYMDsO1GE2GyMKWMWg81o/j3uKDl0Rw3uRJMDIEr1qCfxCn68vC72xzJrF99ff3t5ff3xOF4Xx/Rxu0CqGkvyBkvI9kBGo10YvGzaDE3g2lKkZQ8svv05+xyB7G1+emz+GrlETXbu/n7mYwBhDCuSTjJ3o2HIcs5ASQJkzeMH2m74Arqji7d5vz9OP799tJhF31ucs+FTC0HBfYgTRFNHXE6vDT3T1a7eH/FlEeiyn05YzKLvLaJPHa4yeW7rA59jYgufwsSt+D6pN3xDqsBd6v6Ewyz63uHYfiqRsHV9hFNJ0/YZK7AFpLimXd3OQSXmolb2ExKz6HuJLp/Q8HaJQA1bEWs0BWUgYUhkxAlVwGRwwEZyMaExZEMmbJGoby+UbpZDFK+JKEylAWj9mkCFL7R5HM9AheKTCbtCI6oU5nnSYW/f75VN2kBLJixm0efb3BArvuR6/WQcYlRqaC/aDVeJCvd4iEN36zZhMYs+2ybwCVdf9VYSbNQywq3icrIohVGTO8lzrK9POMyiT7e5u1y7MbpZicVHKb/dAJcz1TuwpChwHcklJiRm0f+nTdzVePckMtmwAWi5iqUrOUKpXI0jq2OPnfOFNqH8cmFjXIMHrLydrbze9kqIMVKCrNWWE/MJi1n0+Ta3YdmjS58+8X5MiVG4VZAVpKM+zZwbZX2PJyxm0WfbXEZuCZP4KrS6gg43mICIsVhW+2tV2tU1OUw4zKJPtxllXjegxcDhTlO2PXEltiRRSzoLcW4titSExCz6fJswLZCBvrpA8lJQ7ROlOfTEwrpANHKr58TqDlExasoHMJQIesFgIy398uPOnKpRaTYwbe50mzhzRQUJLkdzR5cweEfHQ1OZ6mAWfb7GoCtTKWaEtN0roB7BNUIlzQ+5buzhimeCCYtZ9NkasdH1Vadb5na3w66OAcO+hTn4KuqGUi2lqb/4LPp0jXdWlbO1KBfc1mmtdJTdAgSGDXGDonKHpTohMYv+qhpRP8ljjFmjFw/Z+4XTIXIOHn8KaxWyMEzSHxa2srZDf8U3OhBVMAYesdlG4tIvOM4U1i6NsbU3ruud5X7wMK/xm8rnPbBHz2wqCNARU+EGRhlyyLeQS/cCfcyN1VQPc+jXTETOPoA8N5d7SPX6nVl4W9ZpsJba55BRQmDCZBb9msl/eDuz6D8r+Vd5vjwuP1/+ABElPDIFDQAA",
           "encoding": "UTF-8"
         },
         "headers": {
           "Alt-Svc": [
-            "quic=\":443\"; ma=2592000; v=\"46,43\",h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,h3-T050=\":443\"; ma=2592000"
+            "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
           ],
           "Cache-Control": [
-            "private, max-age=0, must-revalidate, no-transform"
+            "no-cache, no-store, max-age=0, must-revalidate"
           ],
           "Content-Encoding": [
             "gzip"
@@ -211,10 +217,13 @@
             "application/json; charset=UTF-8"
           ],
           "Date": [
-            "Sat, 21 Mar 2020 17:59:25 GMT"
+            "Mon, 22 Mar 2021 04:46:00 GMT"
           ],
           "Expires": [
-            "Sat, 21 Mar 2020 17:59:25 GMT"
+            "Mon, 01 Jan 1990 00:00:00 GMT"
+          ],
+          "Pragma": [
+            "no-cache"
           ],
           "Server": [
             "GSE"
@@ -240,7 +249,91 @@
           "code": 200,
           "message": "OK"
         },
-        "url": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.spreadsheet%27+and+%27root%27+in+parents&pageSize=1000&fields=files%28name%2Cid%2Cparents%29"
+        "url": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.folder%27&pageSize=1000&fields=files%28name%2Cid%2Cparents%29&supportsAllDrives=True&includeItemsFromAllDrives=True"
+      }
+    },
+    {
+      "recorded_at": "2021-03-22T04:46:00",
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": ""
+        },
+        "headers": {
+          "Accept": [
+            "*/*"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "User-Agent": [
+            "python-requests/2.25.1"
+          ],
+          "authorization": [
+            "Bearer <ACCESS_TOKEN>"
+          ]
+        },
+        "method": "GET",
+        "uri": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.spreadsheet%27+and+%27root%27+in+parents&pageSize=1000&fields=files%28name%2Cid%2Cparents%29&supportsAllDrives=True&includeItemsFromAllDrives=True"
+      },
+      "response": {
+        "body": {
+          "base64_string": "H4sIAAAAAAAAAL3WSc+iSAAG4Pv3K4znJkFAxL6xg+wCskwmBtkX2fdO//exJ90XZ47qASpVpKqe1EtR/PjabKO0CLvt981fX5vNj8e12abBo7rd4Qm6ajAFsYMp1qkatFUgjflFE3etOuMZgg4pcFMc+Azx22//diy9e/irax92/e+m2mvDsv8z/qMBxHnM1ZAakGBeMfOjesG3v578/bj9/PZsGA7kdM+YvupDhQGDCJMz2wN4sTql+gpcsMvI0jGexEksvc3gmom8ivKw8iaHTBYVdQnfNAdXPossa7P5zOARYaNnNzTfZmjrVohPRaM2ehJzCz4GdI0Hueo1bZ/zfm6U043aeTg0xW8zdNLBbmxbu3Bn2ExaaRePIGu4qbV6syqcslEz846ibNfAngzGw7Ahi/Qxu/EyzmplDncd3ZW0L0s6zaKHya5RM/W6QIh9nAEJLMR+zQAd/D+OXrehF3RJGL7Io0ZSpXeNRuKCsIfaHlNbai/pQCVddwUMAb5okRapk4r8/KqSVb1sqmijtGmcll7xGg+Nm7xfczzoqIkzE4wQNMHgrQJt7qfEp7oqPCOu1zFJ9bw+r3UcRF4uKYwd8pOGohmN6p441PF5PChwBGVoRvis3UKL4vofyckVg7Rx9G5JCKxYC1cuW2CPFnu+1EK+zLTithSkUmRBOn0kpxjRBtO/m5gwe/bRYv1BXRCMAURrMJJc41BDYLNriUXW8+fltQ4cvaFqhw5dcdrxiB4OHtXcjvlVKZdYE3RPz2MHVwuAFZ4d78mpzNu1dLuo4Pj+KNRSNMQOkQHLWgozHKTWTUx4Kj1Mdxb/SE4XPoSEvbzGJkhiOq3T1gFHU7IF3CLS4xHRnYnkpmu1/MfzWocokfScWc5Y3HM7s5NGMRuNd+6g0F7UWat6ySyBnojBW/WZ/bQ71BLrsxPKeN75SObI6jc2oxc7JtmlJ6/VjdGieJw7PP8mvGs/papPRHexq/WEC2x5JI6CupujMsSU9DS6XpA4Fg655+ej8rUOuTDKJWpjEJD4ggrH+0DG8o0ETjnlGV62moqGE3CVgrTzkZxWF3P3WmoSnapiJmJw10GCRCyowBKz62PArQGGlGOXDc/r8p6cVthm1IW9GwFxEWiMHeHGdvcc51s5Po81rh7dUOngvVXRr8zp61H8/PoHREPEJfkKAAA=",
+          "encoding": "UTF-8"
+        },
+        "headers": {
+          "Alt-Svc": [
+            "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
+          ],
+          "Cache-Control": [
+            "no-cache, no-store, max-age=0, must-revalidate"
+          ],
+          "Content-Encoding": [
+            "gzip"
+          ],
+          "Content-Security-Policy": [
+            "frame-ancestors 'self'"
+          ],
+          "Content-Type": [
+            "application/json; charset=UTF-8"
+          ],
+          "Date": [
+            "Mon, 22 Mar 2021 04:46:00 GMT"
+          ],
+          "Expires": [
+            "Mon, 01 Jan 1990 00:00:00 GMT"
+          ],
+          "Pragma": [
+            "no-cache"
+          ],
+          "Server": [
+            "GSE"
+          ],
+          "Transfer-Encoding": [
+            "chunked"
+          ],
+          "Vary": [
+            "Origin",
+            "X-Origin"
+          ],
+          "X-Content-Type-Options": [
+            "nosniff"
+          ],
+          "X-Frame-Options": [
+            "SAMEORIGIN"
+          ],
+          "X-XSS-Protection": [
+            "1; mode=block"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "https://www.googleapis.com/drive/v3/files?q=mimeType%3D%27application%2Fvnd.google-apps.spreadsheet%27+and+%27root%27+in+parents&pageSize=1000&fields=files%28name%2Cid%2Cparents%29&supportsAllDrives=True&includeItemsFromAllDrives=True"
       }
     }
   ],

@@ -94,7 +94,7 @@ def betamax_authorizedsession(request, set_test_config):
 
 @pytest.fixture
 def betamax_client(request, betamax_authorizedsession):
-    request.cls.client = Client(session=betamax_authorizedsession)
+    request.cls.client = Client(session=betamax_authorizedsession, load_dirs=True)
     return request.cls.client
 
 
