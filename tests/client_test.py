@@ -1,5 +1,5 @@
 import pytest
-from past.builtins import basestring
+import six
 
 from gspread_pandas import Client
 
@@ -22,7 +22,7 @@ class TestClient:
             assert {"name", "id", "path"} == set(d.keys())
 
     def test_email(self):
-        assert isinstance(self.client.auth.service_account_email, basestring)
+        assert isinstance(self.client.auth.service_account_email, six.string_types)
 
     def test_email_no_perm(self, betamax_client_bad_scope, capsys):
         betamax_client_bad_scope.email

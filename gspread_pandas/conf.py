@@ -2,11 +2,10 @@ import json
 import sys
 from os import environ, name
 
-from future.utils import reraise
+import six
 from google.oauth2.credentials import Credentials as OAuthCredentials
 from google.oauth2.service_account import Credentials as SACredentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from past.builtins import basestring
 
 from gspread_pandas.exceptions import ConfigException
 from gspread_pandas.util import decode
@@ -145,7 +144,7 @@ def get_creds(
         if "private_key_id" in config:
             return SACredentials.from_service_account_info(config, scopes=scope)
 
-        if not isinstance(user, basestring):
+        if not isinstance(user, six.string_types):
             raise ConfigException(
                 "Need to provide a user key as a string if not using a service account"
             )
@@ -181,4 +180,4 @@ def get_creds(
         exc_info = sys.exc_info()
 
     if "exc_info" in locals():
-        reraise(ConfigException, *exc_info[1:])
+        six.reraise(ConfigException, *exc_info[1:])
