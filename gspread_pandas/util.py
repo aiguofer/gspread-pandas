@@ -473,7 +473,8 @@ def add_paths(root, dirs):
     path = root.get("path", root.get("name", ""))
 
     for child in children:
-        child["path"] = path + "/" + child["name"]
+        child["path"] = (path + "/" + child["name"]).replace("//", "/")
+
         add_paths(child, dirs)
 
 

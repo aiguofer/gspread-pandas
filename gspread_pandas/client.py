@@ -99,6 +99,7 @@ class Client(ClientV4):
         monkey_patch_request(self)
 
         self._root = self._drive_request(file_id="root", params={"fields": "name,id"})
+        self._root["path"] = "/"
 
         if load_dirs:
             self.refresh_directories()
@@ -155,13 +156,13 @@ class Client(ClientV4):
         self._load_dirs = True
         q = "mimeType='application/vnd.google-apps.folder'"
         self._dirs = self._query_drive(q)
-        root_dirs = []
+        root_dirs = [self.root]
 
         for dir_ in self._dirs:
             # these are top level shared drives
             if "parents" not in dir_:
                 dir_["path"] = dir_["name"]
-                root_dirs.append(dir_)
+            root_dirs.append(dir_)
 
         for root_dir in root_dirs:
             add_paths(root_dir, self._dirs)
