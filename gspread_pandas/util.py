@@ -454,7 +454,7 @@ def parse_permission(perm):
 
 def remove_keys(dct, keys=[]):
     """Remove keys from a dict."""
-    return {key: val for key, val in iteritems(dct) if key not in keys}
+    return {key: val for key, val in six.iteritems(dct) if key not in keys}
 
 
 def remove_keys_from_list(lst, keys=[]):
