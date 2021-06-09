@@ -373,10 +373,10 @@ class Spread:
             row number for first row of headers or data (default 1)
         unformatted_columns : list
             column numbers or names for columns you'd like to pull in as
-            unformatted values (defaul [])
+            unformatted values, use -1 for all columns (default None)
         formula_columns : list
             column numbers or names for columns you'd like to pull in as
-            actual formulas (defaul [])
+            actual formulas, use -1 for all columns (default None)
         sheet : str,int
             optional, if you want to open a different sheet first,
             see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
@@ -405,6 +405,8 @@ class Spread:
         # replace values with a different value render option before we set the
         # index in set_col_names
         if unformatted_columns:
+            if unformatted_columns[0] == -1:
+                unformatted_columns = col_names
             self._fix_value_render(
                 df,
                 header_rows + start_row - 1,
@@ -414,6 +416,8 @@ class Spread:
             )
 
         if formula_columns:
+            if formula_columns[0] == -1:
+                formula_columns = col_names
             self._fix_value_render(
                 df, header_rows + start_row - 1, col_names, formula_columns, "FORMULA"
             )
