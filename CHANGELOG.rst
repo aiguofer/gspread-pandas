@@ -8,12 +8,47 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Removed
+-------
+
+- Remove deprecated param raw_column_names
+
 [3.0.1] - 2021-12-28
 -----------------------------
+
+Changed
+-------
+
+- Pipeline changes
+
 [3.0.0] - 2021-12-28
 -----------------------------
+
+Changed
+-------
+
+- Upgrade gspread to >= 5
+
+Removed
+-------
+
+- BREAKING: Removed Python 2.7 support
+- Removed Travis pipeline
+
+Added
+-----
+
+- CI pipeline using Github Actions
+
 [2.3.1] - 2021-11-29
 -----------------------------
+
+Fixed
+-----
+
+- Fix gspread 5 incompatibility by blocking requirements
+
 [2.3.0] - 2021-03-21
 -----------------------------
 
