@@ -1,7 +1,7 @@
 {
   "http_interactions": [
     {
-      "recorded_at": "2021-03-22T04:45:56",
+      "recorded_at": "2021-12-29T00:13:24",
       "request": {
         "body": {
           "encoding": "utf-8",
@@ -18,7 +18,7 @@
             "keep-alive"
           ],
           "User-Agent": [
-            "python-requests/2.25.1"
+            "python-requests/2.26.0"
           ],
           "authorization": [
             "Bearer <ACCESS_TOKEN>"
@@ -34,7 +34,7 @@
         },
         "headers": {
           "Alt-Svc": [
-            "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
+            "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
           ],
           "Cache-Control": [
             "no-cache, no-store, max-age=0, must-revalidate"
@@ -49,7 +49,7 @@
             "application/json; charset=UTF-8"
           ],
           "Date": [
-            "Mon, 22 Mar 2021 04:45:56 GMT"
+            "Wed, 29 Dec 2021 00:13:24 GMT"
           ],
           "Expires": [
             "Mon, 01 Jan 1990 00:00:00 GMT"
@@ -85,7 +85,7 @@
       }
     },
     {
-      "recorded_at": "2021-03-22T04:45:57",
+      "recorded_at": "2021-12-29T00:13:24",
       "request": {
         "body": {
           "encoding": "utf-8",
@@ -102,7 +102,7 @@
             "keep-alive"
           ],
           "User-Agent": [
-            "python-requests/2.25.1"
+            "python-requests/2.26.0"
           ],
           "authorization": [
             "Bearer <ACCESS_TOKEN>"
@@ -118,7 +118,7 @@
         },
         "headers": {
           "Alt-Svc": [
-            "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
+            "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
           ],
           "Cache-Control": [
             "no-cache, no-store, max-age=0, must-revalidate"
@@ -133,7 +133,7 @@
             "application/json; charset=UTF-8"
           ],
           "Date": [
-            "Mon, 22 Mar 2021 04:45:57 GMT"
+            "Wed, 29 Dec 2021 00:13:24 GMT"
           ],
           "Expires": [
             "Mon, 01 Jan 1990 00:00:00 GMT"
