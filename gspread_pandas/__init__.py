@@ -1,4 +1,4 @@
-from gspread.models import Spreadsheet
+from gspread import Spreadsheet
 from gspread.urls import SPREADSHEETS_API_V4_BASE_URL
 
 from ._version import __version__, __version_info__

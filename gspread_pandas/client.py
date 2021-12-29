@@ -1,9 +1,9 @@
 import requests
 from google.auth.credentials import Credentials
 from google.auth.transport.requests import AuthorizedSession
+from gspread import Spreadsheet
 from gspread.client import Client as ClientV4
 from gspread.exceptions import APIError, SpreadsheetNotFound
-from gspread.models import Spreadsheet
 from gspread.utils import finditem
 
 from gspread_pandas.conf import default_scope, get_creds
@@ -214,7 +214,7 @@ class Client(ClientV4):
         :param title: A title of a spreadsheet.
         :type title: str
 
-        :returns: a :class:`~gspread.models.Spreadsheet` instance.
+        :returns: a :class:`~gspread.spreadsheet.Spreadsheet` instance.
 
         If there's more than one spreadsheet with same title the first one
         will be opened.

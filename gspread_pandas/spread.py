@@ -3,14 +3,14 @@ from re import match
 
 import numpy as np
 import pandas as pd
+from gspread import Spreadsheet, Worksheet
 from gspread.exceptions import (
     APIError,
     NoValidUrlKeyFound,
     SpreadsheetNotFound,
     WorksheetNotFound,
 )
-from gspread.models import Worksheet
-from gspread.utils import fill_gaps, rightpad
+from gspread.utils import ValueInputOption, ValueRenderOption, fill_gaps, rightpad
 
 from gspread_pandas.client import Client
 from gspread_pandas.conf import default_scope
@@ -93,17 +93,16 @@ class Spread:
         for the expected format
     """
 
-    #: `(gspread.models.Spreadsheet)` - Currently open Spreadsheet
-    spread = None
+    #: `(gspread.spreadsheet.Spreadsheet)` - Currently open Spreadsheet
+    spread: Spreadsheet = None
 
-    #: `(gspread.models.Worksheet)` - Currently open Worksheet
-    sheet = None
+    #: `(gspread.worksheet.Worksheet)` - Currently open Worksheet
+    sheet: Worksheet = None
 
     #: `(Client)` - Instance of gspread_pandas
     #: :class:`Client <gspread_pandas.client.Client>`
     client = None
 
-    # chunk range request: https://github.com/burnash/gspread/issues/375
     _max_range_chunk_size = 1000000
 
     # `(dict)` - Spreadsheet metadata
@@ -304,7 +303,7 @@ class Spread:
         self.refresh_spread_metadata()
         self.open_sheet(name)
 
-    def _get_columns(self, cols, value_render_option="FORMATTED_VALUE"):
+    def _get_columns(self, cols, value_render_option=ValueRenderOption.formatted):
         """
         Returns a list of all values in `cols`.
 
@@ -407,12 +406,16 @@ class Spread:
                 header_rows + start_row - 1,
                 col_names,
                 unformatted_columns,
-                "UNFORMATTED_VALUE",
+                ValueRenderOption.unformatted,
             )
 
         if formula_columns:
             self._fix_value_render(
-                df, header_rows + start_row - 1, col_names, formula_columns, "FORMULA"
+                df,
+                header_rows + start_row - 1,
+                col_names,
+                formula_columns,
+                ValueRenderOption.formula,
             )
 
         df = set_col_names(df, col_names)
@@ -509,13 +512,13 @@ class Spread:
                     raw_columns, list
                 ), "raw_columns must be a list of ints"
                 raw_cells = [i for i in cells if i.col in raw_columns]
-                self.sheet.update_cells(raw_cells, "RAW")
+                self.sheet.update_cells(raw_cells, ValueInputOption.raw)
             else:
                 raw_cells = []
 
             user_cells = [i for i in cells if i not in raw_cells]
             if user_cells:
-                self.sheet.update_cells(user_cells, "USER_ENTERED")
+                self.sheet.update_cells(user_cells, ValueInputOption.user_entered)
 
     def _ensure_sheet(self, sheet):
         if sheet is not None:
@@ -784,7 +787,7 @@ class Spread:
         ----------
         vals : list
             Values returned by
-            :meth:`get_all_values() <gspread.models.Sheet.get_all_values()>_`
+            :meth:`get_all_values() <gspread.worksheet.Worksheet.get_all_values()>_`
 
 
         Returns

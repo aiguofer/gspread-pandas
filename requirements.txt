@@ -1,5 +1,5 @@
 # Reqs
-gspread<5.0.0
+gspread>=5.0.0
 pandas>=0.20.0
 decorator
 google-auth

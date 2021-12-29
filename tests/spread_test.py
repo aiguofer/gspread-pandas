@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from gspread.models import Worksheet
+from gspread import Worksheet
 
 from gspread_pandas import Spread, util
 
