@@ -2,7 +2,5 @@
 gspread<5.0.0
 pandas>=0.20.0
 decorator
-six
-pathlib2;python_version=="2.7"
 google-auth
 google-auth-oauthlib

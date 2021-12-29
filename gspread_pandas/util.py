@@ -5,7 +5,6 @@ from time import sleep
 
 import numpy as np
 import pandas as pd
-import six
 from google.oauth2 import credentials as oauth2, service_account
 from gspread.client import Client as ClientV4
 from gspread.exceptions import APIError
@@ -51,7 +50,7 @@ def parse_df_col_names(df, include_index, index_size=1, flatten_sep=None):
     # handle multi-index headers
     if len(headers) > 0 and type(headers[0]) == tuple:
 
-        if isinstance(flatten_sep, six.string_types):
+        if isinstance(flatten_sep, str):
             headers = [
                 [
                     # Remove blank elements and join using sep
@@ -238,7 +237,7 @@ def get_cell_as_tuple(cell):
         ):
             raise TypeError("{0} is not a valid cell tuple".format(cell))
         return cell
-    elif isinstance(cell, six.string_types):
+    elif isinstance(cell, str):
         if not match("[a-zA-Z]+[0-9]+", cell):
             raise TypeError("{0} is not a valid address".format(cell))
         return a1_to_rowcol(cell)
@@ -454,7 +453,7 @@ def parse_permission(perm):
 
 def remove_keys(dct, keys=[]):
     """Remove keys from a dict."""
-    return {key: val for key, val in six.iteritems(dct) if key not in keys}
+    return {key: val for key, val in dct.items() if key not in keys}
 
 
 def remove_keys_from_list(lst, keys=[]):

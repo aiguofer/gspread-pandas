@@ -9,7 +9,7 @@ flake8
 pytest
 pre-commit
 isort
-black;python_version>="3.6"
+black
 pycryptodome
 betamax
 betamax_serializers

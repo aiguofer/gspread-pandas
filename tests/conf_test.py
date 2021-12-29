@@ -1,15 +1,11 @@
 import os
+from pathlib import PosixPath, WindowsPath
 
 import pytest
 from google.oauth2.credentials import Credentials as OAuth2Credentials
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 
 from gspread_pandas import conf, exceptions
-
-try:
-    from pathlib import PosixPath, WindowsPath
-except ImportError:
-    from pathlib2 import PosixPath, WindowsPath
 
 
 def test_get_config_dir():

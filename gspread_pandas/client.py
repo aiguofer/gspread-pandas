@@ -1,9 +1,4 @@
-from __future__ import print_function
-
-from builtins import super
-
 import requests
-import six
 from google.auth.credentials import Credentials
 from google.auth.transport.requests import AuthorizedSession
 from gspread.client import Client as ClientV4
@@ -86,7 +81,7 @@ class Client(ClientV4):
                 credentials = creds
             elif creds is not None and "oauth2client" in creds.__module__:
                 credentials = convert_credentials(creds)
-            elif isinstance(user, six.string_types):
+            elif isinstance(user, str):
                 credentials = get_creds(user, config, self.scope)
             else:
                 raise TypeError(

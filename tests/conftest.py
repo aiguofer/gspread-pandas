@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 
 import pytest
 from betamax import Betamax
@@ -9,12 +10,6 @@ from google.auth.transport.requests import AuthorizedSession
 
 from gspread_pandas import Client, Spread, conf
 from gspread_pandas.util import decode
-
-# from betamax_json_body_serializer import JSONBodySerializer
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
 
 pytest.RECORD = os.environ.get("GSPREAD_RECORD") is not None
 pytest.DUMMY_TOKEN = "<ACCESS_TOKEN>"

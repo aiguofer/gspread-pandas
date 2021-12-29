@@ -1,11 +1,8 @@
-from __future__ import print_function
-
 from builtins import range, str
 from re import match
 
 import numpy as np
 import pandas as pd
-import six
 from gspread.exceptions import (
     APIError,
     NoValidUrlKeyFound,
@@ -543,10 +540,7 @@ class Spread:
             Tuple like (index, worksheet)
         """
         for ix, worksheet in enumerate(self.sheets):
-            if (
-                isinstance(sheet, six.string_types)
-                and sheet.lower() == worksheet.title.lower()
-            ):
+            if isinstance(sheet, str) and sheet.lower() == worksheet.title.lower():
                 return ix, worksheet
             if isinstance(sheet, Worksheet) and sheet.id == worksheet.id:
                 return ix, worksheet
