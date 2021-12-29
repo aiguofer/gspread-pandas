@@ -28,7 +28,6 @@ from gspread_pandas.util import (
     create_merge_cells_request,
     create_merge_headers_request,
     create_unmerge_cells_request,
-    deprecate,
     fillna,
     find_col_indexes,
     get_cell_as_tuple,
@@ -648,7 +647,6 @@ class Spread:
         start=(1, 1),
         replace=False,
         sheet=None,
-        raw_column_names=None,
         raw_columns=None,
         freeze_index=False,
         freeze_headers=False,
@@ -678,10 +676,6 @@ class Spread:
             before saving,
             see :meth:`open_sheet <gspread_pandas.spread.Spread.open_sheet>`
             (default None)
-        raw_column_names : list, str
-            (DEPRECATED use raw_collumns instead) optional, list of columns
-            from your dataframe that you want interpreted as RAW input in
-            google sheets.
         raw_columns : list, str
             optional, list of columns from your dataframe that you want
             interpreted as RAW input in google sheets. This can be column
@@ -737,12 +731,7 @@ class Spread:
             # make sure sheet is large enough
             self.sheet.resize(max(sheet_rows, req_rows), max(sheet_cols, req_cols))
 
-        if raw_column_names:
-            deprecate("raw_column_names is deprecated, please use raw_columns instead.")
-            raw_columns = find_col_indexes(
-                raw_column_names, header, start[COL] + index_size
-            )
-        elif raw_columns:
+        if raw_columns:
             if is_indexes(raw_columns):
                 offset = index_size + start[COL] - 1
                 raw_columns = [ix + offset for ix in raw_columns]
