@@ -2,5 +2,5 @@
 gspread>=5.0.0
 pandas>=0.20.0
 decorator
-google-auth
+google-auth==2.3.3
 google-auth-oauthlib
