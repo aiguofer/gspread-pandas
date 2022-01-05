@@ -3,7 +3,7 @@ sphinx
 sphinx_rtd_theme
 coverage
 twine
-bump2version
+bump2version==1.0.1
 tox
 flake8
 pytest
