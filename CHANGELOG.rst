@@ -8,6 +8,17 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Fixed
+-----
+
+- Potential issue with resizing in `clear_sheet`
+
+Added
+-----
+
+- Section about resizing issues to README
+
 [3.0.2] - 2021-12-29
 -----------------------------
 
