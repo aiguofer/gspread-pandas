@@ -2,7 +2,7 @@ pip
 sphinx
 sphinx_rtd_theme
 coverage
-twine
+twine==3.7.1
 bump2version
 tox
 flake8
