@@ -11,7 +11,7 @@ pre-commit
 isort
 black
 pycryptodome
-betamax
+betamax==0.8.1
 betamax_serializers
 pytest_mock
 oauth2client
