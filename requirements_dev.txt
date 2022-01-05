@@ -15,4 +15,4 @@ betamax
 betamax_serializers
 pytest_mock
 oauth2client
-wheel
+wheel==0.37.1
