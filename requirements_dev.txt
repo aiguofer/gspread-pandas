@@ -10,7 +10,7 @@ pytest
 pre-commit
 isort
 black
-pycryptodome
+pycryptodome==3.12.0
 betamax
 betamax_serializers
 pytest_mock
