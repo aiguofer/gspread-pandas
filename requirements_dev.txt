@@ -6,7 +6,7 @@ twine
 bump2version
 tox
 flake8
-pytest
+pytest==6.2.5
 pre-commit
 isort
 black
