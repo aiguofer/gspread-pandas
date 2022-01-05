@@ -8,7 +8,7 @@ tox
 flake8
 pytest
 pre-commit
-isort
+isort==5.10.1
 black
 pycryptodome
 betamax
