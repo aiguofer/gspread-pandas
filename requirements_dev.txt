@@ -13,6 +13,6 @@ black
 pycryptodome
 betamax
 betamax_serializers
-pytest_mock
+pytest_mock==3.6.1
 oauth2client
 wheel
