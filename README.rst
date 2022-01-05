@@ -188,3 +188,21 @@ to be valid. Just run this in shell:
    python -c "from gspread_pandas import Spread; Spread('<user_key>','')"
 
 Then follow the instructions to create and store the OAuth creds.
+
+
+This action would increase the number of cells in the workbook above the limit of 10000000 cells.
+-------------------------------------------------------------------------------------------------
+
+IMO, Google sheets is not the right tool for large datasets. However, there's probably good reaons
+you might have to use it in such cases. When uploading a large DataFrame, you might run into this
+error.
+
+By default, `Spread.df_to_sheet` will add rows and/or columns needed to accomodate the DataFrame.
+Since a new sheet contains a fairly large number of columns, if you're uploading a DF with lots of
+rows you might exceed the max number of cells in a worksheet even if your data does not. In order
+to fix this you have 2 options:
+
+1. The easiest is to pass `replace=True`, which will first resize the worksheet and clear out all values.
+2. Another option is to first resize to 1x1 using `Spread.sheet.resize(1, 1)` and then do `df_to_sheet`
+
+There's a strange caveat with resizing, so going to 1x1 first is recommended (`replace=True` already does this). To read more see the following issue: https://issuetracker.google.com/issues/213126648.
