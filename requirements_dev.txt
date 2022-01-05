@@ -1,7 +1,7 @@
 pip
 sphinx
 sphinx_rtd_theme
-coverage
+coverage==6.2
 twine
 bump2version
 tox
