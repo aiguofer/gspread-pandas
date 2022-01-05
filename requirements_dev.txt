@@ -14,5 +14,5 @@ pycryptodome
 betamax
 betamax_serializers
 pytest_mock
-oauth2client
+oauth2client==4.1.3
 wheel
