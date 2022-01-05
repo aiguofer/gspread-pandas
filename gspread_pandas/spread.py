@@ -596,13 +596,14 @@ class Spread:
         row_resize = max(rows, frozen_rows + 1)
         col_resize = max(cols, frozen_cols + 1)
 
+        # resize to smallest possible size first
+        # https://issuetracker.google.com/issues/213126648
+        # TODO: these 2 operations could be done in a single batchUpdate call
+        self.sheet.resize(frozen_rows + 1, frozen_cols + 1)
         self.sheet.resize(row_resize, col_resize)
 
-        self.update_cells(
-            start=(1, 1),
-            end=(row_resize, col_resize),
-            vals=["" for i in range(0, row_resize * col_resize)],
-        )
+        # clear the value on the first cell since it didn't get deleted above
+        self.update_cells(start=(1, 1), end=(1, 1), vals=[""])
 
     def delete_sheet(self, sheet):
         """
