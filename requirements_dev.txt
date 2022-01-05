@@ -9,7 +9,7 @@ flake8
 pytest
 pre-commit
 isort
-black
+black==21.12b0
 pycryptodome
 betamax
 betamax_serializers
