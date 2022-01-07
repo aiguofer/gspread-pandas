@@ -1,6 +1,6 @@
 # Reqs
 gspread>=5.0.0
 pandas>=0.20.0
-decorator
+decorator==5.1.1
 google-auth
 google-auth-oauthlib
