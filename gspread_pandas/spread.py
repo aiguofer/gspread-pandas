@@ -590,7 +590,7 @@ class Spread:
             "frozenRowCount", 0
         )
         frozen_cols = self._sheet_metadata["properties"]["gridProperties"].get(
-            "frozenColCount", 0
+            "frozenColumnCount", 0
         )
 
         row_resize = max(rows, frozen_rows + 1)
