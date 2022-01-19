@@ -10,13 +10,19 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 ------------
 [3.0.4] - 2022-01-18
 -----------------------------
+
+Fixed
+-----
+
+- Frozen column field in ``gridProperties`` changed from ``frozenColCount`` to ``frozenColumnCount``
+
 [3.0.3] - 2022-01-04
 -----------------------------
 
 Fixed
 -----
 
-- Potential issue with resizing in `clear_sheet`
+- Potential issue with resizing in ``clear_sheet``
 
 Added
 -----
