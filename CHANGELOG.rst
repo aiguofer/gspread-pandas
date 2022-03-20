@@ -8,6 +8,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Fixed
+-----
+
+- OOB auth flow was removed from google-auth, `see here <https://developers.googleblog.com/2022/02/making-oauth-flows-safer.html#disallowed-oob>`_. Fixed it by running local server to listen for token.
+
 [3.0.4] - 2022-01-18
 -----------------------------
 
