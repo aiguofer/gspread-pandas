@@ -152,10 +152,14 @@ def get_creds(
             # need to convert Path to string for python 2.7
             return OAuthCredentials.from_authorized_user_file(str(creds_file))
 
-        flow = InstalledAppFlow.from_client_config(
-            config, scope, redirect_uri="urn:ietf:wg:oauth:2.0:oob"
+        flow = InstalledAppFlow.from_client_config(config, scope)
+        creds = flow.run_local_server(
+            host="localhost",
+            port=8182,
+            authorization_prompt_message="Please visit this URL: {url}",
+            success_message="The auth flow is complete; you may close this window.",
+            open_browser=False,
         )
-        creds = flow.run_console()
 
         if save:
             creds_data = {
