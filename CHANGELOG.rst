@@ -8,6 +8,8 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+[3.1.0] - 2022-03-19
+-----------------------------
 
 Fixed
 -----
