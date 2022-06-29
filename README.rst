@@ -6,10 +6,6 @@ Getting Started
         :target: https://pypi.python.org/pypi/gspread-pandas
         :alt: PyPI Version
 
-.. image:: https://img.shields.io/travis/aiguofer/gspread-pandas.svg
-        :target: https://travis-ci.org/aiguofer/gspread-pandas
-        :alt: Travis-CI Build Status
-
 .. image:: https://readthedocs.org/projects/gspread-pandas/badge/?version=latest
         :target: https://gspread-pandas.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status

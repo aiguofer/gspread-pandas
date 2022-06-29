@@ -45,6 +45,7 @@ version.
 CI
 ---
 
-Tests will run on Travis CI using Tox, and they'll test on a variety of Python versions
-on Linux, and test only latest Python on Mac and Windows. If a version tag is pushed and
-the tests pass, the new version will be pushed to PyPi by Travis.
+CI is managed by Github Actions:
+python-package.yml - workflow for testing and linting for each python version on every push
+tagged-release.yml - workflow that does ^ and then creates a github release only on tagged push
+python-publish.yml - workflow that publishes package to PyPi when a github release is created
