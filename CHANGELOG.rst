@@ -8,6 +8,19 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Fixed
+-----
+
+- Don't use the deprecated pandas option `inplace = True`
+- Fix hanging auth test
+- Example in docs
+
+Removed
+-------
+
+- Fix for early pandas 1.0 is no longer necessary
+
 [3.2.0] - 2022-03-19
 -----------------------------
 [3.1.0] - 2022-03-19
