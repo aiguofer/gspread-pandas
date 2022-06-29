@@ -1,5 +1,4 @@
 import warnings
-from distutils.version import StrictVersion
 from re import match
 from time import sleep
 
@@ -217,13 +216,7 @@ def fillna(df, fill_value=""):
     """
     for col in df.dtypes[df.dtypes == "category"].index:
         if fill_value not in df[col].cat.categories:
-            df[col].cat.add_categories([fill_value], inplace=True)
-    # Known bug https://github.com/pandas-dev/pandas/issues/25472
-    if StrictVersion(pd.__version__) >= StrictVersion("1.0"):
-        for col in df.dtypes[
-            df.dtypes.apply(lambda x: x in ["float64", "int16"])
-        ].index:
-            df[col] = df[col].astype("float")
+            df[col] = df[col].cat.add_categories([fill_value])
     return df.fillna(fill_value)
 
 

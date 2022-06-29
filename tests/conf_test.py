@@ -45,7 +45,7 @@ class Test_get_creds:
             conf.get_creds(user=None)
 
     def test_oauth_first_time(self, mocker, set_oauth_config, creds_json):
-        mocked = mocker.patch.object(conf.InstalledAppFlow, "run_console")
+        mocked = mocker.patch.object(conf.InstalledAppFlow, "run_local_server")
         mocked.return_value = OAuth2Credentials.from_authorized_user_info(creds_json)
         conf.get_creds()
         # python 3.5 doesn't have assert_called_once
@@ -53,10 +53,10 @@ class Test_get_creds:
         assert (conf.get_config_dir() / "creds" / "default").exists()
 
     def test_oauth_first_time_no_save(self, mocker, set_oauth_config):
-        mocker.patch.object(conf.InstalledAppFlow, "run_console")
+        mocker.patch.object(conf.InstalledAppFlow, "run_local_server")
         conf.get_creds(save=False)
         # python 3.5 doesn't have assert_called_once
-        assert conf.InstalledAppFlow.run_console.call_count == 1
+        assert conf.InstalledAppFlow.run_local_server.call_count == 1
 
     def test_oauth_default(self, make_creds):
         assert isinstance(conf.get_creds(), OAuth2Credentials)
