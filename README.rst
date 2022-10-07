@@ -104,7 +104,7 @@ the tool and generate credentials. Please use your web browser and go to
    to have a service account interacting with spreadsheets).
 -  If you select **OAuth client ID**:
 
-   -  Select **Application type** item as **Other** and give it a name.
+   -  Select **Application type** item as **Desktop app** and give it a name.
    -  Click on **Create** button.
    -  Click on **Download JSON** icon on the right side of created
       **OAuth client IDs** and store the downloaded file on your file system.
