@@ -27,6 +27,7 @@ from gspread_pandas.util import (
     create_frozen_request,
     create_merge_cells_request,
     create_merge_headers_request,
+    create_merge_index_request,
     create_unmerge_cells_request,
     fillna,
     find_col_indexes,
@@ -655,6 +656,7 @@ class Spread:
         add_filter=False,
         merge_headers=False,
         flatten_headers_sep=None,
+        merge_index=False,
     ):
         """
         Save a DataFrame into a worksheet.
@@ -696,6 +698,9 @@ class Spread:
             if you want to flatten your multi-headers to a single row,
             you can pass the string that you'd like to use to concatenate
             the levels, for example, ': ' (default None)
+        merge_index : bool
+            whether to merge cells in the index that have the same value
+            (default False)
 
         Returns
         -------
@@ -703,18 +708,22 @@ class Spread:
         """
         self._ensure_sheet(sheet)
 
+        include_index = index
         header = df.columns
-        index_size = df.index.nlevels if index else 0
-        header_size = df.columns.nlevels
+        index = df.index
+        index_size = index.nlevels if include_index else 0
+        header_size = header.nlevels
 
-        if index:
+        if include_index:
             df = df.reset_index()
 
         df = fillna(df, fill_value)
         df_list = df.values.tolist()
 
         if headers:
-            header_rows = parse_df_col_names(df, index, index_size, flatten_headers_sep)
+            header_rows = parse_df_col_names(
+                df, include_index, index_size, flatten_headers_sep
+            )
             df_list = header_rows + df_list
 
         start = get_cell_as_tuple(start)
@@ -763,6 +772,15 @@ class Spread:
                 {
                     "requests": create_merge_headers_request(
                         self.sheet.id, header, start, index_size
+                    )
+                }
+            )
+
+        if include_index and merge_index:
+            self.spread.batch_update(
+                {
+                    "requests": create_merge_index_request(
+                        self.sheet.id, index, start, header_size
                     )
                 }
             )
