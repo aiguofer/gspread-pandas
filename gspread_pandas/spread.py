@@ -768,24 +768,29 @@ class Spread:
             )
 
         if merge_headers:
-            self.spread.batch_update(
-                {
-                    "requests": create_merge_headers_request(
-                        self.sheet.id, header, start, index_size
-                    )
-                }
-            )
+            self._merge_index(start, header, index_size, "columns")
 
         if include_index and merge_index:
-            self.spread.batch_update(
-                {
-                    "requests": create_merge_index_request(
-                        self.sheet.id, index, start, header_size
-                    )
-                }
-            )
+            self._merge_index(start, index, header_size, "index")
 
         self.refresh_spread_metadata()
+
+    def _merge_index(self, start, index, other_axis_size, axis):
+        """
+        Make a request to merge cells with the same values for the given index.
+        This really only applies to MultiIndex.
+        """
+        func = (
+            create_merge_index_request
+            if "index"
+            else create_merge_headers_request
+            if "columns"
+            else None
+        )
+
+        self.spread.batch_update(
+            {"requests": func(self.sheet.id, index, start, other_axis_size)}
+        )
 
     def _fix_merge_values(self, vals):
         """
