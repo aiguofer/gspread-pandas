@@ -782,9 +782,9 @@ class Spread:
         """
         func = (
             create_merge_index_request
-            if "index"
+            if axis == "index"
             else create_merge_headers_request
-            if "columns"
+            if axis == "columns"
             else None
         )
 
