@@ -783,17 +783,35 @@ class Spread:
         Make a request to merge cells with the same values for the given index.
         This really only applies to MultiIndex.
         """
-        func = (
-            create_merge_index_request
-            if axis == "index"
-            else create_merge_headers_request
-            if axis == "columns"
-            else None
-        )
+        dims = self.get_sheet_dims()
+        if axis in ("index", 0):
+            func = create_merge_index_request
+            ix_start = (
+                start[ROW] + other_axis_size,
+                start[COL],
+            )
+            ix_end = (
+                dims[ROW],
+                start[COL] + index.nlevels - 1,
+            )
+        elif axis in ("columns", 1):
+            func = create_merge_headers_request
+            ix_start = (
+                start[ROW],
+                start[COL] + other_axis_size,
+            )
+            ix_end = (
+                start[ROW] + index.nlevels - 1,
+                dims[COL],
+            )
 
-        self.spread.batch_update(
-            {"requests": func(self.sheet.id, index, start, other_axis_size)}
-        )
+        # unmerge index before updating the new indexes
+        self.unmerge_cells(ix_start, ix_end)
+
+        requests = func(self.sheet.id, index, start, other_axis_size)
+
+        if requests:
+            self.spread.batch_update({"requests": requests})
 
     def _fix_merge_values(self, vals):
         """
