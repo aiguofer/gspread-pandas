@@ -165,6 +165,9 @@ class Spread:
         """Refresh spreadsheet metadata."""
         self._spread_metadata = self.spread.fetch_sheet_metadata()
 
+        if self.sheet:
+            self.sheet._properties = self._sheet_metadata["properties"]
+
     @property
     def _sheet_metadata(self):
         """`(dict)` - Metadata for currently open worksheet"""
