@@ -22,6 +22,8 @@ from gspread_pandas.exceptions import (
 from gspread_pandas.util import (
     COL,
     ROW,
+    axis_is_column,
+    axis_is_index,
     chunks,
     create_filter_request,
     create_frozen_request,
@@ -783,9 +785,27 @@ class Spread:
         Make a request to merge cells with the same values for the given index.
         This really only applies to MultiIndex.
         """
+        if axis_is_index(axis):
+            create_requests = create_merge_index_request
+        elif axis_is_column(axis):
+            create_requests = create_merge_headers_request
+        else:
+            raise ValueError("Axis should be 'index' or 'columns'")
+
+        self._unmerge_index(start, index, other_axis_size, axis)
+
+        requests = create_requests(self.sheet.id, index, start, other_axis_size)
+
+        if requests:
+            self.spread.batch_update({"requests": requests})
+
+    def _unmerge_index(self, start, index, other_axis_size, axis):
+        """
+        In order to ensure merged cells still match up for the given
+        MultiIndex, we need to first unmerge all the cells
+        """
         dims = self.get_sheet_dims()
-        if axis in ("index", 0):
-            func = create_merge_index_request
+        if axis_is_index(axis):
             ix_start = (
                 start[ROW] + other_axis_size,
                 start[COL],
@@ -794,8 +814,7 @@ class Spread:
                 dims[ROW],
                 start[COL] + index.nlevels - 1,
             )
-        elif axis in ("columns", 1):
-            func = create_merge_headers_request
+        elif axis_is_column(axis):
             ix_start = (
                 start[ROW],
                 start[COL] + other_axis_size,
@@ -804,14 +823,7 @@ class Spread:
                 start[ROW] + index.nlevels - 1,
                 dims[COL],
             )
-
-        # unmerge index before updating the new indexes
         self.unmerge_cells(ix_start, ix_end)
-
-        requests = func(self.sheet.id, index, start, other_axis_size)
-
-        if requests:
-            self.spread.batch_update({"requests": requests})
 
     def _fix_merge_values(self, vals):
         """

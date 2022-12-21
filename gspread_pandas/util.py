@@ -564,3 +564,11 @@ def find_col_indexes(cols, col_names, col_offset=1):
             col_locs += [ix for ix in range(len(loc)) if loc[ix]]
     # add 1 because we want the index based on spreadsheet, not python
     return [ele + col_offset for ele in set(col_locs)]
+
+
+def axis_is_index(axis):
+    return axis in ("index", 0)
+
+
+def axis_is_column(axis):
+    return axis in ("columns", 1)
