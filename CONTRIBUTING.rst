@@ -36,7 +36,7 @@ any ideas here I'd be happy to discuss.
 Versions
 --------
 
-In order to bump versions, we use `bumpversion <https://github.com/peritus/bumpversion>`__.
+In order to bump versions, we use `bump2version <https://github.com/c4urself/bump2version>`__.
 This will take care of adding an entry in the CHANGELOG for the new version and bumping
 the version everywhere it needs to. This will also create a git tag for the specific
 version.

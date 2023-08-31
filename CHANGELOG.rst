@@ -8,6 +8,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Added
+-----
+
+- Add ``merge_index`` option for ``Spread.df_to_sheet``
+
 [3.2.2] - 2022-06-29
 -----------------------------
 
@@ -23,7 +29,7 @@ Changed
 Fixed
 -----
 
-- Don't use the deprecated pandas option `inplace = True`
+- Don't use the deprecated pandas option ``inplace = True``
 - Fix hanging auth test
 - Example in docs
 
