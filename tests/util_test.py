@@ -300,14 +300,14 @@ def test_monkey_patch_request(betamax_authorizedsession):
 
 
 def test_get_col_merge_ranges():
-    cols = pd.MultiIndex.from_arrays(
+    ix = pd.MultiIndex.from_arrays(
         [
             ["col1", "col1", "col2", "col2"],
             ["subcol1", "subcol1", "subcol1", "subcol1"],
             ["subsubcol1", "subsubcol2", "subsubcol2", "subsubcol2"],
         ]
     )
-    assert util.get_col_merge_ranges(cols) == [
+    assert util.get_merge_ranges(ix) == [
         [(0, 1), (2, 3)],
         [(0, 1), (2, 3)],
         [(2, 3)],

@@ -22,11 +22,14 @@ from gspread_pandas.exceptions import (
 from gspread_pandas.util import (
     COL,
     ROW,
+    axis_is_column,
+    axis_is_index,
     chunks,
     create_filter_request,
     create_frozen_request,
     create_merge_cells_request,
     create_merge_headers_request,
+    create_merge_index_request,
     create_unmerge_cells_request,
     fillna,
     find_col_indexes,
@@ -163,6 +166,9 @@ class Spread:
     def refresh_spread_metadata(self):
         """Refresh spreadsheet metadata."""
         self._spread_metadata = self.spread.fetch_sheet_metadata()
+
+        if self.sheet:
+            self.sheet._properties = self._sheet_metadata["properties"]
 
     @property
     def _sheet_metadata(self):
@@ -655,6 +661,7 @@ class Spread:
         add_filter=False,
         merge_headers=False,
         flatten_headers_sep=None,
+        merge_index=False,
     ):
         """
         Save a DataFrame into a worksheet.
@@ -696,6 +703,9 @@ class Spread:
             if you want to flatten your multi-headers to a single row,
             you can pass the string that you'd like to use to concatenate
             the levels, for example, ': ' (default None)
+        merge_index : bool
+            whether to merge cells in the index that have the same value
+            (default False)
 
         Returns
         -------
@@ -703,18 +713,22 @@ class Spread:
         """
         self._ensure_sheet(sheet)
 
+        include_index = index
         header = df.columns
-        index_size = df.index.nlevels if index else 0
-        header_size = df.columns.nlevels
+        index = df.index
+        index_size = index.nlevels if include_index else 0
+        header_size = header.nlevels
 
-        if index:
+        if include_index:
             df = df.reset_index()
 
         df = fillna(df, fill_value)
         df_list = df.values.tolist()
 
         if headers:
-            header_rows = parse_df_col_names(df, index, index_size, flatten_headers_sep)
+            header_rows = parse_df_col_names(
+                df, include_index, index_size, flatten_headers_sep
+            )
             df_list = header_rows + df_list
 
         start = get_cell_as_tuple(start)
@@ -759,15 +773,57 @@ class Spread:
             )
 
         if merge_headers:
-            self.spread.batch_update(
-                {
-                    "requests": create_merge_headers_request(
-                        self.sheet.id, header, start, index_size
-                    )
-                }
-            )
+            self._merge_index(start, header, index_size, "columns")
+
+        if include_index and merge_index:
+            self._merge_index(start, index, header_size, "index")
 
         self.refresh_spread_metadata()
+
+    def _merge_index(self, start, index, other_axis_size, axis):
+        """
+        Make a request to merge cells with the same values for the given index.
+        This really only applies to MultiIndex.
+        """
+        if axis_is_index(axis):
+            create_requests = create_merge_index_request
+        elif axis_is_column(axis):
+            create_requests = create_merge_headers_request
+        else:
+            raise ValueError("Axis should be 'index' or 'columns'")
+
+        self._unmerge_index(start, index, other_axis_size, axis)
+
+        requests = create_requests(self.sheet.id, index, start, other_axis_size)
+
+        if requests:
+            self.spread.batch_update({"requests": requests})
+
+    def _unmerge_index(self, start, index, other_axis_size, axis):
+        """
+        In order to ensure merged cells still match up for the given
+        MultiIndex, we need to first unmerge all the cells
+        """
+        dims = self.get_sheet_dims()
+        if axis_is_index(axis):
+            ix_start = (
+                start[ROW] + other_axis_size,
+                start[COL],
+            )
+            ix_end = (
+                dims[ROW],
+                start[COL] + index.nlevels - 1,
+            )
+        elif axis_is_column(axis):
+            ix_start = (
+                start[ROW],
+                start[COL] + other_axis_size,
+            )
+            ix_end = (
+                start[ROW] + index.nlevels - 1,
+                dims[COL],
+            )
+        self.unmerge_cells(ix_start, ix_end)
 
     def _fix_merge_values(self, vals):
         """

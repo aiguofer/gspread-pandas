@@ -308,12 +308,12 @@ def monkey_patch_request(client, retry_delay=10):
 
 
 def create_merge_headers_request(sheet_id, headers, start, index_size):
-    """Create v4 API request to merge labels for a given worksheet."""
+    """Create v4 API request to merge header labels for a given worksheet."""
     request = []
     start = get_cell_as_tuple(start)
 
     if isinstance(headers, pd.MultiIndex):
-        merge_cells = get_col_merge_ranges(headers)
+        merge_cells = get_merge_ranges(headers)
         request.append(
             [
                 create_merge_cells_request(
@@ -329,7 +329,29 @@ def create_merge_headers_request(sheet_id, headers, start, index_size):
     return request
 
 
-def get_col_merge_ranges(index):
+def create_merge_index_request(sheet_id, index, start, header_size):
+    """Create v4 API request to merge index labels for a given worksheet."""
+    request = []
+    start = get_cell_as_tuple(start)
+
+    if isinstance(index, pd.MultiIndex):
+        merge_cells = get_merge_ranges(index)
+        request.append(
+            [
+                create_merge_cells_request(
+                    sheet_id,
+                    (start[ROW] + row_rng[START] + header_size, start[COL] + col_ix),
+                    (start[ROW] + row_rng[END] + header_size, start[COL] + col_ix),
+                )
+                for col_ix, col in enumerate(merge_cells)
+                for row_rng in col
+            ]
+        )
+
+    return request
+
+
+def get_merge_ranges(index):
     """
     Get list of ranges to be merged for each level of columns.
 
@@ -357,7 +379,7 @@ def get_contiguous_ranges(lst, lst_start, lst_end):
     Get list of tuples, each indicating the range of contiguous equal values in the lst
     between lst_start and lst_end. Everything is 0 indexed.
 
-    For example, get_contiguous_ranges([0, 0, 0, 1, 1], 1, 4) = [(1, 2), (3, 4)]
+    For example, get_contiguous_ranges([0, 0, 0, 1, 1], 1, 4) = [(0, 2), (3, 4)]
     [(the 2nd and 3rd items are both 0), (the 4th and 5th items are both 1)]
     """
     prev_val = None
@@ -542,3 +564,11 @@ def find_col_indexes(cols, col_names, col_offset=1):
             col_locs += [ix for ix in range(len(loc)) if loc[ix]]
     # add 1 because we want the index based on spreadsheet, not python
     return [ele + col_offset for ele in set(col_locs)]
+
+
+def axis_is_index(axis):
+    return axis in ("index", 0)
+
+
+def axis_is_column(axis):
+    return axis in ("columns", 1)
