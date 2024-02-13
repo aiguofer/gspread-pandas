@@ -18,16 +18,14 @@ Links:
 -  `Source code <https://github.com/aiguofer/gspread-pandas>`_
 -  `Short video tutorial <https://youtu.be/2yIcNYzfzPw>`_
 
-.. attention:: Upgrading from < 2.0
+.. attention:: Looking for maintainer
 
-    If you are upgrading, the ``user`` is now an optional param that
-    uses ``default`` as the default. If you're a single user, you might
-    want to re-name your credentials to ``default`` so you can stop
-    specifying it:
+   I don't really use this package anymore and with my current lifestyle I don't
+   have much time to maintain this project. The library as-is only supports
+   gspread version <6. Updating this to support v6 might involve a fair bit of work
+   which I unfortunately cant do. I'm happy to work with anyone who might want to
+   maintain, or I can still accept PRs.
 
-    .. code-block:: console
-
-        mv ~/.config/gspread_pandas/creds{<old_name>,default}
 
 Overview
 ========
