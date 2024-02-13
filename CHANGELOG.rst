@@ -8,6 +8,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [Unreleased]
 ------------
+
+Changed
+-------
+
+- Limit gspread version to < 6.0
+
 [3.2.3] - 2023-08-30
 -----------------------------
 
