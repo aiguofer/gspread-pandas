@@ -1055,7 +1055,7 @@ class Spread:
         """
         return self.client.list_permissions(self.spread.id)
 
-    def move(self, path="/", create=True):
+    def move(self, path="/", id_string=None, create=True):
         """
         Move the current spreadsheet to the specified path in your Google drive. If the
         file is not currently in you drive, it will be added.
@@ -1070,4 +1070,4 @@ class Spread:
         Returns
         -------
         """
-        self.client.move_file(self.spread.id, path, create)
+        self.client.move_file(self.spread.id, path, id_string, create)

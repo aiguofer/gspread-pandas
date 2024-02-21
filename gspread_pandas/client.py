@@ -398,7 +398,7 @@ class Client(ClientV4):
         self.refresh_directories()
         return parent
 
-    def move_file(self, file_id, path, create=False):
+    def move_file(self, file_id, path, id_string, create=False):
         """
         Move a file to the given path.
 
@@ -415,16 +415,20 @@ class Client(ClientV4):
         Returns
         -------
         """
-        if path == "/":
-            folder_id = "root"
+        if id_string:
+            folder_id = id_string
+        
         else:
-            parent, missing = folders_to_create(path, self._get_dirs(False))
-            if missing:
-                if not create:
-                    raise Exception("Folder does not exist")
+            if path == "/":
+                folder_id = "root"
+            else:
+                parent, missing = folders_to_create(path, self._get_dirs(False))
+                if missing:
+                    if not create:
+                        raise Exception("Folder does not exist")
 
-                parent = self.create_folder(path)
-            folder_id = parent["id"]
+                    parent = self.create_folder(path)
+                folder_id = parent["id"]
 
         old_parents = self._drive_request(
             "get", file_id, params={"fields": "parents"}
